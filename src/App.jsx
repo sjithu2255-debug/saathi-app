@@ -69,8 +69,216 @@ const REGEX = {
 const LANGUAGES = {
   en: { name: 'English', nativeName: 'English' },
   hi: { name: 'Hindi', nativeName: 'हिन्दी' },
+  bn: { name: 'Bengali', nativeName: 'বাংলা' },
+  mr: { name: 'Marathi', nativeName: 'मराठी' },
+  te: { name: 'Telugu', nativeName: 'తెలుగు' },
+  ta: { name: 'Tamil', nativeName: 'தமிழ்' },
+  gu: { name: 'Gujarati', nativeName: 'ગુજરાતી' },
+  ur: { name: 'Urdu', nativeName: 'اردو' },
+  kn: { name: 'Kannada', nativeName: 'ಕನ್ನಡ' },
   ml: { name: 'Malayalam', nativeName: 'മലയാളം' },
-  ta: { name: 'Tamil', nativeName: 'தமிழ்' }
+  pa: { name: 'Punjabi', nativeName: 'ਪੰਜਾਬੀ' }
+};
+
+const TRANSLATIONS = {
+  en: {
+    dashboard: "Dashboard",
+    rescue: "Emergency Rescue",
+    volunteer: "Volunteering",
+    services: "Local Services",
+    surveys: "Civic Surveys",
+    activeSOS: "SOS Broadcast Active",
+    emergencyAssist: "Emergency Assistance",
+    triggerSOS: "TRIGGER SOS",
+    stopBroadcast: "STOP BROADCAST",
+    hyperlocalFeed: "Hyperlocal Feed",
+    viewMap: "View Map",
+    wallet: "Rewards Wallet",
+    walletSub: "Tap to view earnings & withdraw",
+    volunteerRegister: "Become a Saathi Volunteer",
+    volunteerRegisterSub: "Help your community by responding to local SOS alerts, verifying service locations, and onboarding local shops.",
+    registerBtn: "Register as a Volunteer",
+  },
+  hi: {
+    dashboard: "डैशबोर्ड",
+    rescue: "आपातकालीन बचाव",
+    volunteer: "स्वयंसेवा",
+    services: "स्थानीय सेवाएं",
+    surveys: "नागरिक सर्वेक्षण",
+    activeSOS: "एसओएस प्रसारण सक्रिय",
+    emergencyAssist: "आपातकालीन सहायता",
+    triggerSOS: "एसओएस ट्रिगर करें",
+    stopBroadcast: "प्रसारण रोकें",
+    hyperlocalFeed: "हाइपरलोकल फीड",
+    viewMap: "मानचित्र देखें",
+    wallet: "पुरस्कार वॉलेट",
+    walletSub: "कमाई देखने और निकालने के लिए टैप करें",
+    volunteerRegister: "साथी स्वयंसेवक बनें",
+    volunteerRegisterSub: "स्थानीय एसओएस अलर्ट का जवाब देकर, सेवा स्थानों की पुष्टि करके और स्थानीय दुकानों को जोड़कर अपने समुदाय की सहायता करें।",
+    registerBtn: "स्वयंसेवक के रूप में पंजीकरण करें",
+  },
+  ml: {
+    dashboard: "ഡാഷ്‌ബോർഡ്",
+    rescue: "അടിയന്തിര രക്ഷാപ്രവർത്തനം",
+    volunteer: "വോളണ്ടിയറിംഗ്",
+    services: "പ്രാദേശിക സേവനങ്ങൾ",
+    surveys: "സിവിക് സർവേകൾ",
+    activeSOS: "SOS ബ്രോഡ്കാസ്റ്റ് സജീവം",
+    emergencyAssist: "അടിയന്തിര സഹായം",
+    triggerSOS: "SOS ട്രിഗർ ചെയ്യുക",
+    stopBroadcast: "ബ്രോਡകാസ്റ്റ് നിർത്തുക",
+    hyperlocalFeed: "ഹൈപ്പർലോക്കൽ ഫീഡ്",
+    viewMap: "മാപ്പ് കാണുക",
+    wallet: "റിവാർഡ് വാലറ്റ്",
+    walletSub: "വരുമാനം കാണാനും പിൻവലിക്കാനും ടാപ്പ് ചെയ്യുക",
+    volunteerRegister: "ഒരു സാഥി വോളണ്ടിയർ ആകുക",
+    volunteerRegisterSub: "പ്രാദേശിക SOS അലേർട്ടുകളോട് പ്രതികരിച്ചും പ്രാദേശിക സ്റ്റോറുകൾ ചേർത്തും നിങ്ങളുടെ കമ്മ్యూണിറ്റിയെ സഹായിക്കുക.",
+    registerBtn: "വോളണ്ടിയർ ആയി രജിസ്റ്റർ ചെയ്യുക",
+  },
+  ta: {
+    dashboard: "டாஷ்போர்டு",
+    rescue: "அவசரகால மீட்பு",
+    volunteer: "தன்னார்வத் தொண்டு",
+    services: "உள்ளூர் சேவைகள்",
+    surveys: "குடிமை ஆய்வுகள்",
+    activeSOS: "SOS ஒளிபரப்பு செயலில் உள்ளது",
+    emergencyAssist: "அவசர உதவி",
+    triggerSOS: "SOS தூண்டவும்",
+    stopBroadcast: "ஒளிபரப்பை நிறுத்து",
+    hyperlocalFeed: "ஹைப்பர்லோகல் ஃபீட்",
+    viewMap: "வரைபடத்தைக் காண்க",
+    wallet: "ரிவார்ட்ஸ் வாலட்",
+    walletSub: "வருவாயைக் காண & திரும்பப் பெற தட்டவும்",
+    volunteerRegister: "சாதி தன்னார்வலராகுங்கள்",
+    volunteerRegisterSub: "உள்ளூர் SOS விழிப்பூட்டல்களுக்குப் பதிலளிப்பதன் மூலமும் உள்ளூர் கடைகளை இணைப்பதன் மூலமும் உங்கள் சமூகத்திற்கு உதவுங்கள்.",
+    registerBtn: "தன்னார்வலராக பதிவு செய்யவும்",
+  },
+  bn: {
+    dashboard: "ড্যাশবোর্ড",
+    rescue: "জরুরী উদ্ধার",
+    volunteer: "স্বেচ্ছাসেবা",
+    services: "স্থানীয় পরিষেবা",
+    surveys: "নাগরিক জরিপ",
+    activeSOS: "SOS ব্রডকাস্ট সক্রিয়",
+    emergencyAssist: "জরুরী সহায়তা",
+    triggerSOS: "SOS ট্রিগার করুন",
+    stopBroadcast: "ব্রডকাস্ট বন্ধ করুন",
+    hyperlocalFeed: "হাইপারলোকাল ফিড",
+    viewMap: "ম্যাপ দেখুন",
+    wallet: "পুরস্কার ওয়ালেট",
+    walletSub: "উপার্জন দেখতে এবং তুলতে ট্যাপ করুন",
+    volunteerRegister: "সাথী স্বেচ্ছাসেবক হন",
+    volunteerRegisterSub: "স্থানীয় SOS অ্যালার্টের প্রতিক্রিয়া জানিয়ে এবং স্থানীয় দোকানগুলি অনবোর্ড করে আপনার সম্প্রদায়কে সহায়তা করুন।",
+    registerBtn: "স্বেচ্ছাসেবক হিসাবে নিবন্ধন করুন",
+  },
+  mr: {
+    dashboard: "डॅशबोर्ड",
+    rescue: "आणीबाणी बचाव",
+    volunteer: "स्वयंसेवा",
+    services: "स्थानिक सेवा",
+    surveys: "नागरी सर्वेक्षण",
+    activeSOS: "SOS प्रसारण सक्रिय",
+    emergencyAssist: "आणीबाणी मदत",
+    triggerSOS: "SOS ट्रिगर करा",
+    stopBroadcast: "प्रसारण थांबवा",
+    hyperlocalFeed: "हायपरलोकल फीड",
+    viewMap: "नकाशा पहा",
+    wallet: "रिवॉर्ड्स वॉलेट",
+    walletSub: "कमाई पाहण्यासाठी आणि काढण्यासाठी टॅप करा",
+    volunteerRegister: "साथी स्वयंसेवक बना",
+    volunteerRegisterSub: "स्थानिक SOS अलर्टना प्रतिसाद देऊन आणि स्थानिक दुकाने ऑनबोर्ड करून तुमच्या समुदायाला मदत करा।",
+    registerBtn: "स्वयंसेवक म्हणून नोंदणी करा",
+  },
+  te: {
+    dashboard: "డాష్‌బోర్డ్",
+    rescue: "అత్యవసర రక్షణ",
+    volunteer: "স্বচ্ছந்த సేవ",
+    services: "స్థానిక సేవలు",
+    surveys: "పౌర సర్వేలు",
+    activeSOS: "SOS ప్రసారం యాక్టివ్‌గా ఉంది",
+    emergencyAssist: "అత్యవసర సహాయం",
+    triggerSOS: "SOS ని యాక్టివేట్ చేయి",
+    stopBroadcast: "ಪ್ರಸಾರ ಪ್ರಸಾರವನ್ನು ನಿಲ್ಲಿಸಿ",
+    hyperlocalFeed: "హైపర్‌లోకల్ ఫీడ్",
+    viewMap: "మ్యాప్ చూడండి",
+    wallet: "రివార్డ్స్ వాలెట్",
+    walletSub: "సంపాదనను వీక్షించడానికి & విత్‌డ్రా చేయడానికి నొక్కండి",
+    volunteerRegister: "సాథీ వాలంటీర్ అవ్వండి",
+    volunteerRegisterSub: "స్థానిక SOS హెచ్చరికలకు ప్రతిస్పందించడం ద్వారా మరియు స్థానిక దుకాణాలను ఆన్‌బోర్డ్ చేయడం ద్వారా మీ కమ్యూనిటీకి సహాయం చేయండి.",
+    registerBtn: "ವಾಲಂಟೀರ್‌గా నమోదు చేసుకోండి",
+  },
+  gu: {
+    dashboard: "ડેશબોર્ડ",
+    rescue: "ઇમરજન્સી બચાવ",
+    volunteer: "સ્વયંસેવા",
+    services: "સ્થાનિક સેવાઓ",
+    surveys: "નાગરિક સર્વેક્ષણ",
+    activeSOS: "SOS પ્રસારણ સક્રિય",
+    emergencyAssist: "ઇમરજન્સી સહાય",
+    triggerSOS: "SOS ટ્રિગર કરો",
+    stopBroadcast: "પ્રસારણ બંધ કરો",
+    hyperlocalFeed: "હાઇપરલોકલ ફીડ",
+    viewMap: "નકશો જુઓ",
+    wallet: "રિવોર્ડ્સ વોલેટ",
+    walletSub: "કમાણી જોવા અને ઉપાડવા માટે ટેપ કરો",
+    volunteerRegister: "સાથી સ્વયંસેવક બનો",
+    volunteerRegisterSub: "સ્થાનિક SOS ચેતવણીઓનો જવાબ આપીને અને સ્થાનિક દુકાનો ઓનબોર્ડ કરીને તમારા સમુદાયને મદદ કરો.",
+    registerBtn: "સ્વયંસેવક તરીકે નોંધણી કરો",
+  },
+  ur: {
+    dashboard: "ڈیش بورڈ",
+    rescue: "ہنگامی بچاؤ",
+    volunteer: "رضاکارانہ خدمت",
+    services: "مقامی خدمات",
+    surveys: "شہری سروے",
+    activeSOS: "SOS نشریات فعال ہے",
+    emergencyAssist: "ہنگامی مدد",
+    triggerSOS: "SOS چالو کریں",
+    stopBroadcast: "نشریات روکیں",
+    hyperlocalFeed: "ہائپر لوکل فیڈ",
+    viewMap: "نقشہ دیکھیں",
+    wallet: "انعامات والیٹ",
+    walletSub: "کمائی دیکھنے اور نکالنے کے لیے تھپتھپائیں",
+    volunteerRegister: "ساتھی رضاکار بنیں",
+    volunteerRegisterSub: "مقامی SOS الرٹس کا جواب دے کر اور مقامی دکانوں کو شامل کر کے اپنے معاشرے کی مدد کریں۔",
+    registerBtn: "رضاکار کے طور پر رجسٹر کریں",
+  },
+  kn: {
+    dashboard: "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+    rescue: "ತುರ್ತು ರಕ್ಷಣೆ",
+    volunteer: "ಸ್ವಯಂಸೇವಕ ಸೇವೆ",
+    services: "ಸ್ಥಳೀಯ ಸೇವೆಗಳು",
+    surveys: "ನಾಗರಿಕ ಸಮೀಕ್ಷೆಗಳು",
+    activeSOS: "SOS ಪ್ರಸಾರ ಸಕ್ರಿಯವಾಗಿದೆ",
+    emergencyAssist: "ತುರ್ತು ಸಹಾಯ",
+    triggerSOS: "SOS ಪ್ರಚೋದಿಸಿ",
+    stopBroadcast: "ಪ್ರಸಾರ ನಿಲ್ಲಿಸಿ",
+    hyperlocalFeed: "ಹೈಪರ್ಲೋಕಲ್ ಫೀಡ್",
+    viewMap: "ನಕ್ಷೆ ನೋಡಿ",
+    wallet: "ರಿವಾರ್ಡ್ಸ್ ವಾಲೆಟ್",
+    walletSub: "ಗಳಿಕೆಯನ್ನು ವೀಕ್ಷಿಸಲು ಮತ್ತು ಹಿಂಪಡೆಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ",
+    volunteerRegister: "ಸಾಥಿ ಸ್ವಯಂಸೇವಕರಾಗಿ",
+    volunteerRegisterSub: "ಸ್ಥಳೀಯ SOS ಎಚ್ಚರಿಕೆಗಳಿಗೆ ಪ್ರತಿಕ್ರಿಯಿಸುವ ಮೂಲಕ ಮತ್ತು ಸ್ಥಳೀಯ ಮಳಿಗೆಗಳನ್ನು ಆನ್‌ಬೋರ್ಡ್ ಮಾಡುವ ಮೂಲಕ ನಿಮ್ಮชุมದಾಯಕ್ಕೆ ಸಹಾಯ ಮಾಡಿ.",
+    registerBtn: "ಸ್ವಯಂಸೇವಕರಾಗಿ ನೋಂದಾಯಿಸಿ",
+  },
+  pa: {
+    dashboard: "ਡੈਸ਼ਬੋਰਡ",
+    rescue: "ਐਮਰਜੈਂਸੀ ਬਚਾਅ",
+    volunteer: "ਵਲੰਟੀਅਰਿੰਗ",
+    services: "ਸਥਾਨਕ ਸੇਵਾਵਾਂ",
+    surveys: "ਨਾਗਰਿਕ ਸਰਵੇਖਣ",
+    activeSOS: "SOS ਪ੍ਰਸਾਰਣ ਸਰਗਰਮ",
+    emergencyAssist: "ਐਮਰਜੈਂਸੀ ਸਹਾਇਤਾ",
+    triggerSOS: "SOS ਚਾਲੂ ਕਰੋ",
+    stopBroadcast: "ਪ੍ਰਸਾਰਣ ਰੋਕੋ",
+    hyperlocalFeed: "ਹਾਇਪਰਲੋਕਲ ਫੀਡ",
+    viewMap: "ਨਕਸ਼ਾ ਦੇਖੋ",
+    wallet: "ਇਨਾਮ ਵਾਲਿਟ",
+    walletSub: "ਕਮਾਈ ਦੇਖਣ ਅਤੇ ਕਢਵਾਉਣ ਲਈ ਟੈਪ ਕਰੋ",
+    volunteerRegister: "ਸਾਥੀ ਵਲੰਟੀਅਰ ਬਣੋ",
+    volunteerRegisterSub: "ਸਥਾਨਕ SOS ਅਲਰਟਾਂ ਦਾ ਜਵਾਬ ਦੇ ਕੇ ਅਤੇ ਸਥਾਨਕ ਦੁਕਾਨਾਂ ਨੂੰ ਆਨਬੋਰਡ ਕਰਕੇ ਆਪਣੇ ਭਾਈਚਾਰੇ ਦੀ ਮਦਦ ਕਰੋ।",
+    registerBtn: "ਵਲੰਟੀਅਰ ਵਜੋਂ ਰਜਿਸਟਰ ਕਰੋ",
+  }
 };
 
 // Generic modal shell — eliminates 5 copies of the same overlay JSX
@@ -383,8 +591,8 @@ export default function SaathiApp() {
   const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState('en');
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
-  const [showLanguagePrompt, setShowLanguagePrompt] = useState(false);
-  const [promptLanguageCode, setPromptLanguageCode] = useState('en');
+  const [sosCountdown, setSosCountdown] = useState(null);
+  const countdownTimerRef = useRef(null);
 
   // Wallet — lifted to root so all modules can credit/debit
   const [walletBalance, setWalletBalance] = useState(245); // demo starting balance
@@ -568,20 +776,47 @@ export default function SaathiApp() {
     }, 100);
   }, []);
 
-  const detectLanguageFromLocation = useCallback((locationString) => {
-    if (!locationString) return 'en';
-    const loc = locationString.toLowerCase();
-    if (loc.includes('kerala') || loc.includes('alappuzha') || loc.includes('kochi') || loc.includes('trivandrum')) {
-      return 'ml'; // Malayalam
+
+  const startSOSCountdown = useCallback(() => {
+    if (isSOSActive) {
+      setIsSOSActive(false);
+      return;
     }
-    if (loc.includes('tamil') || loc.includes('coimbatore') || loc.includes('chennai') || loc.includes('madurai')) {
-      return 'ta'; // Tamil
+    if (sosCountdown !== null) return;
+    setSosCountdown(5);
+    const interval = setInterval(() => {
+      setSosCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setIsSOSActive(true);
+          setActiveTab('rescue');
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    countdownTimerRef.current = interval;
+  }, [isSOSActive, sosCountdown]);
+
+  const cancelSOSCountdown = useCallback(() => {
+    if (countdownTimerRef.current) {
+      clearInterval(countdownTimerRef.current);
+      countdownTimerRef.current = null;
     }
-    if (loc.includes('delhi') || loc.includes('mumbai') || loc.includes('uttar') || loc.includes('bihar') || loc.includes('haryana') || loc.includes('punjab') || loc.includes('rajasthan')) {
-      return 'hi'; // Hindi
-    }
-    return 'en';
+    setSosCountdown(null);
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (countdownTimerRef.current) {
+        clearInterval(countdownTimerRef.current);
+      }
+    };
+  }, []);
+
+  const t = useCallback((key) => {
+    return TRANSLATIONS[currentLanguage]?.[key] || TRANSLATIONS['en'][key];
+  }, [currentLanguage]);
 
   const pendingApprovalsCount = useMemo(() => {
     return volunteerRequests.filter(r => r.status === 'pending').length +
@@ -591,13 +826,13 @@ export default function SaathiApp() {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'home': return <HomeFeed isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onViewCertificate={() => setShowCertificate(true)} userRole={userRole} walletBalance={walletBalance} onOpenWallet={() => setShowWallet(true)} volunteerApplicationStatus={volunteerApplicationStatus} setVolunteerApplicationStatus={setVolunteerApplicationStatus} setVolunteerRequests={setVolunteerRequests} displayUser={displayUser} services={services} setActiveTab={setActiveTab} volunteerRequests={volunteerRequests} surveys={surveys} />;
+      case 'home': return <HomeFeed t={t} startSOSCountdown={startSOSCountdown} isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onViewCertificate={() => setShowCertificate(true)} userRole={userRole} walletBalance={walletBalance} onOpenWallet={() => setShowWallet(true)} volunteerApplicationStatus={volunteerApplicationStatus} setVolunteerApplicationStatus={setVolunteerApplicationStatus} setVolunteerRequests={setVolunteerRequests} displayUser={displayUser} services={services} setActiveTab={setActiveTab} volunteerRequests={volunteerRequests} surveys={surveys} />;
       case 'rescue': return <RescueModule isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onOpenChat={setActiveChatUser} userCoords={userCoords} locationStatus={locationStatus} />;
       case 'volunteer': return <VolunteerModule userCoords={userCoords} userRole={userRole} locationStatus={locationStatus} />;
       case 'services': return <ServicesModule userCoords={userCoords} locationStatus={locationStatus} userRole={userRole} onCommission={creditCommission} onShowEarning={showEarning} services={services} setServices={setServices} />;
       case 'survey': return <SurveyModule userRole={userRole} userCoords={userCoords} onMicroReward={creditMicro} onShowEarning={showEarning} surveys={surveys} setSurveys={setSurveys} />;
       case 'admin-approvals': return <AdminApprovalsModule volunteerRequests={volunteerRequests} setVolunteerRequests={setVolunteerRequests} services={services} setServices={setServices} surveys={surveys} setSurveys={setSurveys} userRole={userRole} setUserRole={setUserRole} setVolunteerApplicationStatus={setVolunteerApplicationStatus} displayUser={displayUser} addWalletTxn={addWalletTxn} />;
-      default: return <HomeFeed isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onViewCertificate={() => setShowCertificate(true)} userRole={userRole} walletBalance={walletBalance} onOpenWallet={() => setShowWallet(true)} volunteerApplicationStatus={volunteerApplicationStatus} setVolunteerApplicationStatus={setVolunteerApplicationStatus} setVolunteerRequests={setVolunteerRequests} displayUser={displayUser} services={services} setActiveTab={setActiveTab} volunteerRequests={volunteerRequests} surveys={surveys} />;
+      default: return <HomeFeed t={t} startSOSCountdown={startSOSCountdown} isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onViewCertificate={() => setShowCertificate(true)} userRole={userRole} walletBalance={walletBalance} onOpenWallet={() => setShowWallet(true)} volunteerApplicationStatus={volunteerApplicationStatus} setVolunteerApplicationStatus={setVolunteerApplicationStatus} setVolunteerRequests={setVolunteerRequests} displayUser={displayUser} services={services} setActiveTab={setActiveTab} volunteerRequests={volunteerRequests} surveys={surveys} />;
     }
   };
 
@@ -610,13 +845,6 @@ export default function SaathiApp() {
     return <AuthScreen onSuccess={(user) => {
       setAuthedUser(user);
       setIsAuthenticated(true);
-      
-      const userLoc = user.location || resolvedLocation;
-      const detectedLang = detectLanguageFromLocation(userLoc);
-      if (detectedLang !== 'en') {
-        setPromptLanguageCode(detectedLang);
-        setShowLanguagePrompt(true);
-      }
 
       if (user.registerAsVolunteer) {
         setUserRole('Citizen');
@@ -872,11 +1100,11 @@ export default function SaathiApp() {
       <main className="flex-1 overflow-y-auto pb-20 md:pb-0 scroll-smooth">
         <div className="max-w-7xl mx-auto px-4 py-6 flex flex-col md:flex-row gap-6">
           <aside className="hidden md:flex flex-col w-64 shrink-0 space-y-2">
-            <NavButton active={activeTab === 'home'} onClick={() => setActiveTab('home')} icon={<Activity size={20}/>} label="Dashboard" />
-            <NavButton active={activeTab === 'rescue'} onClick={() => setActiveTab('rescue')} icon={<ShieldAlert size={20}/>} label="Emergency Rescue" color="red" />
-            <NavButton active={activeTab === 'volunteer'} onClick={() => setActiveTab('volunteer')} icon={<HeartHandshake size={20}/>} label="Volunteering" color="green" />
-            <NavButton active={activeTab === 'services'} onClick={() => setActiveTab('services')} icon={<Wrench size={20}/>} label="Local Services" color="orange" />
-            <NavButton active={activeTab === 'survey'} onClick={() => setActiveTab('survey')} icon={<FileText size={20}/>} label="Civic Surveys" color="blue" />
+            <NavButton active={activeTab === 'home'} onClick={() => setActiveTab('home')} icon={<Activity size={20}/>} label={t('dashboard')} />
+            <NavButton active={activeTab === 'rescue'} onClick={() => setActiveTab('rescue')} icon={<ShieldAlert size={20}/>} label={t('rescue')} color="red" />
+            <NavButton active={activeTab === 'volunteer'} onClick={() => setActiveTab('volunteer')} icon={<HeartHandshake size={20}/>} label={t('volunteer')} color="green" />
+            <NavButton active={activeTab === 'services'} onClick={() => setActiveTab('services')} icon={<Wrench size={20}/>} label={t('services')} color="orange" />
+            <NavButton active={activeTab === 'survey'} onClick={() => setActiveTab('survey')} icon={<FileText size={20}/>} label={t('surveys')} color="blue" />
             {userRole === 'Admin' && (
               <NavButton 
                 active={activeTab === 'admin-approvals'} 
@@ -940,14 +1168,14 @@ export default function SaathiApp() {
 
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-50">
         <div className="flex justify-around items-center h-16">
-          <MobileNavButton active={activeTab === 'home'} onClick={() => setActiveTab('home')} icon={<Activity size={22}/>} label="Home" />
-          <MobileNavButton active={activeTab === 'rescue'} onClick={() => setActiveTab('rescue')} icon={<ShieldAlert size={22}/>} label="SOS" color="text-red-600" />
-          <MobileNavButton active={activeTab === 'volunteer'} onClick={() => setActiveTab('volunteer')} icon={<HeartHandshake size={22}/>} label="Volunteer" />
-          <MobileNavButton active={activeTab === 'services'} onClick={() => setActiveTab('services')} icon={<Wrench size={22}/>} label="Services" />
+          <MobileNavButton active={activeTab === 'home'} onClick={() => setActiveTab('home')} icon={<Activity size={22}/>} label={t('dashboard')} />
+          <MobileNavButton active={activeTab === 'rescue'} onClick={() => setActiveTab('rescue')} icon={<ShieldAlert size={22}/>} label={t('rescue')} color="text-red-600" />
+          <MobileNavButton active={activeTab === 'volunteer'} onClick={() => setActiveTab('volunteer')} icon={<HeartHandshake size={22}/>} label={t('volunteer')} />
+          <MobileNavButton active={activeTab === 'services'} onClick={() => setActiveTab('services')} icon={<Wrench size={22}/>} label={t('services')} />
           {userRole === 'Admin' ? (
             <MobileNavButton active={activeTab === 'admin-approvals'} onClick={() => setActiveTab('admin-approvals')} icon={<ShieldCheck size={22}/>} label="Approvals" color="text-purple-600" badge={pendingApprovalsCount} />
           ) : (
-            <MobileNavButton active={activeTab === 'survey'} onClick={() => setActiveTab('survey')} icon={<FileText size={22}/>} label="Surveys" />
+            <MobileNavButton active={activeTab === 'survey'} onClick={() => setActiveTab('survey')} icon={<FileText size={22}/>} label={t('surveys')} />
           )}
         </div>
       </nav>
@@ -1000,46 +1228,7 @@ export default function SaathiApp() {
         />
       )}
 
-      {showLanguagePrompt && (
-        <Modal onClose={() => setShowLanguagePrompt(false)}>
-          <ModalHeader
-            icon={<Sparkles size={20} className="text-white" />}
-            title="Language Preference"
-            subtitle="Switch app language based on your location"
-            gradient="from-orange-500 to-amber-600"
-            onClose={() => setShowLanguagePrompt(false)}
-          />
-          <div className="p-5 overflow-y-auto space-y-4 text-center">
-            <div className="mx-auto w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 animate-bounce">
-              <Activity size={24} />
-            </div>
-            <div>
-              <h4 className="text-base font-bold text-slate-900">Change Language?</h4>
-              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                We noticed you are using Saathi in <span className="font-bold text-orange-600">{resolvedLocation}</span>. 
-                Would you like to switch your app language to <span className="font-bold text-emerald-600">{LANGUAGES[promptLanguageCode]?.nativeName || promptLanguageCode}</span>?
-              </p>
-            </div>
-            <div className="flex gap-3 pt-2">
-              <button
-                onClick={() => setShowLanguagePrompt(false)}
-                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl transition-colors text-xs uppercase tracking-wider"
-              >
-                Keep English
-              </button>
-              <button
-                onClick={() => {
-                  setCurrentLanguage(promptLanguageCode);
-                  setShowLanguagePrompt(false);
-                }}
-                className="flex-1 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-bold py-2.5 rounded-xl transition-all shadow-md shadow-orange-500/10 text-xs uppercase tracking-wider"
-              >
-                Switch to {LANGUAGES[promptLanguageCode]?.name}
-              </button>
-            </div>
-          </div>
-        </Modal>
-      )}
+
 
       {earningToast && (
         <EarningToast
@@ -1048,7 +1237,164 @@ export default function SaathiApp() {
           onDone={() => setEarningToast(null)}
         />
       )}
+
+      {/* Floating SOS button */}
+      {isAuthenticated && (
+        <div className="fixed bottom-24 right-6 md:bottom-8 md:right-8 z-[150] flex flex-col items-end gap-2">
+          {isSOSActive ? (
+            <button
+              type="button"
+              onClick={() => setIsSOSActive(false)}
+              className="flex items-center gap-2 bg-white text-red-600 border-2 border-red-500 hover:bg-red-50 font-bold px-4 py-3 rounded-full shadow-2xl transition-all animate-bounce text-xs uppercase tracking-wider"
+            >
+              <span className="w-3 h-3 bg-red-600 rounded-full animate-ping"></span>
+              {t('stopBroadcast')}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={startSOSCountdown}
+              disabled={sosCountdown !== null}
+              className="flex items-center justify-center w-14 h-14 md:w-16 md:h-16 bg-red-600 hover:bg-red-700 hover:scale-105 active:scale-95 text-white rounded-full shadow-2xl transition-all relative group"
+              title={t('triggerSOS')}
+            >
+              <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-25 group-hover:opacity-40"></div>
+              <ShieldAlert size={28} className="relative z-10" />
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Full-screen countdown overlay */}
+      {sosCountdown !== null && (
+        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md flex flex-col items-center justify-center z-[300] animate-in fade-in duration-200">
+          <div className="text-center space-y-6 max-w-sm px-6">
+            <div className="relative w-32 h-32 mx-auto flex items-center justify-center">
+              <div className="absolute inset-0 rounded-full border-4 border-red-500 animate-ping opacity-75"></div>
+              <div className="absolute inset-2 rounded-full border-2 border-red-600/50 bg-red-50 flex items-center justify-center shadow-inner">
+                <span className="text-5xl font-black text-red-600 animate-pulse">{sosCountdown}</span>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="text-2xl font-black text-white tracking-tight">TRIGGERING SOS</h3>
+              <p className="text-sm text-slate-300 leading-relaxed">
+                Broadcasting emergency alert to nearby volunteers & contacts in {sosCountdown} seconds...
+              </p>
+            </div>
+            
+            <button
+              type="button"
+              onClick={cancelSOSCountdown}
+              className="w-full bg-white hover:bg-slate-100 text-slate-900 font-bold py-3 px-6 rounded-full text-sm uppercase tracking-wider transition-all shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center gap-2"
+            >
+              <X size={16} /> Cancel Trigger
+            </button>
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+// --- LOCATION PICKER MODAL ---
+function LocationPickerModal({ currentLocation, onSelect, onRetryGPS, locationStatus, onClose }) {
+  const [typedLocation, setTypedLocation] = useState('');
+  
+  const presetLocations = [
+    { name: "Alappuzha, Kerala", lat: 9.4981, lng: 76.3388 },
+    { name: "Coimbatore, Tamil Nadu", lat: 11.0168, lng: 76.9558 },
+    { name: "Bangalore, Karnataka", lat: 12.9716, lng: 77.5946 },
+    { name: "Mumbai, Maharashtra", lat: 19.0760, lng: 72.8777 },
+    { name: "New Delhi, Delhi", lat: 28.6139, lng: 77.2090 },
+    { name: "Kochi, Kerala", lat: 9.9312, lng: 76.2673 },
+  ];
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!typedLocation.trim()) return;
+    onSelect(typedLocation.trim(), 20.5937, 78.9629);
+  };
+
+  return (
+    <Modal onClose={onClose}>
+      <ModalHeader
+        icon={<MapPin size={22} className="text-white" />}
+        title="Set Location"
+        subtitle="Set your location manually or detect via GPS"
+        gradient="from-orange-500 to-emerald-600"
+        onClose={onClose}
+      />
+      <div className="p-5 overflow-y-auto space-y-4 text-sm text-slate-700">
+        <div>
+          <button
+            type="button"
+            onClick={onRetryGPS}
+            disabled={locationStatus === 'requesting'}
+            className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-orange-400 text-white font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-orange-500/10"
+          >
+            {locationStatus === 'requesting' ? (
+              <>
+                <Loader2 size={16} className="animate-spin" /> Detecting Location...
+              </>
+            ) : (
+              <>
+                <MapPin size={16} /> Detect My Location (GPS)
+              </>
+            )}
+          </button>
+          {locationStatus === 'granted' && (
+            <p className="text-[10px] text-green-600 font-semibold mt-1.5 text-center">✓ GPS location detected successfully</p>
+          )}
+        </div>
+
+        <div className="relative flex items-center gap-2 py-2">
+          <div className="flex-1 h-px bg-slate-200"></div>
+          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Or select city</span>
+          <div className="flex-1 h-px bg-slate-200"></div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          {presetLocations.map((loc, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => onSelect(loc.name, loc.lat, loc.lng)}
+              className={`p-2.5 rounded-xl border text-xs font-semibold text-left transition-all ${
+                currentLocation === loc.name
+                  ? 'border-orange-500 bg-orange-50 text-orange-700'
+                  : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700'
+              }`}
+            >
+              {loc.name}
+            </button>
+          ))}
+        </div>
+
+        <div className="relative flex items-center gap-2 py-2">
+          <div className="flex-1 h-px bg-slate-200"></div>
+          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Or type custom</span>
+          <div className="flex-1 h-px bg-slate-200"></div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <input
+            type="text"
+            placeholder="Type your city or area name..."
+            value={typedLocation}
+            onChange={(e) => setTypedLocation(e.target.value)}
+            className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+          />
+          <button
+            type="submit"
+            disabled={!typedLocation.trim()}
+            className="w-full bg-slate-800 hover:bg-slate-900 disabled:bg-slate-300 text-white font-bold py-2 rounded-xl text-xs transition-colors"
+          >
+            Confirm Typed Location
+          </button>
+        </form>
+      </div>
+    </Modal>
   );
 }
 
@@ -1309,6 +1655,8 @@ function AlertDetailModal({ alert, isSOSActive, onTriggerSOS, onClose }) {
 
 // --- HOME ---
 function HomeFeed({ 
+  t,
+  startSOSCountdown,
   isSOSActive, 
   setIsSOSActive, 
   liveLocation, 
@@ -1340,13 +1688,13 @@ function HomeFeed({
           </div>
           <div className="relative z-10 flex items-center justify-between">
             <div>
-              <p className="text-[11px] uppercase tracking-widest text-white/80 font-semibold">Rewards Wallet</p>
+              <p className="text-[11px] uppercase tracking-widest text-white/80 font-semibold">{t('wallet')}</p>
               <div className="flex items-baseline gap-0.5 mt-1">
                 <IndianRupee size={22} className="text-white/90" strokeWidth={2.5} />
                 <span className="text-3xl font-black">{walletBalance.toLocaleString('en-IN')}</span>
               </div>
               <p className="text-xs text-white/80 mt-1 flex items-center gap-1">
-                <Sparkles size={12} /> Tap to view earnings & withdraw
+                <Sparkles size={12} /> {t('walletSub')}
               </p>
             </div>
             <div className="bg-white/20 backdrop-blur-sm rounded-full p-3">
@@ -1356,13 +1704,97 @@ function HomeFeed({
         </button>
       )}
 
+      {/* Hyperlocal Feed moved UP */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+            <Activity size={18} className="text-orange-600"/> {t('hyperlocalFeed')}
+          </h3>
+          <button className="text-sm text-orange-600 font-medium hover:underline">{t('viewMap')}</button>
+        </div>
+        <div className="space-y-4">
+          {MOCK_ALERTS.map(alert => {
+            const isHigh = alert.severity === 'high';
+            const isMedium = alert.severity === 'medium';
+            return (
+              <div 
+                key={alert.id} 
+                onClick={() => setSelectedAlert(alert)}
+                className={`bg-white p-5 rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden group ${
+                  isHigh 
+                    ? 'border-red-200 hover:border-red-400 bg-gradient-to-br from-white to-red-50/20 hover:shadow-md' 
+                    : isMedium 
+                      ? 'border-orange-200 hover:border-orange-400 bg-gradient-to-br from-white to-orange-50/10 hover:shadow-md' 
+                      : 'border-slate-200 hover:border-slate-400 bg-white hover:shadow-md'
+                }`}
+              >
+                <div className={`absolute top-0 left-0 w-1.5 h-full ${
+                  isHigh ? 'bg-red-500' : isMedium ? 'bg-orange-500' : 'bg-slate-400'
+                }`} />
+
+                <div className="flex items-start gap-4">
+                  <div className={`p-3.5 rounded-xl shrink-0 relative ${
+                    isHigh 
+                      ? 'bg-red-50 text-red-600' 
+                      : isMedium 
+                        ? 'bg-orange-50 text-orange-600' 
+                        : 'bg-slate-100 text-slate-600'
+                  }`}>
+                    <AlertTriangle size={22} className={isHigh ? 'animate-pulse' : ''} />
+                    {alert.status === 'Active' && (
+                      <span className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white animate-ping ${
+                        isHigh ? 'bg-red-500' : 'bg-orange-500'
+                      }`} />
+                    )}
+                  </div>
+
+                  <div className="space-y-1.5 flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h4 className="font-extrabold text-slate-900 text-sm tracking-tight">
+                        {alert.title || alert.type}
+                      </h4>
+                      <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                        isHigh 
+                          ? 'bg-red-100 text-red-700' 
+                          : isMedium 
+                            ? 'bg-orange-100 text-orange-700' 
+                            : 'bg-slate-100 text-slate-600'
+                      }`}>
+                        {alert.type}
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed max-w-xl">
+                      {alert.description}
+                    </p>
+
+                    <div className="flex items-center text-[11px] text-slate-400 mt-2 gap-3">
+                      <span className="flex items-center gap-1 font-medium"><MapPin size={12} className={isHigh ? 'text-red-500' : 'text-slate-400'}/> {alert.distance}</span>
+                      <span>•</span>
+                      <span className="flex items-center gap-1 font-medium"><Clock size={12}/> {alert.time}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end shrink-0 sm:self-center">
+                  <div className="flex items-center gap-1 text-xs font-bold text-orange-600 group-hover:translate-x-1 transition-transform duration-200">
+                    View & Action
+                    <ChevronRight size={16} />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className={`relative overflow-hidden rounded-2xl p-6 flex flex-col justify-between items-start transition-all duration-300 ${isSOSActive ? 'bg-red-600 shadow-red-500/40' : 'bg-slate-900'} text-white shadow-xl min-h-[180px]`}>
           <div className="absolute -right-10 -top-10 opacity-10">
             <ShieldAlert size={150} />
           </div>
           <div className="w-full relative z-10">
-            <h2 className="text-2xl font-bold mb-1">{isSOSActive ? 'SOS Broadcast Active' : 'Emergency Assistance'}</h2>
+            <h2 className="text-2xl font-bold mb-1">{isSOSActive ? t('activeSOS') : t('emergencyAssist')}</h2>
             {isSOSActive ? (
               <div className="space-y-2 mt-2">
                 <div className="flex items-center gap-2 text-red-100 bg-red-700/50 p-2 rounded-lg backdrop-blur-sm">
@@ -1382,10 +1814,10 @@ function HomeFeed({
             )}
           </div>
           <button 
-            onClick={() => setIsSOSActive(!isSOSActive)}
+            onClick={isSOSActive ? () => setIsSOSActive(false) : startSOSCountdown}
             className={`mt-4 px-6 py-2.5 rounded-full font-bold text-sm tracking-wide transition-all z-10 w-full sm:w-auto ${isSOSActive ? 'bg-white text-red-600 hover:bg-red-50 shadow-lg' : 'bg-red-500 hover:bg-red-400 text-white shadow-lg shadow-red-500/20 flex items-center justify-center gap-2'}`}
           >
-            {isSOSActive ? 'STOP BROADCAST' : <><AlertTriangle size={18} /> TRIGGER SOS</>}
+            {isSOSActive ? t('stopBroadcast') : <><AlertTriangle size={18} /> {t('triggerSOS')}</>}
           </button>
         </div>
 
@@ -1494,10 +1926,10 @@ function HomeFeed({
               <div>
                 <div className="flex items-center gap-2 mb-2 text-green-800">
                   <HeartHandshake size={20} />
-                  <h3 className="font-bold text-lg">Become a Saathi Volunteer</h3>
+                  <h3 className="font-bold text-lg">{t('volunteerRegister')}</h3>
                 </div>
                 <p className="text-slate-600 text-xs leading-relaxed max-w-md">
-                  Help your community by responding to local SOS alerts, verifying service locations, and onboarding local shops. You will earn rewards for every action and receive a certified civic impact credential.
+                  {t('volunteerRegisterSub')}
                 </p>
               </div>
               <button
@@ -1519,7 +1951,7 @@ function HomeFeed({
                 }}
                 className="mt-4 bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-5 rounded-xl text-xs self-start transition-all shadow-sm flex items-center gap-1.5"
               >
-                <HeartHandshake size={14} /> Register as a Volunteer
+                <HeartHandshake size={14} /> {t('registerBtn')}
               </button>
             </div>
           )}
@@ -1563,95 +1995,12 @@ function HomeFeed({
         </div>
       )}
 
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-            <Activity size={18} className="text-orange-600"/> Hyperlocal Feed
-          </h3>
-          <button className="text-sm text-orange-600 font-medium hover:underline">View Map</button>
-        </div>
-        <div className="space-y-4">
-          {MOCK_ALERTS.map(alert => {
-            const isHigh = alert.severity === 'high';
-            const isMedium = alert.severity === 'medium';
-            return (
-              <div 
-                key={alert.id} 
-                onClick={() => setSelectedAlert(alert)}
-                className={`bg-white p-5 rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden group ${
-                  isHigh 
-                    ? 'border-red-200 hover:border-red-400 bg-gradient-to-br from-white to-red-50/20 hover:shadow-md' 
-                    : isMedium 
-                      ? 'border-orange-200 hover:border-orange-400 bg-gradient-to-br from-white to-orange-50/10 hover:shadow-md' 
-                      : 'border-slate-200 hover:border-slate-400 bg-white hover:shadow-md'
-                }`}
-              >
-                <div className={`absolute top-0 left-0 w-1.5 h-full ${
-                  isHigh ? 'bg-red-500' : isMedium ? 'bg-orange-500' : 'bg-slate-400'
-                }`} />
-
-                <div className="flex items-start gap-4">
-                  <div className={`p-3.5 rounded-xl shrink-0 relative ${
-                    isHigh 
-                      ? 'bg-red-50 text-red-600' 
-                      : isMedium 
-                        ? 'bg-orange-50 text-orange-600' 
-                        : 'bg-slate-100 text-slate-600'
-                  }`}>
-                    <AlertTriangle size={22} className={isHigh ? 'animate-pulse' : ''} />
-                    {alert.status === 'Active' && (
-                      <span className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white animate-ping ${
-                        isHigh ? 'bg-red-500' : 'bg-orange-500'
-                      }`} />
-                    )}
-                  </div>
-
-                  <div className="space-y-1.5 flex-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h4 className="font-extrabold text-slate-900 text-sm tracking-tight">
-                        {alert.title || alert.type}
-                      </h4>
-                      <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                        isHigh 
-                          ? 'bg-red-100 text-red-700' 
-                          : isMedium 
-                            ? 'bg-orange-100 text-orange-700' 
-                            : 'bg-slate-100 text-slate-600'
-                      }`}>
-                        {alert.type}
-                      </span>
-                    </div>
-
-                    <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed max-w-xl">
-                      {alert.description}
-                    </p>
-
-                    <div className="flex items-center text-[11px] text-slate-400 mt-2 gap-3">
-                      <span className="flex items-center gap-1 font-medium"><MapPin size={12} className={isHigh ? 'text-red-500' : 'text-slate-400'}/> {alert.distance}</span>
-                      <span>•</span>
-                      <span className="flex items-center gap-1 font-medium"><Clock size={12}/> {alert.time}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-end shrink-0 sm:self-center">
-                  <div className="flex items-center gap-1 text-xs font-bold text-orange-600 group-hover:translate-x-1 transition-transform duration-200">
-                    View & Action
-                    <ChevronRight size={16} />
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
       {selectedAlert && (
         <AlertDetailModal
           alert={selectedAlert}
           isSOSActive={isSOSActive}
           onTriggerSOS={() => {
-            setIsSOSActive(true);
+            startSOSCountdown();
             setSelectedAlert(null);
           }}
           onClose={() => setSelectedAlert(null)}
