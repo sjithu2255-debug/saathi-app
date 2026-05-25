@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { 
   AlertTriangle, HeartHandshake, Wrench, FileText, 
-  Bell, MapPin, User, ShieldAlert, 
+  Bell, MapPin, User, ShieldAlert, ShieldCheck, 
   Clock, Star, ChevronRight, Activity, 
   Database, Server, Code, CheckCircle, Radio, 
   Navigation, Users, PhoneCall, Sparkles, Loader2,
@@ -125,17 +125,24 @@ const MOCK_VOLUNTEER = [
 ];
 
 const MOCK_SERVICES = [
-  { id: 1, category: "Ambulance", name: "City Life Support", rating: 4.8, lat: 28.6139, lng: 77.2090, registeredAt: "Connaught Place", verified: true, available: true },
-  { id: 2, category: "Electrician", name: "Ravi Electricals", rating: 4.5, lat: 28.6200, lng: 77.2100, registeredAt: "Karol Bagh", verified: true, available: true },
-  { id: 3, category: "Plumber", name: "QuickFix Plumbing", rating: 4.2, lat: 28.5355, lng: 77.3910, registeredAt: "Noida Sector 18", verified: false, available: false },
-  { id: 4, category: "Ambulance", name: "MediCare Express", rating: 4.7, lat: 11.0168, lng: 76.9558, registeredAt: "Coimbatore Central", verified: true, available: true },
-  { id: 5, category: "Electrician", name: "PowerFix Solutions", rating: 4.3, lat: 12.9716, lng: 77.5946, registeredAt: "Bangalore HSR", verified: true, available: true },
-  { id: 6, category: "Carpenter", name: "WoodCraft Studio", rating: 4.6, lat: 28.7041, lng: 77.1025, registeredAt: "North Delhi", verified: true, available: true },
+  { id: 1, category: "Ambulance", name: "City Life Support", rating: 4.8, lat: 28.6139, lng: 77.2090, registeredAt: "Connaught Place", verified: true, available: true, status: 'approved' },
+  { id: 2, category: "Electrician", name: "Ravi Electricals", rating: 4.5, lat: 28.6200, lng: 77.2100, registeredAt: "Karol Bagh", verified: true, available: true, status: 'approved' },
+  { id: 3, category: "Plumber", name: "QuickFix Plumbing", rating: 4.2, lat: 28.5355, lng: 77.3910, registeredAt: "Noida Sector 18", verified: false, available: false, status: 'approved' },
+  { id: 4, category: "Ambulance", name: "MediCare Express", rating: 4.7, lat: 11.0168, lng: 76.9558, registeredAt: "Coimbatore Central", verified: true, available: true, status: 'approved' },
+  { id: 5, category: "Electrician", name: "PowerFix Solutions", rating: 4.3, lat: 12.9716, lng: 77.5946, registeredAt: "Bangalore HSR", verified: true, available: true, status: 'approved' },
+  { id: 6, category: "Carpenter", name: "WoodCraft Studio", rating: 4.6, lat: 28.7041, lng: 77.1025, registeredAt: "North Delhi", verified: true, available: true, status: 'approved' },
+  { id: 7, category: "Plumber", name: "Kuttanad Plumbing Works", rating: 4.4, lat: 9.5000, lng: 76.3400, registeredAt: "Alappuzha Town", verified: true, available: true, status: 'approved' },
+  { id: 8, category: "Electrician", name: "Kerala Power Solutions", rating: 4.8, lat: 9.4800, lng: 76.3300, registeredAt: "Ambalappuzha", verified: true, available: true, status: 'approved' },
+  { id: 9, category: "Towing", name: "Highway Recovery", rating: 4.1, lat: 9.4950, lng: 76.3350, registeredAt: "NH66 Alappuzha", verified: false, available: true, status: 'approved' },
+  { id: 10, category: "Ambulance", name: "CareLine Medical", rating: 4.9, lat: 9.4900, lng: 76.3500, registeredAt: "Medical College Area", verified: true, available: true, status: 'approved' },
 ];
 
 const MOCK_SURVEYS = [
-  { id: 1, title: "Ward 42 Road Quality Assessment", authority: "City Corporation", expires: "2 days left", responses: 450 },
-  { id: 2, title: "Post-Monsoon Health Check", authority: "Health Dept", expires: "5 days left", responses: 1200 },
+  { id: 1, title: "Ward 42 Road Quality Assessment", authority: "City Corporation", expires: "2 days left", responses: 450, status: 'approved' },
+  { id: 2, title: "Post-Monsoon Health Check", authority: "Health Dept", expires: "5 days left", responses: 1200, status: 'approved' },
+  { id: 3, title: "Canal Cleaning Initiative Feedback", authority: "Alappuzha Municipality", expires: "3 days left", responses: 850, status: 'approved' },
+  { id: 4, title: "Public Transport Efficiency", authority: "KSRTC", expires: "1 week left", responses: 2300, status: 'approved' },
+  { id: 5, title: "Waste Management Survey", authority: "Pollution Control Board", expires: "Tomorrow", responses: 3120, status: 'approved' },
 ];
 
 const MOCK_RESPONDERS = [
@@ -212,34 +219,38 @@ const formatDistance = (km) => {
   return `${Math.round(km)} km`;
 };
 
-// --- AI INTEGRATION (Anthropic Claude API) ---
+// --- AI INTEGRATION (Mock Simulation) ---
+// Since this is a frontend-only app, we mock the AI responses to avoid CORS errors and API key leaks.
 const generateAIContent = async (prompt) => {
-  const RETRIES = 3;
-  let delay = 1000;
-  for (let i = 0; i < RETRIES; i++) {
-    try {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          messages: [{ role: "user", content: prompt }]
-        })
-      });
-      if (!response.ok) throw new Error('API Error');
-      const data = await response.json();
-      const text = (data.content || [])
-        .filter(item => item.type === "text")
-        .map(item => item.text)
-        .join("\n");
-      return text || "No response generated.";
-    } catch (error) {
-      if (i === RETRIES - 1) throw new Error("Failed to connect to AI service.");
-      await new Promise(res => setTimeout(res, delay));
-      delay *= 2;
-    }
+  await new Promise(res => setTimeout(res, 1200)); // Simulate network latency
+
+  const lowerPrompt = prompt.toLowerCase();
+  
+  // 1. Chat Moderation
+  if (lowerPrompt.includes("chat moderator")) {
+    if (lowerPrompt.match(/sex|nude|naked|hot/)) return "SEXUAL";
+    if (lowerPrompt.match(/kill|hate|stupid|idiot|die|abuse/)) return "ABUSE";
+    if (lowerPrompt.match(/buy|sell|discount|promo|cheap/)) return "SPAM";
+    return "SAFE";
   }
+
+  // 2. Survey Insights
+  if (lowerPrompt.includes("civic analyst")) {
+    return "Citizens are generally concerned about the current state of infrastructure and are demanding quicker resolutions. Many have noted that recent improvements are a step in the right direction, but more consistent maintenance is required.";
+  }
+
+  // 3. Emergency Advice
+  if (lowerPrompt.includes("emergency response ai")) {
+    if (lowerPrompt.match(/fire|burn/)) {
+      return "1. Evacuate the area immediately using the stairs, not elevators.\n2. Call the fire department (101).\n3. If caught in smoke, drop to the floor and crawl to safety.";
+    }
+    if (lowerPrompt.match(/accident|crash|bleeding|hurt/)) {
+      return "1. Ensure the area is safe before approaching the victim.\n2. Do not move the person unless there is immediate danger.\n3. Apply direct pressure to any bleeding wounds with a clean cloth.";
+    }
+    return "1. Stay calm and ensure you are in a safe location.\n2. Call emergency services immediately.\n3. Do not intervene unless you are trained in first aid.";
+  }
+
+  return "No response generated.";
 };
 
 // Clipboard fallback for execCommand environments
@@ -309,6 +320,11 @@ export default function SaathiApp() {
   const [liveLocation, setLiveLocation] = useState(null);
   const [showNotification, setShowNotification] = useState(false);
   const [userRole, setUserRole] = useState(MOCK_USER.role);
+  const [volunteerApplicationStatus, setVolunteerApplicationStatus] = useState('idle'); // idle | pending | approved | rejected
+  const [volunteerRequests, setVolunteerRequests] = useState([
+    { id: 1, name: "Amit Sharma", phone: "+91 98765 43220", email: "amit.sharma@example.com", status: "pending", date: "1 day ago", idType: "Aadhaar Card", idNumber: "XXXX XXXX 8892" },
+    { id: 2, name: "Priya Patel", phone: "+91 98765 43221", email: "priya.patel@example.com", status: "pending", date: "2 hours ago", idType: "PAN Card", idNumber: "ABCDE5678G" },
+  ]);
   const [activeChatUser, setActiveChatUser] = useState(null);
   const [showNotifPanel, setShowNotifPanel] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -331,6 +347,8 @@ export default function SaathiApp() {
     { id: 6, type: 'credit', source: 'micro', amount: 10, description: 'Verified service location', date: '3 weeks ago' },
   ]);
   const [showWallet, setShowWallet] = useState(false);
+  const [services, setServices] = useState(MOCK_SERVICES);
+  const [surveys, setSurveys] = useState(MOCK_SURVEYS);
 
   const addWalletTxn = useCallback((txn) => {
     setWalletTxns(prev => [{ ...txn, id: Date.now(), date: 'just now' }, ...prev]);
@@ -500,15 +518,22 @@ export default function SaathiApp() {
     }, 100);
   }, []);
 
+  const pendingApprovalsCount = useMemo(() => {
+    return volunteerRequests.filter(r => r.status === 'pending').length +
+           services.filter(s => s.status === 'pending').length +
+           surveys.filter(s => s.status === 'pending').length;
+  }, [volunteerRequests, services, surveys]);
+
   const renderContent = () => {
     switch (activeTab) {
-      case 'home': return <HomeFeed isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onViewCertificate={() => setShowCertificate(true)} userRole={userRole} walletBalance={walletBalance} onOpenWallet={() => setShowWallet(true)} />;
+      case 'home': return <HomeFeed isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onViewCertificate={() => setShowCertificate(true)} userRole={userRole} walletBalance={walletBalance} onOpenWallet={() => setShowWallet(true)} volunteerApplicationStatus={volunteerApplicationStatus} setVolunteerApplicationStatus={setVolunteerApplicationStatus} setVolunteerRequests={setVolunteerRequests} displayUser={displayUser} services={services} setActiveTab={setActiveTab} volunteerRequests={volunteerRequests} surveys={surveys} />;
       case 'rescue': return <RescueModule isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onOpenChat={setActiveChatUser} userCoords={userCoords} locationStatus={locationStatus} />;
       case 'volunteer': return <VolunteerModule userCoords={userCoords} userRole={userRole} locationStatus={locationStatus} />;
-      case 'services': return <ServicesModule userCoords={userCoords} locationStatus={locationStatus} userRole={userRole} onCommission={creditCommission} onShowEarning={showEarning} />;
-      case 'survey': return <SurveyModule userRole={userRole} userCoords={userCoords} onMicroReward={creditMicro} onShowEarning={showEarning} />;
+      case 'services': return <ServicesModule userCoords={userCoords} locationStatus={locationStatus} userRole={userRole} onCommission={creditCommission} onShowEarning={showEarning} services={services} setServices={setServices} />;
+      case 'survey': return <SurveyModule userRole={userRole} userCoords={userCoords} onMicroReward={creditMicro} onShowEarning={showEarning} surveys={surveys} setSurveys={setSurveys} />;
+      case 'admin-approvals': return <AdminApprovalsModule volunteerRequests={volunteerRequests} setVolunteerRequests={setVolunteerRequests} services={services} setServices={setServices} surveys={surveys} setSurveys={setSurveys} userRole={userRole} setUserRole={setUserRole} setVolunteerApplicationStatus={setVolunteerApplicationStatus} displayUser={displayUser} addWalletTxn={addWalletTxn} />;
       case 'architecture': return <ArchitectureDocs />;
-      default: return <HomeFeed isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onViewCertificate={() => setShowCertificate(true)} userRole={userRole} walletBalance={walletBalance} onOpenWallet={() => setShowWallet(true)} />;
+      default: return <HomeFeed isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onViewCertificate={() => setShowCertificate(true)} userRole={userRole} walletBalance={walletBalance} onOpenWallet={() => setShowWallet(true)} volunteerApplicationStatus={volunteerApplicationStatus} setVolunteerApplicationStatus={setVolunteerApplicationStatus} setVolunteerRequests={setVolunteerRequests} displayUser={displayUser} services={services} setActiveTab={setActiveTab} volunteerRequests={volunteerRequests} surveys={surveys} />;
     }
   };
 
@@ -521,6 +546,26 @@ export default function SaathiApp() {
     return <AuthScreen onSuccess={(user) => {
       setAuthedUser(user);
       setIsAuthenticated(true);
+      if (user.registerAsVolunteer) {
+        setUserRole('Citizen');
+        setVolunteerApplicationStatus('pending');
+        setVolunteerRequests(prev => [
+          {
+            id: Date.now(),
+            name: user.name || "Jithu Sreekumar",
+            phone: user.phone || "+91 98765 43210",
+            email: user.email || "",
+            status: "pending",
+            date: "Just now",
+            idType: user.idType || "Aadhaar Card",
+            idNumber: user.idNumber || "XXXX XXXX 4521"
+          },
+          ...prev
+        ]);
+      } else {
+        setUserRole(user.role || 'Citizen');
+        setVolunteerApplicationStatus('idle');
+      }
     }} />;
   }
 
@@ -535,25 +580,18 @@ export default function SaathiApp() {
             <SaathiLogo size={36} showWordmark={true} />
           </div>
           
-          <button 
-            onClick={() => {
-              if (locationStatus === 'denied' || locationStatus === 'unavailable') {
-                setShowLocationPicker(true);
-              } else if (locationStatus === 'granted' || locationStatus === 'manual') {
-                setShowLocationPicker(true);
-              }
-            }}
+          <div 
             className={`flex items-center space-x-2 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-              locationStatus === 'granted' ? 'bg-green-50 text-green-700 hover:bg-green-100' :
-              locationStatus === 'manual' ? 'bg-blue-50 text-blue-700 hover:bg-blue-100' :
+              locationStatus === 'granted' ? 'bg-green-50 text-green-700' :
+              locationStatus === 'manual' ? 'bg-blue-50 text-blue-700' :
               locationStatus === 'requesting' ? 'bg-blue-50 text-blue-700' :
-              locationStatus === 'denied' || locationStatus === 'unavailable' ? 'bg-orange-50 text-orange-700 hover:bg-orange-100 cursor-pointer' :
+              locationStatus === 'denied' || locationStatus === 'unavailable' ? 'bg-orange-50 text-orange-700' :
               'bg-slate-100 text-slate-600'
             }`}
             title={
               locationStatus === 'granted' && userCoords ? `GPS: ${userCoords.lat.toFixed(5)}, ${userCoords.lng.toFixed(5)} (±${Math.round(userCoords.accuracy)}m)` :
-              locationStatus === 'manual' ? 'Manually set — click to change' :
-              locationStatus === 'denied' ? 'Click to set location manually' :
+              locationStatus === 'manual' ? 'Manually set' :
+              locationStatus === 'denied' ? 'Location access blocked' :
               locationStatus === 'requesting' ? 'Fetching location...' : ''
             }
           >
@@ -573,10 +611,10 @@ export default function SaathiApp() {
             )}
             <span className="truncate max-w-[120px] sm:max-w-xs">
               {locationStatus === 'requesting' ? 'Locating...' :
-               locationStatus === 'denied' || locationStatus === 'unavailable' ? 'Set Location' :
+               locationStatus === 'denied' || locationStatus === 'unavailable' ? 'Location' :
                resolvedLocation}
             </span>
-          </button>
+          </div>
 
           <div className="flex items-center space-x-2">
             {/* Wallet — visible to Volunteer/NGO/Admin */}
@@ -744,6 +782,16 @@ export default function SaathiApp() {
             <NavButton active={activeTab === 'volunteer'} onClick={() => setActiveTab('volunteer')} icon={<HeartHandshake size={20}/>} label="Volunteering" color="green" />
             <NavButton active={activeTab === 'services'} onClick={() => setActiveTab('services')} icon={<Wrench size={20}/>} label="Local Services" color="orange" />
             <NavButton active={activeTab === 'survey'} onClick={() => setActiveTab('survey')} icon={<FileText size={20}/>} label="Civic Surveys" color="blue" />
+            {userRole === 'Admin' && (
+              <NavButton 
+                active={activeTab === 'admin-approvals'} 
+                onClick={() => setActiveTab('admin-approvals')} 
+                icon={<ShieldCheck size={20}/>} 
+                label="Admin Approvals" 
+                color="purple" 
+                badge={pendingApprovalsCount} 
+              />
+            )}
             
             <div className={`mt-8 p-4 rounded-xl border ${
               userRole === 'Admin' 
@@ -801,7 +849,11 @@ export default function SaathiApp() {
           <MobileNavButton active={activeTab === 'rescue'} onClick={() => setActiveTab('rescue')} icon={<ShieldAlert size={22}/>} label="SOS" color="text-red-600" />
           <MobileNavButton active={activeTab === 'volunteer'} onClick={() => setActiveTab('volunteer')} icon={<HeartHandshake size={22}/>} label="Volunteer" />
           <MobileNavButton active={activeTab === 'services'} onClick={() => setActiveTab('services')} icon={<Wrench size={22}/>} label="Services" />
-          <MobileNavButton active={activeTab === 'survey'} onClick={() => setActiveTab('survey')} icon={<FileText size={22}/>} label="Surveys" />
+          {userRole === 'Admin' ? (
+            <MobileNavButton active={activeTab === 'admin-approvals'} onClick={() => setActiveTab('admin-approvals')} icon={<ShieldCheck size={22}/>} label="Approvals" color="text-purple-600" badge={pendingApprovalsCount} />
+          ) : (
+            <MobileNavButton active={activeTab === 'survey'} onClick={() => setActiveTab('survey')} icon={<FileText size={22}/>} label="Surveys" />
+          )}
         </div>
       </nav>
 
@@ -864,8 +916,175 @@ export default function SaathiApp() {
   );
 }
 
+// --- WALLET MODAL ---
+function WalletModal({ balance, transactions, onPayout, onClose }) {
+  const [upiId, setUpiId] = useState('');
+  const [amount, setAmount] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [status, setStatus] = useState('idle'); // idle, loading, success, error
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const handleRedeem = (e) => {
+    e.preventDefault();
+    setErrorMessage('');
+    
+    // Validation
+    const amt = parseFloat(amount);
+    if (!upiId) {
+      setErrorMessage('Please enter your UPI ID');
+      return;
+    }
+    if (!upiId.includes('@')) {
+      setErrorMessage('Please enter a valid UPI ID (e.g. name@upi)');
+      return;
+    }
+    if (isNaN(amt) || amt <= 0) {
+      setErrorMessage('Please enter a valid amount');
+      return;
+    }
+    if (amt > balance) {
+      setErrorMessage('Amount exceeds your current balance');
+      return;
+    }
+
+    setIsLoading(true);
+    setStatus('loading');
+
+    // Simulate network delay
+    setTimeout(() => {
+      setIsLoading(false);
+      onPayout(amt);
+      setStatus('success');
+      setAmount('');
+      setUpiId('');
+    }, 2000);
+  };
+
+  return (
+    <Modal onClose={onClose}>
+      <ModalHeader 
+        icon={<Wallet size={20} />} 
+        title="Redeem Rewards" 
+        subtitle="Withdraw your earnings instantly via UPI" 
+        gradient="from-amber-500 to-orange-600" 
+        onClose={onClose} 
+      />
+      <div className="p-5 overflow-y-auto space-y-5">
+        <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-4 flex items-center justify-between">
+          <div>
+            <p className="text-[10px] uppercase font-bold text-amber-800 tracking-wider">Available Balance</p>
+            <div className="flex items-baseline gap-0.5 mt-1 text-slate-900">
+              <span className="text-xl font-bold">₹</span>
+              <span className="text-3xl font-black">{balance}</span>
+            </div>
+          </div>
+          <div className="w-10 h-10 bg-amber-500/10 rounded-full flex items-center justify-center text-amber-600">
+            <Wallet size={20} />
+          </div>
+        </div>
+
+        {status === 'success' ? (
+          <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center space-y-3 animate-in fade-in duration-300">
+            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600 mx-auto">
+              <CheckCircle size={28} />
+            </div>
+            <div>
+              <h4 className="font-bold text-green-950">Redemption Successful!</h4>
+              <p className="text-xs text-green-700 mt-1">The amount has been debited and will reflect in your UPI account shortly.</p>
+            </div>
+            <button
+              onClick={() => setStatus('idle')}
+              className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-xl text-xs transition-colors"
+            >
+              Redeem More
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handleRedeem} className="space-y-4">
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-slate-700">UPI ID</label>
+              <input
+                type="text"
+                placeholder="e.g. user@okhdfcbank"
+                value={upiId}
+                disabled={status === 'loading'}
+                onChange={(e) => setUpiId(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent disabled:bg-slate-50 disabled:text-slate-400"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-slate-700">Amount (₹)</label>
+              <input
+                type="number"
+                placeholder="Enter amount to withdraw"
+                value={amount}
+                disabled={status === 'loading'}
+                onChange={(e) => setAmount(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent disabled:bg-slate-50 disabled:text-slate-400"
+              />
+            </div>
+            {errorMessage && (
+              <p className="text-xs text-red-600 font-semibold">{errorMessage}</p>
+            )}
+            <button
+              type="submit"
+              disabled={status === 'loading'}
+              className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-orange-400 text-white font-bold py-2.5 rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-md shadow-orange-500/10"
+            >
+              {status === 'loading' ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" /> Processing Payout...
+                </>
+              ) : (
+                'Confirm Redemption'
+              )}
+            </button>
+          </form>
+        )}
+
+        <div>
+          <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Transaction History</h4>
+          <div className="space-y-2 max-h-[180px] overflow-y-auto pr-1">
+            {transactions.length === 0 ? (
+              <p className="text-xs text-slate-400 text-center py-4">No transactions yet.</p>
+            ) : (
+              transactions.map(tx => (
+                <div key={tx.id} className="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-100 rounded-xl">
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-slate-800 truncate">{tx.description}</p>
+                    <p className="text-[10px] text-slate-400">{tx.date}</p>
+                  </div>
+                  <span className={`text-xs font-bold shrink-0 ${tx.type === 'credit' ? 'text-green-600' : 'text-red-600'}`}>
+                    {tx.type === 'credit' ? '+' : '-'} ₹{tx.amount}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
 // --- HOME ---
-function HomeFeed({ isSOSActive, setIsSOSActive, liveLocation, onViewCertificate, userRole, walletBalance, onOpenWallet }) {
+function HomeFeed({ 
+  isSOSActive, 
+  setIsSOSActive, 
+  liveLocation, 
+  onViewCertificate, 
+  userRole, 
+  walletBalance, 
+  onOpenWallet,
+  volunteerApplicationStatus,
+  setVolunteerApplicationStatus,
+  setVolunteerRequests,
+  displayUser,
+  services,
+  setActiveTab,
+  volunteerRequests,
+  surveys
+}) {
   const showWalletCard = ['Volunteer', 'NGO', 'Admin'].includes(userRole);
 
   return (
@@ -929,29 +1148,179 @@ function HomeFeed({ isSOSActive, setIsSOSActive, liveLocation, onViewCertificate
           </button>
         </div>
 
-        <div className="bg-gradient-to-br from-orange-500 via-orange-600 to-emerald-600 rounded-2xl p-6 text-white shadow-xl flex flex-col justify-between min-h-[180px]">
-          <div>
-            <h2 className="text-xl font-bold mb-1">Your Civic Impact</h2>
-            <div className="flex items-center gap-4 mt-3">
-              <div className="text-center">
-                <div className="text-3xl font-black">{MOCK_USER.volunteerHours}</div>
-                <div className="text-xs text-white/80 uppercase tracking-wider font-semibold">Hours</div>
-              </div>
-              <div className="w-px h-10 bg-white/30"></div>
-              <div className="text-center">
-                <div className="text-3xl font-black">3</div>
-                <div className="text-xs text-white/80 uppercase tracking-wider font-semibold">Missions</div>
+        {userRole === 'Admin' ? (
+          <div className="bg-gradient-to-br from-purple-600 to-indigo-700 rounded-2xl p-6 text-white shadow-xl flex flex-col justify-between min-h-[180px]">
+            <div>
+              <h2 className="text-xl font-bold mb-1">Platform Analytics</h2>
+              <div className="grid grid-cols-3 gap-2 mt-3 text-center">
+                <div>
+                  <div className="text-2xl font-black">{1420 + (volunteerRequests ? volunteerRequests.length : 0)}</div>
+                  <div className="text-[10px] text-white/80 uppercase tracking-wider font-semibold">Total Users</div>
+                </div>
+                <div className="border-l border-white/20">
+                  <div className="text-2xl font-black">{services ? services.filter(s => s.status === 'approved').length : 4}</div>
+                  <div className="text-[10px] text-white/80 uppercase tracking-wider font-semibold">Services</div>
+                </div>
+                <div className="border-l border-white/20">
+                  <div className="text-2xl font-black">{isSOSActive ? 1 : 0}</div>
+                  <div className="text-[10px] text-white/80 uppercase tracking-wider font-semibold">Active SOS</div>
+                </div>
               </div>
             </div>
+            <button 
+              onClick={() => setActiveTab('admin-approvals')}
+              className="mt-4 text-xs font-semibold bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg self-start backdrop-blur-sm transition-colors flex items-center gap-1.5 animate-pulse"
+            >
+              <ShieldCheck size={14} /> Manage Approvals ({(volunteerRequests ? volunteerRequests.filter(r => r.status === 'pending').length : 0) + (services ? services.filter(s => s.status === 'pending').length : 0) + (surveys ? surveys.filter(s => s.status === 'pending').length : 0)})
+            </button>
           </div>
-          <button 
-            onClick={onViewCertificate}
-            className="mt-4 text-xs font-semibold bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg self-start backdrop-blur-sm transition-colors flex items-center gap-1.5"
-          >
-            <Award size={14} /> View Certificate
-          </button>
-        </div>
+        ) : userRole === 'NGO' ? (
+          <div className="bg-gradient-to-br from-blue-600 to-cyan-600 rounded-2xl p-6 text-white shadow-xl flex flex-col justify-between min-h-[180px]">
+            <div>
+              <h2 className="text-xl font-bold mb-1">NGO Impact Dashboard</h2>
+              <div className="flex items-center gap-4 mt-3">
+                <div className="text-center">
+                  <div className="text-3xl font-black">5</div>
+                  <div className="text-xs text-white/80 uppercase tracking-wider font-semibold">Active Drives</div>
+                </div>
+                <div className="w-px h-10 bg-white/30"></div>
+                <div className="text-center">
+                  <div className="text-3xl font-black">142</div>
+                  <div className="text-xs text-white/80 uppercase tracking-wider font-semibold">Participants</div>
+                </div>
+              </div>
+            </div>
+            <button 
+              onClick={() => setActiveTab('volunteer')}
+              className="mt-4 text-xs font-semibold bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg self-start backdrop-blur-sm transition-colors flex items-center gap-1.5"
+            >
+              <HeartHandshake size={14} /> Manage Drives
+            </button>
+          </div>
+        ) : userRole === 'ServiceProvider' ? (
+          <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-6 text-white shadow-xl flex flex-col justify-between min-h-[180px]">
+            <div>
+              <h2 className="text-xl font-bold mb-1">Business Dashboard</h2>
+              <div className="flex items-center gap-4 mt-3">
+                <div className="text-center">
+                  <div className="text-3xl font-black">4.8 ★</div>
+                  <div className="text-xs text-white/80 uppercase tracking-wider font-semibold">Rating</div>
+                </div>
+                <div className="w-px h-10 bg-white/30"></div>
+                <div className="text-center">
+                  <div className="text-3xl font-black">28</div>
+                  <div className="text-xs text-white/80 uppercase tracking-wider font-semibold">Bookings</div>
+                </div>
+              </div>
+            </div>
+            <button 
+              onClick={() => setActiveTab('services')}
+              className="mt-4 text-xs font-semibold bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg self-start backdrop-blur-sm transition-colors flex items-center gap-1.5"
+            >
+              <Wrench size={14} /> View Service Dashboard
+            </button>
+          </div>
+        ) : (
+          <div className="bg-gradient-to-br from-orange-500 via-orange-600 to-emerald-600 rounded-2xl p-6 text-white shadow-xl flex flex-col justify-between min-h-[180px]">
+            <div>
+              <h2 className="text-xl font-bold mb-1">Your Civic Impact</h2>
+              <div className="flex items-center gap-4 mt-3">
+                <div className="text-center">
+                  <div className="text-3xl font-black">{MOCK_USER.volunteerHours}</div>
+                  <div className="text-xs text-white/80 uppercase tracking-wider font-semibold">Hours</div>
+                </div>
+                <div className="w-px h-10 bg-white/30"></div>
+                <div className="text-center">
+                  <div className="text-3xl font-black">3</div>
+                  <div className="text-xs text-white/80 uppercase tracking-wider font-semibold">Missions</div>
+                </div>
+              </div>
+            </div>
+            <button 
+              onClick={onViewCertificate}
+              className="mt-4 text-xs font-semibold bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg self-start backdrop-blur-sm transition-colors flex items-center gap-1.5"
+            >
+              <Award size={14} /> View Certificate
+            </button>
+          </div>
+        )}
       </div>
+
+      {userRole === 'Citizen' && (
+        <div className="mt-4">
+          {volunteerApplicationStatus === 'idle' && (
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between min-h-[180px] animate-in slide-in-from-bottom duration-300">
+              <div>
+                <div className="flex items-center gap-2 mb-2 text-green-800">
+                  <HeartHandshake size={20} />
+                  <h3 className="font-bold text-lg">Become a Saathi Volunteer</h3>
+                </div>
+                <p className="text-slate-600 text-xs leading-relaxed max-w-md">
+                  Help your community by responding to local SOS alerts, verifying service locations, and onboarding local shops. You will earn rewards for every action and receive a certified civic impact credential.
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setVolunteerApplicationStatus('pending');
+                  setVolunteerRequests(prev => [
+                    {
+                      id: Date.now(),
+                      name: displayUser?.name || "Jithu Sreekumar",
+                      phone: displayUser?.phone || "+91 98765 43210",
+                      email: displayUser?.email || "jithu@gmail.com",
+                      status: "pending",
+                      date: "Just now",
+                      idType: displayUser?.idType || "Aadhaar Card",
+                      idNumber: displayUser?.idNumber || "XXXX XXXX 4521"
+                    },
+                    ...prev
+                  ]);
+                }}
+                className="mt-4 bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-5 rounded-xl text-xs self-start transition-all shadow-sm flex items-center gap-1.5"
+              >
+                <HeartHandshake size={14} /> Register as a Volunteer
+              </button>
+            </div>
+          )}
+
+          {volunteerApplicationStatus === 'pending' && (
+            <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between min-h-[180px] animate-in fade-in duration-300">
+              <div>
+                <div className="flex items-center gap-2 mb-2 text-amber-800">
+                  <Clock size={20} className="animate-spin" />
+                  <h3 className="font-bold text-lg">Volunteer Registration Pending</h3>
+                </div>
+                <p className="text-slate-600 text-xs leading-relaxed max-w-md">
+                  Thank you for applying to be a Saathi Volunteer! Your application has been submitted to the platform administrators for ID and profile verification. You will be notified as soon as it is approved.
+                </p>
+              </div>
+              <div className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 bg-amber-100 px-3 py-1.5 rounded-lg self-start">
+                <Clock size={12} className="animate-spin" /> Waiting for Admin Approval
+              </div>
+            </div>
+          )}
+
+          {volunteerApplicationStatus === 'rejected' && (
+            <div className="bg-gradient-to-br from-red-50 to-rose-50 border border-red-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between min-h-[180px] animate-in fade-in duration-300">
+              <div>
+                <div className="flex items-center gap-2 mb-2 text-red-800">
+                  <X size={20} />
+                  <h3 className="font-bold text-lg">Volunteer Registration Rejected</h3>
+                </div>
+                <p className="text-slate-600 text-xs leading-relaxed max-w-md">
+                  Unfortunately, your volunteer application could not be approved at this time. Please check that your details and verification ID are correct.
+                </p>
+              </div>
+              <button
+                onClick={() => setVolunteerApplicationStatus('idle')}
+                className="mt-4 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-xl text-xs self-start transition-all shadow-sm"
+              >
+                Try Again
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       <div>
         <div className="flex items-center justify-between mb-4">
@@ -1438,8 +1807,23 @@ function PostOpportunityModal({ userCoords, userRole, onPost, onClose }) {
 }
 
 // --- SERVICES ---
-function ServicesModule({ userCoords, locationStatus, userRole, onCommission, onShowEarning }) {
-  const [services, setServices] = useState(MOCK_SERVICES);
+function ServicesModule({ userCoords, locationStatus, userRole, onCommission, onShowEarning, services, setServices }) {
+
+  // Dynamically fetch (mock) local services based on map suggestions (user location)
+  useEffect(() => {
+    if (userCoords) {
+      const dynamicServices = [
+        { id: 'd1', category: "Ambulance", name: "Local Fast Response", rating: 4.8, lat: userCoords.lat + 0.015, lng: userCoords.lng + 0.012, registeredAt: "Nearby Area", verified: true, available: true, status: 'approved' },
+        { id: 'd2', category: "Plumber", name: "QuickFix Local Plumber", rating: 4.5, lat: userCoords.lat - 0.01, lng: userCoords.lng + 0.02, registeredAt: "Nearby Area", verified: true, available: true, status: 'approved' },
+        { id: 'd3', category: "Electrician", name: "City Power Solutions", rating: 4.7, lat: userCoords.lat + 0.02, lng: userCoords.lng - 0.01, registeredAt: "Nearby Area", verified: true, available: true, status: 'approved' },
+        { id: 'd4', category: "Tow Truck", name: "Express Auto Recovery", rating: 4.3, lat: userCoords.lat - 0.015, lng: userCoords.lng - 0.015, registeredAt: "Nearby Area", verified: false, available: true, status: 'approved' },
+      ];
+      setServices(prev => {
+        if (prev.some(s => s.id === 'd1')) return prev;
+        return [...dynamicServices, ...prev];
+      });
+    }
+  }, [userCoords]);
   const [radiusKm, setRadiusKm] = useState(20);
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [showOnboard, setShowOnboard] = useState(false);
@@ -1964,8 +2348,21 @@ function ServiceApprovalQueueModal({ services, onApprove, onReject, onClose }) {
 }
 
 // --- SURVEY ---
-function SurveyModule({ userRole, userCoords, onMicroReward, onShowEarning }) {
-  const [surveys, setSurveys] = useState(MOCK_SURVEYS);
+function SurveyModule({ userRole, userCoords, onMicroReward, onShowEarning, surveys, setSurveys }) {
+
+  // Dynamically fetch (mock) local surveys based on map suggestions (user location)
+  useEffect(() => {
+    if (userCoords) {
+      const dynamicSurveys = [
+        { id: 'ds1', title: "Local Ward Infrastructure Feedback", authority: "Municipal Council", expires: "3 days left", responses: 840, status: 'approved' },
+        { id: 'ds2', title: "Community Safety Assessment", authority: "Local Police Dept", expires: "1 week left", responses: 1250, status: 'approved' }
+      ];
+      setSurveys(prev => {
+        if (prev.some(s => s.id === 'ds1')) return prev;
+        return [...dynamicSurveys, ...prev];
+      });
+    }
+  }, [userCoords]);
   const [insights, setInsights] = useState({});
   const [loadingSurveyId, setLoadingSurveyId] = useState(null);
   const [showPostForm, setShowPostForm] = useState(false);
@@ -2673,6 +3070,287 @@ function TakeSurveyModal({ survey, canEarn, onSubmit, onClose }) {
   );
 }
 
+// --- ADMIN APPROVALS ---
+function AdminApprovalsModule({ 
+  volunteerRequests, 
+  setVolunteerRequests, 
+  services, 
+  setServices, 
+  surveys, 
+  setSurveys, 
+  userRole, 
+  setUserRole, 
+  setVolunteerApplicationStatus,
+  displayUser,
+  addWalletTxn
+}) {
+  const [subTab, setSubTab] = useState('volunteers');
+
+  const pendingVolunteers = volunteerRequests.filter(r => r.status === 'pending');
+  const pendingServices = services.filter(s => s.status === 'pending');
+  const pendingSurveys = surveys.filter(s => s.status === 'pending');
+
+  const handleApproveVolunteer = (id, name) => {
+    setVolunteerRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'approved' } : r));
+    if (name === displayUser.name) {
+      setUserRole('Volunteer');
+      setVolunteerApplicationStatus('approved');
+    }
+  };
+
+  const handleRejectVolunteer = (id, name) => {
+    setVolunteerRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'rejected' } : r));
+    if (name === displayUser.name) {
+      setVolunteerApplicationStatus('rejected');
+    }
+  };
+
+  const handleApproveService = (id, name, onboardedBy) => {
+    setServices(prev => prev.map(s => s.id === id ? { ...s, status: 'approved', verified: true } : s));
+    // Reward the volunteer who onboarded the service
+    if (onboardedBy && onboardedBy.toLowerCase().includes('volunteer')) {
+      addWalletTxn({
+        type: 'credit',
+        source: 'commission',
+        amount: 25,
+        description: `Commission: Onboarded ${name} (Approved)`
+      });
+    }
+  };
+
+  const handleRejectService = (id) => {
+    setServices(prev => prev.filter(s => s.id !== id));
+  };
+
+  const handleApproveSurvey = (id) => {
+    setSurveys(prev => prev.map(s => s.id === id ? { ...s, status: 'approved' } : s));
+  };
+
+  const handleRejectSurvey = (id) => {
+    setSurveys(prev => prev.filter(s => s.id !== id));
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold text-slate-900">Admin Control Center</h2>
+        <p className="text-sm text-slate-500">Manage pending registration, service onboarding, and civic survey requests.</p>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex border-b border-slate-200 overflow-x-auto">
+        <button
+          onClick={() => setSubTab('volunteers')}
+          className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold whitespace-nowrap border-b-2 transition-all ${
+            subTab === 'volunteers'
+              ? 'border-purple-600 text-purple-700 font-bold'
+              : 'border-transparent text-slate-500 hover:text-slate-700'
+          }`}
+        >
+          <HeartHandshake size={16} />
+          Volunteer Requests
+          {pendingVolunteers.length > 0 && (
+            <span className="bg-purple-100 text-purple-700 text-xs font-bold px-2 py-0.5 rounded-full">
+              {pendingVolunteers.length}
+            </span>
+          )}
+        </button>
+        <button
+          onClick={() => setSubTab('services')}
+          className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold whitespace-nowrap border-b-2 transition-all ${
+            subTab === 'services'
+              ? 'border-purple-600 text-purple-700 font-bold'
+              : 'border-transparent text-slate-500 hover:text-slate-700'
+          }`}
+        >
+          <Wrench size={16} />
+          Service Listings
+          {pendingServices.length > 0 && (
+            <span className="bg-purple-100 text-purple-700 text-xs font-bold px-2 py-0.5 rounded-full">
+              {pendingServices.length}
+            </span>
+          )}
+        </button>
+        <button
+          onClick={() => setSubTab('surveys')}
+          className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold whitespace-nowrap border-b-2 transition-all ${
+            subTab === 'surveys'
+              ? 'border-purple-600 text-purple-700 font-bold'
+              : 'border-transparent text-slate-500 hover:text-slate-700'
+          }`}
+        >
+          <FileText size={16} />
+          Civic Surveys
+          {pendingSurveys.length > 0 && (
+            <span className="bg-purple-100 text-purple-700 text-xs font-bold px-2 py-0.5 rounded-full">
+              {pendingSurveys.length}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* Tab Panels */}
+      <div className="space-y-4">
+        {subTab === 'volunteers' && (
+          <div className="space-y-3">
+            {pendingVolunteers.length === 0 ? (
+              <div className="bg-white border border-dashed border-slate-200 rounded-2xl p-8 text-center text-slate-500">
+                <CheckCircle size={36} className="mx-auto text-green-500 mb-2" />
+                <p className="text-sm font-medium">No pending volunteer registrations.</p>
+              </div>
+            ) : (
+              pendingVolunteers.map(req => (
+                <div key={req.id} className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm transition-all hover:border-purple-200">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex gap-3">
+                      <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 shrink-0">
+                        <User size={20} />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-slate-900">{req.name}</h4>
+                        <p className="text-xs text-slate-500 mt-0.5">{req.email || "No email provided"} • {req.phone}</p>
+                        <div className="mt-3 bg-slate-50 border border-slate-100 rounded-lg p-2.5 space-y-1">
+                          <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Identity Proof (DigiLocker)</p>
+                          <p className="text-xs text-slate-700"><strong>Type:</strong> {req.idType || "Aadhaar Card"}</p>
+                          <p className="text-xs text-slate-700"><strong>ID Number:</strong> {req.idNumber || "XXXX XXXX 8892"}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">
+                      Pending
+                    </span>
+                  </div>
+                  <div className="flex gap-3 mt-4 border-t border-slate-100 pt-4">
+                    <button
+                      onClick={() => handleRejectVolunteer(req.id, req.name)}
+                      className="flex-1 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold py-2 rounded-xl transition-all"
+                    >
+                      Reject
+                    </button>
+                    <button
+                      onClick={() => handleApproveVolunteer(req.id, req.name)}
+                      className="flex-1 bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-2 rounded-xl transition-all shadow-sm"
+                    >
+                      Approve Volunteer
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+
+        {subTab === 'services' && (
+          <div className="space-y-3">
+            {pendingServices.length === 0 ? (
+              <div className="bg-white border border-dashed border-slate-200 rounded-2xl p-8 text-center text-slate-500">
+                <CheckCircle size={36} className="mx-auto text-green-500 mb-2" />
+                <p className="text-sm font-medium">No pending service listings.</p>
+              </div>
+            ) : (
+              pendingServices.map(service => (
+                <div key={service.id} className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm transition-all hover:border-purple-200">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex gap-3">
+                      <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 shrink-0">
+                        <Wrench size={18} />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-slate-900">{service.name}</h4>
+                        <p className="text-xs text-slate-500 mt-0.5">{service.category} • Onboarded by {service.onboardedBy || 'Volunteer'}</p>
+                        <p className="text-xs text-slate-600 mt-2"><strong>Owner:</strong> {service.ownerName} ({service.ownerPhone})</p>
+                        {service.description && (
+                          <p className="text-xs text-slate-600 mt-1 italic">"{service.description}"</p>
+                        )}
+                        {service.shopDoc && (
+                          <div className="mt-3 bg-blue-50/50 border border-blue-100 rounded-lg p-2.5 flex items-center gap-2">
+                            <FileText size={16} className="text-blue-600 shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-semibold text-slate-800 truncate">{service.shopDoc.name}</p>
+                              <p className="text-[10px] text-slate-500">Shop verification • {(service.shopDoc.size / 1024).toFixed(0)} KB</p>
+                            </div>
+                            <span className="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded">Verified Doc</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">
+                      Pending Approval
+                    </span>
+                  </div>
+                  <div className="flex gap-3 mt-4 border-t border-slate-100 pt-4">
+                    <button
+                      onClick={() => handleRejectService(service.id)}
+                      className="flex-1 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold py-2 rounded-xl transition-all"
+                    >
+                      Reject
+                    </button>
+                    <button
+                      onClick={() => handleApproveService(service.id, service.name, service.onboardedBy)}
+                      className="flex-1 bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-2 rounded-xl transition-all shadow-sm"
+                    >
+                      Approve Listing
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+
+        {subTab === 'surveys' && (
+          <div className="space-y-3">
+            {pendingSurveys.length === 0 ? (
+              <div className="bg-white border border-dashed border-slate-200 rounded-2xl p-8 text-center text-slate-500">
+                <CheckCircle size={36} className="mx-auto text-green-500 mb-2" />
+                <p className="text-sm font-medium">No pending civic surveys.</p>
+              </div>
+            ) : (
+              pendingSurveys.map(survey => (
+                <div key={survey.id} className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm transition-all hover:border-purple-200">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex gap-3">
+                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+                        <FileText size={18} />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-slate-900">{survey.title}</h4>
+                        <p className="text-xs text-slate-500 mt-0.5">Authority: {survey.authority} • Expires: {survey.expires}</p>
+                        {survey.rewardAmount && (
+                          <div className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded">
+                            <Sparkles size={10} /> Reward: ₹{survey.rewardAmount}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">
+                      Pending Review
+                    </span>
+                  </div>
+                  <div className="flex gap-3 mt-4 border-t border-slate-100 pt-4">
+                    <button
+                      onClick={() => handleRejectSurvey(survey.id)}
+                      className="flex-1 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold py-2 rounded-xl transition-all"
+                    >
+                      Reject
+                    </button>
+                    <button
+                      onClick={() => handleApproveSurvey(survey.id)}
+                      className="flex-1 bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-2 rounded-xl transition-all shadow-sm"
+                    >
+                      Approve Survey
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // --- ARCHITECTURE ---
 function ArchitectureDocs() {
   const [docTab, setDocTab] = useState('schema');
@@ -2772,31 +3450,46 @@ WS     /ws/sos-broadcast`;
 }
 
 // --- UTILITY COMPONENTS ---
-function NavButton({ icon, label, active, onClick, color = 'orange' }) {
+function NavButton({ icon, label, active, onClick, color = 'orange', badge }) {
   const activeClasses = {
     orange: 'bg-orange-50 text-orange-700',
     red: 'bg-red-50 text-red-700',
     green: 'bg-green-50 text-green-700',
-    blue: 'bg-blue-50 text-blue-700'
+    blue: 'bg-blue-50 text-blue-700',
+    purple: 'bg-purple-50 text-purple-700'
   };
   return (
     <button 
       onClick={onClick}
-      className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl font-medium transition-all duration-200 ${active ? activeClasses[color] : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'}`}
+      className={`flex items-center justify-between w-full px-4 py-3 rounded-xl font-medium transition-all duration-200 ${active ? activeClasses[color] : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'}`}
     >
-      <div className={`${active ? '' : 'text-slate-400'}`}>{icon}</div>
-      {label}
+      <div className="flex items-center gap-3">
+        <div className={`${active ? '' : 'text-slate-400'}`}>{icon}</div>
+        {label}
+      </div>
+      {badge > 0 && (
+        <span className="bg-purple-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 animate-pulse">
+          {badge}
+        </span>
+      )}
     </button>
   );
 }
 
-function MobileNavButton({ icon, label, active, onClick, color = '' }) {
+function MobileNavButton({ icon, label, active, onClick, color = '', badge }) {
   return (
     <button 
       onClick={onClick}
-      className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${active ? (color || 'text-orange-600') : 'text-slate-400 hover:text-slate-600'}`}
+      className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors relative ${active ? (color || 'text-orange-600') : 'text-slate-400 hover:text-slate-600'}`}
     >
-      {icon}
+      <div className="relative">
+        {icon}
+        {badge > 0 && (
+          <span className="absolute -top-1.5 -right-2.5 bg-purple-600 text-white text-[8px] font-bold h-4 w-4 rounded-full flex items-center justify-center animate-pulse border border-white">
+            {badge}
+          </span>
+        )}
+      </div>
       <span className="text-[10px] font-medium">{label}</span>
     </button>
   );
@@ -3744,6 +4437,7 @@ function AuthScreen({ onSuccess }) {
         volunteerHours: 0,
         idType: signupData.idType,
         idNumber: signupData.idNumber,
+        registerAsVolunteer: signupData.registerAsVolunteer || false,
       });
     }, 1000);
   }, [phone, signupData, onSuccess]);
@@ -4034,6 +4728,19 @@ function AuthScreen({ onSuccess }) {
                     </button>
                   ))}
                 </div>
+              </div>
+
+              <div className="flex items-center gap-3 p-3 bg-orange-50/50 border border-orange-100 rounded-xl hover:bg-orange-50 transition-colors cursor-pointer" onClick={() => setSignupData(prev => ({ ...prev, registerAsVolunteer: !prev.registerAsVolunteer }))}>
+                <input
+                  type="checkbox"
+                  id="registerAsVolunteer"
+                  checked={signupData.registerAsVolunteer || false}
+                  onChange={(e) => {}} // click handler on div handles state change
+                  className="w-4 h-4 text-orange-600 border-slate-300 rounded focus:ring-orange-500 cursor-pointer"
+                />
+                <label htmlFor="registerAsVolunteer" className="text-xs font-semibold text-slate-700 cursor-pointer select-none">
+                  Register as a Volunteer (requires Admin approval)
+                </label>
               </div>
 
               <button
