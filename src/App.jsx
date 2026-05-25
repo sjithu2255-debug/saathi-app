@@ -581,7 +581,7 @@ export default function SaathiApp() {
           </div>
           
           <div 
-            className={`flex items-center space-x-2 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+            className={`flex items-center space-x-2 px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-default select-none pointer-events-none ${
               locationStatus === 'granted' ? 'bg-green-50 text-green-700' :
               locationStatus === 'manual' ? 'bg-blue-50 text-blue-700' :
               locationStatus === 'requesting' ? 'bg-blue-50 text-blue-700' :
@@ -1067,6 +1067,151 @@ function WalletModal({ balance, transactions, onPayout, onClose }) {
   );
 }
 
+function AlertDetailModal({ alert, isSOSActive, onTriggerSOS, onClose }) {
+  if (!alert) return null;
+
+  const alertDetails = {
+    "Medical Emergency": {
+      title: "Blood Requirement (Urgent)",
+      description: "A critical blood requirement has been raised for a patient undergoing emergency surgery. A+ blood group is urgently needed to stabilize the patient's condition.",
+      location: "Alappuzha General Hospital (Blood Bank Wing)",
+      contactName: "Dr. Sreekumar (Emergency Coordinator)",
+      contactPhone: "+91 98765 43210",
+      notes: "Please confirm your availability and recent donation history. If you are eligible and within 5km, please reach the hospital wings or contact the coordinator immediately.",
+      primaryActionText: "Call Hospital Support",
+      sosActionText: "Broadcast for A+ Donor",
+    },
+    "Missing Person": {
+      title: "Missing Child Alert",
+      description: "A 12-year-old child named Rahul has been reported missing. He was last seen near the Central Park playing area playing with friends.",
+      location: "Central Park and surrounding neighborhood (Coimbatore)",
+      contactName: "Ramesh (Father / Guardian)",
+      contactPhone: "+91 98765 43211",
+      notes: "Rahul is wearing a blue t-shirt and white shoes. He is about 4'5\" tall, light-brown hair. If you have any leads, please contact the guardian or call 112 directly.",
+      primaryActionText: "Contact Parent",
+      sosActionText: "Trigger Local Search SOS",
+    },
+    "Water Logging": {
+      title: "Heavy Water Logging Alert",
+      description: "Severe water logging reported on NH66 Bypass. The water level has reached up to 1.5 feet, causing traffic standstills.",
+      location: "NH66 Bypass Road, near Ambalappuzha junction",
+      contactName: "Traffic Control Wing",
+      contactPhone: "+91 484 233 4455",
+      notes: "Cars and two-wheelers are strongly advised to take alternative bypass roads. Pedestrians should avoid walking near open storm drains.",
+      primaryActionText: "Traffic Helpline",
+      sosActionText: "Trigger Road SOS Alert",
+    }
+  };
+
+  const details = alertDetails[alert.type] || {
+    title: alert.type,
+    description: "Hyperlocal emergency report. Citizens in the area are requested to remain vigilant and offer assistance if trained.",
+    location: "Nearby Area (" + alert.distance + ")",
+    contactName: "Saathi Control Room",
+    contactPhone: "112",
+    notes: "Proceed with caution and follow emergency guidelines.",
+    primaryActionText: "Call Emergency Dispatch",
+    sosActionText: "Trigger SOS Broadcast",
+  };
+
+  const handleCall = () => {
+    window.open("tel:112", "_self");
+  };
+
+  return (
+    <Modal onClose={onClose} maxWidth="max-w-md">
+      <ModalHeader
+        icon={<AlertOctagon size={22} className="animate-pulse text-white" />}
+        title={details.title}
+        subtitle={`Severity: ${alert.severity.toUpperCase()} • ${alert.time}`}
+        gradient={alert.severity === 'high' ? 'from-red-600 to-rose-700' : 'from-orange-500 to-amber-600'}
+        onClose={onClose}
+      />
+      <div className="p-5 overflow-y-auto space-y-4 text-sm text-slate-700">
+        <div className="flex gap-2">
+          <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider ${
+            alert.severity === 'high' ? 'bg-red-100 text-red-700' :
+            alert.severity === 'medium' ? 'bg-orange-100 text-orange-700' :
+            'bg-slate-100 text-slate-700'
+          }`}>
+            {alert.severity} Severity
+          </span>
+          <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider ${
+            alert.status === 'Active' ? 'bg-emerald-100 text-emerald-700 animate-pulse' : 'bg-slate-100 text-slate-700'
+          }`}>
+            {alert.status}
+          </span>
+        </div>
+
+        <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+          <p className="font-semibold text-slate-900 mb-1">Alert Details</p>
+          <p className="text-xs leading-relaxed text-slate-600">{details.description}</p>
+        </div>
+
+        <div className="space-y-2.5">
+          <div className="flex items-start gap-2.5">
+            <MapPin size={16} className="text-slate-400 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Location / Venue</p>
+              <p className="text-xs text-slate-800 font-medium">{details.location} ({alert.distance})</p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-2.5">
+            <Users size={16} className="text-slate-400 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Key Contact</p>
+              <p className="text-xs text-slate-800 font-medium">{details.contactName}</p>
+              <p className="text-xs text-slate-500 font-mono mt-0.5">{details.contactPhone}</p>
+            </div>
+          </div>
+        </div>
+
+        {details.notes && (
+          <div className="bg-amber-50/50 border border-amber-100 rounded-xl p-3.5 text-xs text-amber-900">
+            <div className="flex items-center gap-1.5 font-bold mb-1">
+              <AlertTriangle size={14} className="text-amber-600" />
+              Volunteer Instructions
+            </div>
+            <p className="text-amber-800 leading-relaxed">{details.notes}</p>
+          </div>
+        )}
+
+        <div className="flex flex-col gap-2 pt-3 border-t border-slate-100">
+          <div className="flex gap-2">
+            <button
+              onClick={handleCall}
+              className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-all shadow-md shadow-red-600/10 flex items-center justify-center gap-2 group text-xs uppercase tracking-wider"
+            >
+              <PhoneCall size={16} className="group-hover:scale-110 transition-transform" />
+              Call 112
+            </button>
+
+            <button
+              onClick={onTriggerSOS}
+              disabled={isSOSActive}
+              className={`flex-1 font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 group text-xs uppercase tracking-wider ${
+                isSOSActive 
+                  ? 'bg-emerald-50 text-emerald-700 cursor-not-allowed border border-emerald-200' 
+                  : 'bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white shadow-md shadow-orange-500/10'
+              }`}
+            >
+              <Radio size={16} className={`${isSOSActive ? '' : 'animate-pulse group-hover:scale-110'} transition-transform`} />
+              {isSOSActive ? "Broadcast Active" : "Trigger SOS"}
+            </button>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl transition-colors text-xs uppercase tracking-wider"
+          >
+            Close Details
+          </button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
 // --- HOME ---
 function HomeFeed({ 
   isSOSActive, 
@@ -1085,6 +1230,7 @@ function HomeFeed({
   volunteerRequests,
   surveys
 }) {
+  const [selectedAlert, setSelectedAlert] = useState(null);
   const showWalletCard = ['Volunteer', 'NGO', 'Admin'].includes(userRole);
 
   return (
@@ -1331,7 +1477,11 @@ function HomeFeed({
         </div>
         <div className="space-y-3">
           {MOCK_ALERTS.map(alert => (
-            <div key={alert.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between hover:border-orange-300 transition-colors cursor-pointer">
+            <div 
+              key={alert.id} 
+              onClick={() => setSelectedAlert(alert)}
+              className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between hover:border-orange-300 transition-colors cursor-pointer"
+            >
               <div className="flex items-center gap-4">
                 <div className={`p-3 rounded-full ${alert.severity === 'high' ? 'bg-red-100 text-red-600' : alert.severity === 'medium' ? 'bg-orange-100 text-orange-600' : 'bg-slate-100 text-slate-600'}`}>
                   <AlertTriangle size={20} />
@@ -1350,6 +1500,18 @@ function HomeFeed({
           ))}
         </div>
       </div>
+
+      {selectedAlert && (
+        <AlertDetailModal
+          alert={selectedAlert}
+          isSOSActive={isSOSActive}
+          onTriggerSOS={() => {
+            setIsSOSActive(true);
+            setSelectedAlert(null);
+          }}
+          onClose={() => setSelectedAlert(null)}
+        />
+      )}
     </div>
   );
 }
