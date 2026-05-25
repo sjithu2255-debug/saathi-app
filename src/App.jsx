@@ -118,9 +118,48 @@ const MOCK_CONTACTS = [
 ];
 
 const MOCK_ALERTS = [
-  { id: 1, type: "Medical Emergency", distance: "0.5 km", time: "2 mins ago", status: "Active", severity: "high" },
-  { id: 2, type: "Missing Person", distance: "2.1 km", time: "1 hour ago", status: "Active", severity: "medium" },
-  { id: 3, type: "Water Logging", distance: "1.2 km", time: "3 hours ago", status: "Resolved", severity: "low" },
+  { 
+    id: 1, 
+    type: "Medical Emergency", 
+    title: "Urgent A+ Blood Needed",
+    description: "Emergency blood requirement raised for a patient undergoing surgery at Alappuzha General Hospital.",
+    location: "Alappuzha General Hospital (Blood Bank Wing)",
+    contactName: "Dr. Sreekumar (Emergency Coordinator)",
+    contactPhone: "+91 98765 43210",
+    notes: "Please confirm your availability and recent donation history. If you are eligible and within 5km, please reach the hospital wings or contact the coordinator immediately.",
+    distance: "0.5 km", 
+    time: "2 mins ago", 
+    status: "Active", 
+    severity: "high" 
+  },
+  { 
+    id: 2, 
+    type: "Missing Person", 
+    title: "Missing Child: 12yo Rahul",
+    description: "A 12-year-old child named Rahul has been reported missing. He was last seen near the Central Park playing area.",
+    location: "Central Park and surrounding neighborhood (Coimbatore)",
+    contactName: "Ramesh (Father / Guardian)",
+    contactPhone: "+91 98765 43211",
+    notes: "Rahul is wearing a blue t-shirt and white shoes. He is about 4'5\" tall, light-brown hair. If you have any leads, please contact the guardian or call 112 directly.",
+    distance: "2.1 km", 
+    time: "1 hour ago", 
+    status: "Active", 
+    severity: "medium" 
+  },
+  { 
+    id: 3, 
+    type: "Water Logging", 
+    title: "Water Logging NH66 Bypass",
+    description: "Severe flooding reported near Ambalappuzha junction. Traffic advised to take alternative routes.",
+    location: "NH66 Bypass Road, near Ambalappuzha junction",
+    contactName: "Traffic Control Wing",
+    contactPhone: "+91 484 233 4455",
+    notes: "Cars and two-wheelers are strongly advised to take alternative bypass roads. Pedestrians should avoid walking near open storm drains.",
+    distance: "1.2 km", 
+    time: "3 hours ago", 
+    status: "Resolved", 
+    severity: "low" 
+  },
 ];
 
 const MOCK_VOLUNTEER = [
@@ -1167,50 +1206,6 @@ function WalletModal({ balance, transactions, onPayout, onClose }) {
 function AlertDetailModal({ alert, isSOSActive, onTriggerSOS, onClose }) {
   if (!alert) return null;
 
-  const alertDetails = {
-    "Medical Emergency": {
-      title: "Blood Requirement (Urgent)",
-      description: "A critical blood requirement has been raised for a patient undergoing emergency surgery. A+ blood group is urgently needed to stabilize the patient's condition.",
-      location: "Alappuzha General Hospital (Blood Bank Wing)",
-      contactName: "Dr. Sreekumar (Emergency Coordinator)",
-      contactPhone: "+91 98765 43210",
-      notes: "Please confirm your availability and recent donation history. If you are eligible and within 5km, please reach the hospital wings or contact the coordinator immediately.",
-      primaryActionText: "Call Hospital Support",
-      sosActionText: "Broadcast for A+ Donor",
-    },
-    "Missing Person": {
-      title: "Missing Child Alert",
-      description: "A 12-year-old child named Rahul has been reported missing. He was last seen near the Central Park playing area playing with friends.",
-      location: "Central Park and surrounding neighborhood (Coimbatore)",
-      contactName: "Ramesh (Father / Guardian)",
-      contactPhone: "+91 98765 43211",
-      notes: "Rahul is wearing a blue t-shirt and white shoes. He is about 4'5\" tall, light-brown hair. If you have any leads, please contact the guardian or call 112 directly.",
-      primaryActionText: "Contact Parent",
-      sosActionText: "Trigger Local Search SOS",
-    },
-    "Water Logging": {
-      title: "Heavy Water Logging Alert",
-      description: "Severe water logging reported on NH66 Bypass. The water level has reached up to 1.5 feet, causing traffic standstills.",
-      location: "NH66 Bypass Road, near Ambalappuzha junction",
-      contactName: "Traffic Control Wing",
-      contactPhone: "+91 484 233 4455",
-      notes: "Cars and two-wheelers are strongly advised to take alternative bypass roads. Pedestrians should avoid walking near open storm drains.",
-      primaryActionText: "Traffic Helpline",
-      sosActionText: "Trigger Road SOS Alert",
-    }
-  };
-
-  const details = alertDetails[alert.type] || {
-    title: alert.type,
-    description: "Hyperlocal emergency report. Citizens in the area are requested to remain vigilant and offer assistance if trained.",
-    location: "Nearby Area (" + alert.distance + ")",
-    contactName: "Saathi Control Room",
-    contactPhone: "112",
-    notes: "Proceed with caution and follow emergency guidelines.",
-    primaryActionText: "Call Emergency Dispatch",
-    sosActionText: "Trigger SOS Broadcast",
-  };
-
   const handleCall = () => {
     window.open("tel:112", "_self");
   };
@@ -1219,7 +1214,7 @@ function AlertDetailModal({ alert, isSOSActive, onTriggerSOS, onClose }) {
     <Modal onClose={onClose} maxWidth="max-w-md">
       <ModalHeader
         icon={<AlertOctagon size={22} className="animate-pulse text-white" />}
-        title={details.title}
+        title={alert.title || alert.type}
         subtitle={`Severity: ${alert.severity.toUpperCase()} • ${alert.time}`}
         gradient={alert.severity === 'high' ? 'from-red-600 to-rose-700' : 'from-orange-500 to-amber-600'}
         onClose={onClose}
@@ -1242,7 +1237,7 @@ function AlertDetailModal({ alert, isSOSActive, onTriggerSOS, onClose }) {
 
         <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
           <p className="font-semibold text-slate-900 mb-1">Alert Details</p>
-          <p className="text-xs leading-relaxed text-slate-600">{details.description}</p>
+          <p className="text-xs leading-relaxed text-slate-600">{alert.description}</p>
         </div>
 
         <div className="space-y-2.5">
@@ -1250,7 +1245,7 @@ function AlertDetailModal({ alert, isSOSActive, onTriggerSOS, onClose }) {
             <MapPin size={16} className="text-slate-400 mt-0.5 shrink-0" />
             <div>
               <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Location / Venue</p>
-              <p className="text-xs text-slate-800 font-medium">{details.location} ({alert.distance})</p>
+              <p className="text-xs text-slate-800 font-medium">{alert.location || 'Nearby'} ({alert.distance})</p>
             </div>
           </div>
 
@@ -1258,25 +1253,26 @@ function AlertDetailModal({ alert, isSOSActive, onTriggerSOS, onClose }) {
             <Users size={16} className="text-slate-400 mt-0.5 shrink-0" />
             <div>
               <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Key Contact</p>
-              <p className="text-xs text-slate-800 font-medium">{details.contactName}</p>
-              <p className="text-xs text-slate-500 font-mono mt-0.5">{details.contactPhone}</p>
+              <p className="text-xs text-slate-800 font-medium">{alert.contactName || 'Saathi Control Room'}</p>
+              <p className="text-xs text-slate-500 font-mono mt-0.5">{alert.contactPhone || '112'}</p>
             </div>
           </div>
         </div>
 
-        {details.notes && (
+        {alert.notes && (
           <div className="bg-amber-50/50 border border-amber-100 rounded-xl p-3.5 text-xs text-amber-900">
             <div className="flex items-center gap-1.5 font-bold mb-1">
               <AlertTriangle size={14} className="text-amber-600" />
               Volunteer Instructions
             </div>
-            <p className="text-amber-800 leading-relaxed">{details.notes}</p>
+            <p className="text-amber-800 leading-relaxed">{alert.notes}</p>
           </div>
         )}
 
         <div className="flex flex-col gap-2 pt-3 border-t border-slate-100">
           <div className="flex gap-2">
             <button
+              type="button"
               onClick={handleCall}
               className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-all shadow-md shadow-red-600/10 flex items-center justify-center gap-2 group text-xs uppercase tracking-wider"
             >
@@ -1285,6 +1281,7 @@ function AlertDetailModal({ alert, isSOSActive, onTriggerSOS, onClose }) {
             </button>
 
             <button
+              type="button"
               onClick={onTriggerSOS}
               disabled={isSOSActive}
               className={`flex-1 font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 group text-xs uppercase tracking-wider ${
@@ -1298,6 +1295,7 @@ function AlertDetailModal({ alert, isSOSActive, onTriggerSOS, onClose }) {
             </button>
           </div>
           <button
+            type="button"
             onClick={onClose}
             className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl transition-colors text-xs uppercase tracking-wider"
           >
@@ -1572,29 +1570,79 @@ function HomeFeed({
           </h3>
           <button className="text-sm text-orange-600 font-medium hover:underline">View Map</button>
         </div>
-        <div className="space-y-3">
-          {MOCK_ALERTS.map(alert => (
-            <div 
-              key={alert.id} 
-              onClick={() => setSelectedAlert(alert)}
-              className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between hover:border-orange-300 transition-colors cursor-pointer"
-            >
-              <div className="flex items-center gap-4">
-                <div className={`p-3 rounded-full ${alert.severity === 'high' ? 'bg-red-100 text-red-600' : alert.severity === 'medium' ? 'bg-orange-100 text-orange-600' : 'bg-slate-100 text-slate-600'}`}>
-                  <AlertTriangle size={20} />
+        <div className="space-y-4">
+          {MOCK_ALERTS.map(alert => {
+            const isHigh = alert.severity === 'high';
+            const isMedium = alert.severity === 'medium';
+            return (
+              <div 
+                key={alert.id} 
+                onClick={() => setSelectedAlert(alert)}
+                className={`bg-white p-5 rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden group ${
+                  isHigh 
+                    ? 'border-red-200 hover:border-red-400 bg-gradient-to-br from-white to-red-50/20 hover:shadow-md' 
+                    : isMedium 
+                      ? 'border-orange-200 hover:border-orange-400 bg-gradient-to-br from-white to-orange-50/10 hover:shadow-md' 
+                      : 'border-slate-200 hover:border-slate-400 bg-white hover:shadow-md'
+                }`}
+              >
+                <div className={`absolute top-0 left-0 w-1.5 h-full ${
+                  isHigh ? 'bg-red-500' : isMedium ? 'bg-orange-500' : 'bg-slate-400'
+                }`} />
+
+                <div className="flex items-start gap-4">
+                  <div className={`p-3.5 rounded-xl shrink-0 relative ${
+                    isHigh 
+                      ? 'bg-red-50 text-red-600' 
+                      : isMedium 
+                        ? 'bg-orange-50 text-orange-600' 
+                        : 'bg-slate-100 text-slate-600'
+                  }`}>
+                    <AlertTriangle size={22} className={isHigh ? 'animate-pulse' : ''} />
+                    {alert.status === 'Active' && (
+                      <span className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white animate-ping ${
+                        isHigh ? 'bg-red-500' : 'bg-orange-500'
+                      }`} />
+                    )}
+                  </div>
+
+                  <div className="space-y-1.5 flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h4 className="font-extrabold text-slate-900 text-sm tracking-tight">
+                        {alert.title || alert.type}
+                      </h4>
+                      <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                        isHigh 
+                          ? 'bg-red-100 text-red-700' 
+                          : isMedium 
+                            ? 'bg-orange-100 text-orange-700' 
+                            : 'bg-slate-100 text-slate-600'
+                      }`}>
+                        {alert.type}
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed max-w-xl">
+                      {alert.description}
+                    </p>
+
+                    <div className="flex items-center text-[11px] text-slate-400 mt-2 gap-3">
+                      <span className="flex items-center gap-1 font-medium"><MapPin size={12} className={isHigh ? 'text-red-500' : 'text-slate-400'}/> {alert.distance}</span>
+                      <span>•</span>
+                      <span className="flex items-center gap-1 font-medium"><Clock size={12}/> {alert.time}</span>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-semibold text-slate-900">{alert.type}</h4>
-                  <div className="flex items-center text-xs text-slate-500 mt-1 gap-2">
-                    <span className="flex items-center"><MapPin size={12} className="mr-0.5"/> {alert.distance}</span>
-                    <span>•</span>
-                    <span className="flex items-center"><Clock size={12} className="mr-0.5"/> {alert.time}</span>
+
+                <div className="flex items-center justify-end shrink-0 sm:self-center">
+                  <div className="flex items-center gap-1 text-xs font-bold text-orange-600 group-hover:translate-x-1 transition-transform duration-200">
+                    View & Action
+                    <ChevronRight size={16} />
                   </div>
                 </div>
               </div>
-              <ChevronRight size={18} className="text-slate-400" />
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
