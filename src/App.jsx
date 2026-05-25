@@ -529,6 +529,21 @@ export default function SaathiApp() {
     }, 100);
   }, []);
 
+  const detectLanguageFromLocation = useCallback((locationString) => {
+    if (!locationString) return 'en';
+    const loc = locationString.toLowerCase();
+    if (loc.includes('kerala') || loc.includes('alappuzha') || loc.includes('kochi') || loc.includes('trivandrum')) {
+      return 'ml'; // Malayalam
+    }
+    if (loc.includes('tamil') || loc.includes('coimbatore') || loc.includes('chennai') || loc.includes('madurai')) {
+      return 'ta'; // Tamil
+    }
+    if (loc.includes('delhi') || loc.includes('mumbai') || loc.includes('uttar') || loc.includes('bihar') || loc.includes('haryana') || loc.includes('punjab') || loc.includes('rajasthan')) {
+      return 'hi'; // Hindi
+    }
+    return 'en';
+  }, []);
+
   const pendingApprovalsCount = useMemo(() => {
     return volunteerRequests.filter(r => r.status === 'pending').length +
            services.filter(s => s.status === 'pending').length +
@@ -551,21 +566,6 @@ export default function SaathiApp() {
   if (showSplash) {
     return <SplashScreen onDone={() => setShowSplash(false)} />;
   }
-
-  const detectLanguageFromLocation = useCallback((locationString) => {
-    if (!locationString) return 'en';
-    const loc = locationString.toLowerCase();
-    if (loc.includes('kerala') || loc.includes('alappuzha') || loc.includes('kochi') || loc.includes('trivandrum')) {
-      return 'ml'; // Malayalam
-    }
-    if (loc.includes('tamil') || loc.includes('coimbatore') || loc.includes('chennai') || loc.includes('madurai')) {
-      return 'ta'; // Tamil
-    }
-    if (loc.includes('delhi') || loc.includes('mumbai') || loc.includes('uttar') || loc.includes('bihar') || loc.includes('haryana') || loc.includes('punjab') || loc.includes('rajasthan')) {
-      return 'hi'; // Hindi
-    }
-    return 'en';
-  }, []);
 
   if (!isAuthenticated) {
     return <AuthScreen onSuccess={(user) => {
