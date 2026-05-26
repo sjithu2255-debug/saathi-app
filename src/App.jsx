@@ -484,9 +484,9 @@ const generateAIContent = async (prompt) => {
   
   // 1. Chat Moderation
   if (lowerPrompt.includes("chat moderator")) {
-    if (lowerPrompt.match(/sex|nude|naked|hot/)) return "SEXUAL";
-    if (lowerPrompt.match(/kill|hate|stupid|idiot|die|abuse/)) return "ABUSE";
-    if (lowerPrompt.match(/buy|sell|discount|promo|cheap/)) return "SPAM";
+    if (lowerPrompt.match(/\b(sex|kiss|fuck)\b/)) return "SEXUAL";
+    if (lowerPrompt.match(/\b(kill|hate|stupid|idiot|die|abuse)\b/)) return "ABUSE";
+    if (lowerPrompt.match(/\b(buy|sell|discount|promo|cheap)\b/)) return "SPAM";
     return "SAFE";
   }
 
