@@ -26,7 +26,7 @@ jobs:
     steps:
       - name: Checkout Code (Anonymous Clone)
         run: |
-          git clone https://github.com/sjithu2255-debug/saathi-app.git .
+          git -c credential.helper="" -c http.extraheader="" clone https://github.com/sjithu2255-debug/saathi-app.git .
           git checkout ${{ github.sha }}
       
       - name: Setup Node

@@ -8,7 +8,7 @@ import {
   MessageSquare, Send, X, AlertOctagon, Award, Download,
   Phone, ArrowRight, ArrowLeft, Fingerprint, KeyRound, ScanLine,
   Paperclip, Image as ImageIcon, Wallet, TrendingUp, IndianRupee,
-  Gift, Zap, ArrowDownToLine, ArrowUpRight, Plus
+  Gift, Zap, ArrowDownToLine, ArrowUpRight, Plus, Sun, Moon
 } from 'lucide-react';
 
 // --- BRAND ---
@@ -569,6 +569,7 @@ const downloadBlob = (blob, filename) => {
 // --- MAIN APP ---
 export default function SaathiApp() {
   const [showSplash, setShowSplash] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authedUser, setAuthedUser] = useState(null);
   const [activeTab, setActiveTab] = useState('home');
@@ -1045,7 +1046,80 @@ export default function SaathiApp() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-[#070913] text-slate-200 font-sans overflow-hidden relative">
+    <div className={`flex flex-col h-screen font-sans overflow-hidden relative ${isDarkMode ? 'bg-[#070913] text-slate-200' : 'bg-slate-50 text-slate-900 light-theme'}`}>
+      <style>{`
+        /* Light theme overrides */
+        .light-theme {
+          background-color: #f8fafc !important;
+          color: #0f172a !important;
+        }
+        .light-theme .hologram-grid {
+          opacity: 0.03 !important;
+        }
+        .light-theme header,
+        .light-theme .bg-\[\#0b0f19\]\/80 {
+          background-color: rgba(255, 255, 255, 0.85) !important;
+          border-color: #e2e8f0 !important;
+          color: #0f172a !important;
+        }
+        .light-theme .text-slate-200,
+        .light-theme .text-slate-300,
+        .light-theme .text-slate-400,
+        .light-theme .text-white {
+          color: #1e293b !important;
+        }
+        .light-theme .text-slate-500 {
+          color: #64748b !important;
+        }
+        .light-theme .bg-slate-900,
+        .light-theme .bg-slate-950,
+        .light-theme .bg-\[\#0b0f19\] {
+          background-color: #ffffff !important;
+          border-color: #e2e8f0 !important;
+        }
+        .light-theme .border-slate-800,
+        .light-theme .border-slate-800\/80,
+        .light-theme .border-slate-700 {
+          border-color: #e2e8f0 !important;
+        }
+        .light-theme input,
+        .light-theme select,
+        .light-theme textarea {
+          background-color: #ffffff !important;
+          color: #0f172a !important;
+          border-color: #cbd5e1 !important;
+        }
+        .light-theme .bg-orange-950\/40 {
+          background-color: #ffedd5 !important;
+          color: #ea580c !important;
+          border-color: #fed7aa !important;
+        }
+        .light-theme .bg-emerald-950\/40 {
+          background-color: #d1fae5 !important;
+          color: #059669 !important;
+          border-color: #a7f3d0 !important;
+        }
+        .light-theme .bg-blue-950\/40 {
+          background-color: #dbeafe !important;
+          color: #1d4ed8 !important;
+          border-color: #bfdbfe !important;
+        }
+        .light-theme .bg-red-950\/40 {
+          background-color: #fee2e2 !important;
+          color: #b91c1c !important;
+          border-color: #fca5a5 !important;
+        }
+        .light-theme button:hover:not(.bg-orange-600, .bg-emerald-600, .bg-red-600, .bg-transparent, .text-white) {
+          background-color: #f1f5f9 !important;
+        }
+        .light-theme .modal-header,
+        .light-theme .bg-gradient-to-r {
+          color: #ffffff !important;
+        }
+        .light-theme .shadow-2xl {
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08) !important;
+        }
+      `}</style>
       
       {/* Background Holographic Grid */}
       <div className="absolute inset-0 hologram-grid opacity-10 pointer-events-none"></div>
@@ -1191,6 +1265,15 @@ export default function SaathiApp() {
                 <span className="text-xs font-bold text-amber-500 hidden sm:inline">{formatINR(walletBalance)}</span>
               </button>
             )}
+
+            {/* Theme Toggle Button */}
+            <button
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              className="p-2 rounded-full transition-colors cursor-pointer text-slate-400 hover:bg-slate-900 border border-transparent hover:border-slate-800/30 flex items-center justify-center"
+            >
+              {isDarkMode ? <Sun size={18} className="text-amber-400" /> : <Moon size={18} className="text-slate-700" />}
+            </button>
 
             <div className="relative" data-dropdown>
               <button 
