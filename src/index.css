@@ -1,1 +1,184 @@
 @import "tailwindcss";
+
+/* -------------------------------------------------------------
+   SAATHI MODERN PREMIUM PSYCHOLOGY & SECURITY STYLE SHEETS
+   ------------------------------------------------------------- */
+
+@layer base {
+  :root {
+    --cosmic-bg: #070913;
+    --cosmic-card: rgba(15, 23, 42, 0.45);
+    --cosmic-card-border: rgba(148, 163, 184, 0.08);
+    --cosmic-glow-emerald: rgba(16, 185, 129, 0.15);
+    --cosmic-glow-amber: rgba(245, 158, 11, 0.15);
+    --cosmic-glow-red: rgba(239, 68, 68, 0.15);
+    --cosmic-glow-purple: rgba(139, 92, 246, 0.15);
+  }
+}
+
+/* Custom Scrollbar for premium feel */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.3);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(244, 63, 94, 0.2);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(244, 63, 94, 0.45);
+}
+
+/* Glassmorphism Styles */
+.glass-panel {
+  background: var(--cosmic-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--cosmic-card-border);
+}
+
+.glass-panel-heavy {
+  background: rgba(11, 15, 28, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.glass-glow-emerald {
+  box-shadow: 0 0 25px 0 var(--cosmic-glow-emerald);
+}
+
+.glass-glow-amber {
+  box-shadow: 0 0 25px 0 var(--cosmic-glow-amber);
+}
+
+.glass-glow-red {
+  box-shadow: 0 0 35px 0 var(--cosmic-glow-red);
+}
+
+.glass-glow-purple {
+  box-shadow: 0 0 25px 0 var(--cosmic-glow-purple);
+}
+
+/* Holographic animated scan line effect */
+.hologram-grid {
+  background-size: 30px 30px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+}
+
+/* Security scan line animation */
+.security-scanner {
+  position: relative;
+  overflow: hidden;
+}
+
+.security-scanner::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, #ef4444, transparent);
+  opacity: 0.8;
+  animation: scan-line 3s linear infinite;
+}
+
+.security-scanner-green::after {
+  background: linear-gradient(90deg, transparent, #10b981, transparent);
+}
+
+@keyframes scan-line {
+  0% {
+    top: 0%;
+  }
+  50% {
+    top: 100%;
+  }
+  100% {
+    top: 0%;
+  }
+}
+
+/* Certificate holographic shifting watermark */
+.holo-watermark {
+  background: linear-gradient(
+    135deg,
+    rgba(249, 115, 22, 0.08) 0%,
+    rgba(16, 185, 129, 0.08) 25%,
+    rgba(139, 92, 246, 0.08) 50%,
+    rgba(239, 68, 68, 0.08) 75%,
+    rgba(249, 115, 22, 0.08) 100%
+  );
+  background-size: 400% 400%;
+  animation: holo-flow 8s ease infinite;
+}
+
+@keyframes holo-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Subtle micro-animations for interactivity */
+.btn-premium-interactive {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-premium-interactive:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 10px 20px -10px rgba(249, 115, 22, 0.5);
+}
+
+.btn-premium-interactive:active {
+  transform: translateY(0px) scale(0.98);
+}
+
+.btn-premium-rescue:hover {
+  box-shadow: 0 10px 25px -5px rgba(239, 68, 68, 0.5);
+}
+
+/* Custom glowing pulse for Active SOS */
+.pulse-glow-sos {
+  animation: pulse-emergency 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-emergency {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.05);
+    box-shadow: 0 0 0 15px rgba(239, 68, 68, 0);
+  }
+}
+
+.pulse-glow-success {
+  animation: pulse-success-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-success-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+  }
+}

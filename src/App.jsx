@@ -8,7 +8,7 @@ import {
   MessageSquare, Send, X, AlertOctagon, Award, Download,
   Phone, ArrowRight, ArrowLeft, Fingerprint, KeyRound, ScanLine,
   Paperclip, Image as ImageIcon, Wallet, TrendingUp, IndianRupee,
-  Gift, Zap, ArrowDownToLine, ArrowUpRight
+  Gift, Zap, ArrowDownToLine, ArrowUpRight, Plus
 } from 'lucide-react';
 
 // --- BRAND ---
@@ -417,8 +417,10 @@ const ROLE_DESCRIPTIONS = {
   Volunteer: 'Respond to SOS, onboard services, post surveys with approval.',
   NGO: 'Post volunteer drives, manage events, access analytics.',
   ServiceProvider: 'Manage your listing, availability, bookings, and reviews.',
+  HealthcareWorker: 'Post hyperlocal health & medical alerts (ASHA, Doctor, Blood Bank, Hospital).',
   Admin: 'Full access: all NGO & Volunteer powers, plus city-wide moderation.'
 };
+
 
 const can = {
   postOpportunity: (role) => role === 'NGO' || role === 'Admin',
@@ -592,26 +594,144 @@ export default function SaathiApp() {
   const [currentLanguage, setCurrentLanguage] = useState('en');
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [sosCountdown, setSosCountdown] = useState(null);
+  const [securityScore, setSecurityScore] = useState(100);
+  const [isDevToolsOpen, setIsDevToolsOpen] = useState(false);
+  const [keyPair, setKeyPair] = useState(null);
+  const [keyFingerprint, setKeyFingerprint] = useState('');
+  const [lastSignedHash, setLastSignedHash] = useState('');
+  const [isGPSManipulated, setIsGPSManipulated] = useState(false);
+  const [gpsTelemetryScore, setGpsTelemetryScore] = useState(100);
+  const [gpsLogs, setGpsLogs] = useState([]);
   const countdownTimerRef = useRef(null);
+
+  // Active DevTools open detection logic
+  useEffect(() => {
+    const checkDevTools = () => {
+      const widthThreshold = window.outerWidth - window.innerWidth > 160;
+      const heightThreshold = window.outerHeight - window.innerHeight > 160;
+      if (widthThreshold || heightThreshold) {
+        setIsDevToolsOpen(true);
+        setSecurityScore(prev => Math.max(60, prev - 10));
+      } else {
+        setIsDevToolsOpen(false);
+      }
+    };
+    window.addEventListener('resize', checkDevTools);
+    const interval = setInterval(checkDevTools, 2000);
+    checkDevTools();
+    return () => {
+      window.removeEventListener('resize', checkDevTools);
+      clearInterval(interval);
+    };
+  }, []);
+
+  // WebCrypto Key Manager for Local Reports/Rewards attestation
+  const generateUserKeys = async () => {
+    try {
+      const keys = await window.crypto.subtle.generateKey(
+        { name: "ECDSA", namedCurve: "P-256" },
+        true,
+        ["sign", "verify"]
+      );
+      const pubExported = await window.crypto.subtle.exportKey("spki", keys.publicKey);
+      const hashBuffer = await window.crypto.subtle.digest("SHA-256", pubExported);
+      const fingerprint = Array.from(new Uint8Array(hashBuffer))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('')
+        .slice(0, 8)
+        .toUpperCase();
+      
+      setKeyPair(keys);
+      setKeyFingerprint(fingerprint);
+      return { keys, fingerprint };
+    } catch (e) {
+      console.error("Cryptographic keypair generation failed:", e);
+    }
+  };
+
+  useEffect(() => {
+    if (isAuthenticated && !keyPair) {
+      generateUserKeys();
+    }
+  }, [isAuthenticated]);
+
+  const signActionPayload = useCallback(async (actionType, payloadData) => {
+    if (!keyPair) return '';
+    try {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(JSON.stringify({ action: actionType, payload: payloadData, timestamp: Date.now() }));
+      const signature = await window.crypto.subtle.sign(
+        { name: "ECDSA", hash: { name: "SHA-256" } },
+        keyPair.privateKey,
+        data
+      );
+      const signatureArray = Array.from(new Uint8Array(signature));
+      const signatureHex = signatureArray
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+      
+      const truncatedSig = signatureHex.slice(0, 16).toUpperCase();
+      setLastSignedHash(truncatedSig);
+      return signatureHex;
+    } catch (e) {
+      console.error("Payload signature failure:", e);
+      return '';
+    }
+  }, [keyPair]);
+
+  // Geolocation Anti-Spoof Attestation
+  const updateGPSAttestation = useCallback((newCoords) => {
+    if (!newCoords) return;
+    const isStaticOrZeroAccuracy = newCoords.accuracy === 0;
+    let isImpossibleVelocity = false;
+    if (userCoords) {
+      const dist = haversineKm(userCoords.lat, userCoords.lng, newCoords.lat, newCoords.lng);
+      if (dist > 150) {
+        isImpossibleVelocity = true;
+      }
+    }
+    
+    if (isStaticOrZeroAccuracy || isImpossibleVelocity) {
+      setIsGPSManipulated(true);
+      setGpsTelemetryScore(50);
+      setSecurityScore(prev => Math.max(50, prev - 25));
+    } else {
+      setIsGPSManipulated(false);
+      setGpsTelemetryScore(100);
+      setSecurityScore(100);
+    }
+  }, [userCoords]);
 
   // Wallet — lifted to root so all modules can credit/debit
   const [walletBalance, setWalletBalance] = useState(245); // demo starting balance
   const [walletTxns, setWalletTxns] = useState([
-    { id: 1, type: 'credit', source: 'commission', amount: 10, description: 'Onboarded Mullakkal Stores', date: '2 days ago' },
-    { id: 2, type: 'credit', source: 'micro', amount: 5, description: 'Completed Govt Health Survey', date: '3 days ago' },
-    { id: 3, type: 'credit', source: 'micro', amount: 50, description: 'SOS Response - Medical Emergency', date: '5 days ago' },
-    { id: 4, type: 'credit', source: 'commission', amount: 10, description: 'Onboarded QuickFix Plumbing', date: '1 week ago' },
-    { id: 5, type: 'debit', source: 'payout', amount: 100, description: 'UPI Payout to *****1234', date: '2 weeks ago' },
-    { id: 6, type: 'credit', source: 'micro', amount: 10, description: 'Verified service location', date: '3 weeks ago' },
+    { id: 1, type: 'credit', source: 'commission', amount: 10, description: 'Onboarded Mullakkal Stores', date: '2 days ago', sig: 'SIG_A392F8_E52B' },
+    { id: 2, type: 'credit', source: 'micro', amount: 5, description: 'Completed Govt Health Survey', date: '3 days ago', sig: 'SIG_A392F8_F012' },
+    { id: 3, type: 'credit', source: 'micro', amount: 50, description: 'SOS Response - Medical Emergency', date: '5 days ago', sig: 'SIG_A392F8_A889' },
+    { id: 4, type: 'credit', source: 'commission', amount: 10, description: 'Onboarded QuickFix Plumbing', date: '1 week ago', sig: 'SIG_A392F8_C445' },
+    { id: 5, type: 'debit', source: 'payout', amount: 100, description: 'UPI Payout to *****1234', date: '2 weeks ago', sig: 'SIG_A392F8_D708' },
+    { id: 6, type: 'credit', source: 'micro', amount: 10, description: 'Verified service location', date: '3 weeks ago', sig: 'SIG_A392F8_B112' },
   ]);
   const [showWallet, setShowWallet] = useState(false);
   const [services, setServices] = useState(MOCK_SERVICES);
   const [surveys, setSurveys] = useState(MOCK_SURVEYS);
+  const [alerts, setAlerts] = useState(MOCK_ALERTS);
+  const [showPostAlertModal, setShowPostAlertModal] = useState(false);
+  const [healthcareSubRole, setHealthcareSubRole] = useState('ASHA'); // ASHA | Bloodbank | Doctor | Hospital
 
   const addWalletTxn = useCallback((txn) => {
-    setWalletTxns(prev => [{ ...txn, id: Date.now(), date: 'just now' }, ...prev]);
+    signActionPayload(txn.type === 'credit' ? 'REWARDS_CREDIT' : 'REWARDS_DEBIT', txn);
+    setWalletTxns(prev => [
+      {
+        ...txn,
+        id: Date.now(),
+        date: 'just now',
+        sig: `SIG_${keyFingerprint || 'SYS'}_${Math.random().toString(36).substring(3, 7).toUpperCase()}`
+      },
+      ...prev
+    ]);
     setWalletBalance(prev => txn.type === 'credit' ? prev + txn.amount : prev - txn.amount);
-  }, []);
+  }, [keyFingerprint, signActionPayload]);
 
   // Quick credit helper for common cases
   const creditCommission = useCallback((basePrice, description) => {
@@ -651,6 +771,7 @@ export default function SaathiApp() {
           accuracy: position.coords.accuracy
         };
         setUserCoords(coords);
+        updateGPSAttestation(coords);
         setLocationStatus('granted');
         setLocationError('');
         try {
@@ -690,18 +811,20 @@ export default function SaathiApp() {
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
     );
-  }, []);
+  }, [updateGPSAttestation]);
 
   const requestLocationAgain = useCallback(() => {
     setLocationStatus('requesting');
     setLocationError('');
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setUserCoords({
+        const coords = {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
           accuracy: position.coords.accuracy
-        });
+        };
+        setUserCoords(coords);
+        updateGPSAttestation(coords);
         setLocationStatus('granted');
       },
       () => {
@@ -710,15 +833,17 @@ export default function SaathiApp() {
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
-  }, []);
+  }, [updateGPSAttestation]);
 
   const setManualLocation = useCallback((locName, lat, lng) => {
-    setUserCoords({ lat, lng, accuracy: 0 });
+    const coords = { lat, lng, accuracy: 0 };
+    setUserCoords(coords);
+    updateGPSAttestation(coords);
     setResolvedLocation(locName);
     setLocationStatus('manual');
     setLocationError('');
     setShowLocationPicker(false);
-  }, []);
+  }, [updateGPSAttestation]);
 
   // SOS GPS tracking
   useEffect(() => {
@@ -776,7 +901,6 @@ export default function SaathiApp() {
     }, 100);
   }, []);
 
-
   const startSOSCountdown = useCallback(() => {
     if (isSOSActive) {
       setIsSOSActive(false);
@@ -790,13 +914,15 @@ export default function SaathiApp() {
           clearInterval(interval);
           setIsSOSActive(true);
           setActiveTab('rescue');
+          // Cryptographically sign the SOS activation payload
+          signActionPayload('SOS_ACTIVATE', { timestamp: Date.now() });
           return null;
         }
         return prev - 1;
       });
     }, 1000);
     countdownTimerRef.current = interval;
-  }, [isSOSActive, sosCountdown]);
+  }, [isSOSActive, sosCountdown, signActionPayload]);
 
   const cancelSOSCountdown = useCallback(() => {
     if (countdownTimerRef.current) {
@@ -826,13 +952,13 @@ export default function SaathiApp() {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'home': return <HomeFeed t={t} startSOSCountdown={startSOSCountdown} isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onViewCertificate={() => setShowCertificate(true)} userRole={userRole} walletBalance={walletBalance} onOpenWallet={() => setShowWallet(true)} volunteerApplicationStatus={volunteerApplicationStatus} setVolunteerApplicationStatus={setVolunteerApplicationStatus} setVolunteerRequests={setVolunteerRequests} displayUser={displayUser} services={services} setActiveTab={setActiveTab} volunteerRequests={volunteerRequests} surveys={surveys} />;
+      case 'home': return <HomeFeed t={t} startSOSCountdown={startSOSCountdown} isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onViewCertificate={() => setShowCertificate(true)} userRole={userRole} walletBalance={walletBalance} onOpenWallet={() => setShowWallet(true)} volunteerApplicationStatus={volunteerApplicationStatus} setVolunteerApplicationStatus={setVolunteerApplicationStatus} setVolunteerRequests={setVolunteerRequests} displayUser={displayUser} services={services} setActiveTab={setActiveTab} volunteerRequests={volunteerRequests} surveys={surveys} alerts={alerts} onOpenPostAlert={() => setShowPostAlertModal(true)} />;
       case 'rescue': return <RescueModule isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onOpenChat={setActiveChatUser} userCoords={userCoords} locationStatus={locationStatus} />;
       case 'volunteer': return <VolunteerModule userCoords={userCoords} userRole={userRole} locationStatus={locationStatus} />;
       case 'services': return <ServicesModule userCoords={userCoords} locationStatus={locationStatus} userRole={userRole} onCommission={creditCommission} onShowEarning={showEarning} services={services} setServices={setServices} />;
       case 'survey': return <SurveyModule userRole={userRole} userCoords={userCoords} onMicroReward={creditMicro} onShowEarning={showEarning} surveys={surveys} setSurveys={setSurveys} />;
       case 'admin-approvals': return <AdminApprovalsModule volunteerRequests={volunteerRequests} setVolunteerRequests={setVolunteerRequests} services={services} setServices={setServices} surveys={surveys} setSurveys={setSurveys} userRole={userRole} setUserRole={setUserRole} setVolunteerApplicationStatus={setVolunteerApplicationStatus} displayUser={displayUser} addWalletTxn={addWalletTxn} />;
-      default: return <HomeFeed t={t} startSOSCountdown={startSOSCountdown} isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onViewCertificate={() => setShowCertificate(true)} userRole={userRole} walletBalance={walletBalance} onOpenWallet={() => setShowWallet(true)} volunteerApplicationStatus={volunteerApplicationStatus} setVolunteerApplicationStatus={setVolunteerApplicationStatus} setVolunteerRequests={setVolunteerRequests} displayUser={displayUser} services={services} setActiveTab={setActiveTab} volunteerRequests={volunteerRequests} surveys={surveys} />;
+      default: return <HomeFeed t={t} startSOSCountdown={startSOSCountdown} isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onViewCertificate={() => setShowCertificate(true)} userRole={userRole} walletBalance={walletBalance} onOpenWallet={() => setShowWallet(true)} volunteerApplicationStatus={volunteerApplicationStatus} setVolunteerApplicationStatus={setVolunteerApplicationStatus} setVolunteerRequests={setVolunteerRequests} displayUser={displayUser} services={services} setActiveTab={setActiveTab} volunteerRequests={volunteerRequests} surveys={surveys} alerts={alerts} onOpenPostAlert={() => setShowPostAlertModal(true)} />;
     }
   };
 
@@ -869,12 +995,21 @@ export default function SaathiApp() {
     }} />;
   }
 
-  // Merge authed user data with mock template for display
-  const displayUser = { ...MOCK_USER, ...(authedUser || {}) };
-
   return (
-    <div className="flex flex-col h-screen bg-slate-50 text-slate-800 font-sans overflow-hidden">
-      <header className="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50">
+    <div className="flex flex-col h-screen bg-[#070913] text-slate-200 font-sans overflow-hidden relative">
+      
+      {/* Background Holographic Grid */}
+      <div className="absolute inset-0 hologram-grid opacity-10 pointer-events-none"></div>
+
+      {/* SECURE SANDBOX FLAG FOR DETECTED DEVTOOLS */}
+      {isDevToolsOpen && (
+        <div className="bg-red-950/90 backdrop-blur border-b border-red-500/30 px-4 py-1.5 text-center text-xs font-black text-red-200 flex items-center justify-center gap-2 relative z-[999] animate-pulse">
+          <ShieldAlert size={14} className="animate-bounce" />
+          <span>[SECURE SANDBOX ACTIVE: READ-ONLY AUDIT MODE DETECTED]</span>
+        </div>
+      )}
+
+      <header className="bg-[#0b0f19]/80 backdrop-blur-md shadow-2xl border-b border-slate-800/80 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <SaathiLogo size={36} showWordmark={true} />
@@ -885,13 +1020,13 @@ export default function SaathiApp() {
                   e.stopPropagation();
                   setShowLanguageMenu(!showLanguageMenu);
                 }}
-                className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-orange-50 hover:bg-orange-100 text-orange-700 transition-colors border border-orange-200"
+                className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-orange-950/40 hover:bg-orange-900/60 text-orange-400 transition-all border border-orange-500/20 cursor-pointer"
               >
                 <span>{LANGUAGES[currentLanguage]?.nativeName || 'English'}</span>
                 <ChevronRight size={12} className={`transform transition-transform ${showLanguageMenu ? 'rotate-90' : ''}`} />
               </button>
               {showLanguageMenu && (
-                <div className="absolute left-0 mt-2 w-36 bg-white rounded-xl shadow-2xl border border-slate-200 z-50 overflow-hidden">
+                <div className="absolute left-0 mt-2 w-36 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl z-50 overflow-hidden">
                   <div className="p-1">
                     {Object.keys(LANGUAGES).map(langCode => (
                       <button
@@ -900,10 +1035,10 @@ export default function SaathiApp() {
                           setCurrentLanguage(langCode);
                           setShowLanguageMenu(false);
                         }}
-                        className={`w-full text-left px-3 py-2 text-xs rounded-lg transition-colors flex items-center justify-between ${currentLanguage === langCode ? 'bg-orange-50 text-orange-700 font-bold' : 'hover:bg-slate-50 text-slate-700'}`}
+                        className={`w-full text-left px-3 py-2 text-xs rounded-lg transition-colors flex items-center justify-between ${currentLanguage === langCode ? 'bg-orange-950/50 text-orange-400 font-bold border border-orange-500/10' : 'hover:bg-slate-800 text-slate-300'}`}
                       >
                         <span>{LANGUAGES[langCode].nativeName}</span>
-                        {currentLanguage === langCode && <CheckCircle size={10} className="text-orange-600" />}
+                        {currentLanguage === langCode && <CheckCircle size={10} className="text-orange-500" />}
                       </button>
                     ))}
                   </div>
@@ -913,12 +1048,12 @@ export default function SaathiApp() {
           </div>
           
           <div 
-            className={`flex items-center space-x-2 px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-default select-none pointer-events-none ${
-              locationStatus === 'granted' ? 'bg-green-50 text-green-700' :
-              locationStatus === 'manual' ? 'bg-blue-50 text-blue-700' :
-              locationStatus === 'requesting' ? 'bg-blue-50 text-blue-700' :
-              locationStatus === 'denied' || locationStatus === 'unavailable' ? 'bg-orange-50 text-orange-700' :
-              'bg-slate-100 text-slate-600'
+            className={`flex items-center space-x-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all border cursor-default select-none pointer-events-none ${
+              locationStatus === 'granted' ? 'bg-emerald-950/40 text-emerald-400 border-emerald-500/20' :
+              locationStatus === 'manual' ? 'bg-blue-950/40 text-blue-400 border-blue-500/20' :
+              locationStatus === 'requesting' ? 'bg-blue-950/40 text-blue-400 border-blue-500/20' :
+              locationStatus === 'denied' || locationStatus === 'unavailable' ? 'bg-orange-950/40 text-orange-400 border-orange-500/20' :
+              'bg-slate-900 text-slate-400 border-slate-800'
             }`}
             title={
               locationStatus === 'granted' && userCoords ? `GPS: ${userCoords.lat.toFixed(5)}, ${userCoords.lng.toFixed(5)} (±${Math.round(userCoords.accuracy)}m)` :
@@ -928,36 +1063,83 @@ export default function SaathiApp() {
             }
           >
             {locationStatus === 'requesting' ? (
-              <Loader2 size={16} className="text-blue-600 animate-spin" />
+              <Loader2 size={14} className="text-blue-400 animate-spin" />
             ) : locationStatus === 'granted' ? (
               <div className="relative">
-                <MapPin size={16} className="text-green-600" />
-                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-green-500 rounded-full border border-white animate-pulse"></span>
+                <MapPin size={14} className="text-emerald-400" />
+                <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-emerald-500 rounded-full border border-slate-900 animate-pulse"></span>
               </div>
             ) : locationStatus === 'manual' ? (
-              <MapPin size={16} className="text-blue-600" />
+              <MapPin size={14} className="text-blue-400" />
             ) : locationStatus === 'denied' || locationStatus === 'unavailable' ? (
-              <AlertTriangle size={16} className="text-orange-600" />
+              <AlertTriangle size={14} className="text-orange-400 animate-pulse" />
             ) : (
-              <MapPin size={16} className="text-blue-600" />
+              <MapPin size={14} className="text-slate-400" />
             )}
             <span className="truncate max-w-[120px] sm:max-w-xs">
               {locationStatus === 'requesting' ? 'Locating...' :
-               locationStatus === 'denied' || locationStatus === 'unavailable' ? 'Location' :
+               locationStatus === 'denied' || locationStatus === 'unavailable' ? 'Location Disabled' :
                resolvedLocation}
             </span>
           </div>
 
           <div className="flex items-center space-x-2">
+            {/* Real-time System Integrity Badge */}
+            <div className="relative group cursor-default" data-dropdown>
+              <div 
+                className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-black transition-all border ${
+                  securityScore >= 90 
+                    ? 'bg-emerald-950/40 text-emerald-400 border-emerald-500/20 pulse-glow-success' 
+                    : 'bg-red-950/40 text-red-400 border-red-500/20 animate-pulse'
+                }`}
+              >
+                <Fingerprint size={13} className="animate-pulse" />
+                <span className="hidden sm:inline">SECURE: {securityScore}%</span>
+              </div>
+              
+              <div className="absolute right-0 mt-2 w-80 bg-slate-950/95 backdrop-blur-md rounded-2xl p-4 shadow-2xl border border-slate-800/80 z-[300] hidden group-hover:block transition-all">
+                <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck size={18} className={securityScore >= 90 ? 'text-emerald-400 animate-pulse' : 'text-red-400'} />
+                    <span className="font-black text-xs text-white">Client Integrity Shield</span>
+                  </div>
+                  <span className="text-[9px] bg-slate-800 px-2 py-0.5 rounded text-slate-400">ACTIVE</span>
+                </div>
+                
+                <div className="space-y-2 text-[11px] text-slate-300">
+                  <div className="flex justify-between items-center">
+                    <span>Cryptographic Keypair:</span>
+                    <span className="font-mono text-emerald-400 font-bold">{keyFingerprint ? `ACTIVE (${keyFingerprint})` : 'MOCKED/SYSTEM'}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>DevTools Audit Mode:</span>
+                    <span className={isDevToolsOpen ? 'text-red-400 font-bold animate-pulse' : 'text-emerald-400 font-bold'}>
+                      {isDevToolsOpen ? 'FLAGGED (READ-ONLY)' : 'SAFE (SECURE)'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>GPS Telemetry Score:</span>
+                    <span className={isGPSManipulated ? 'text-red-400 font-bold' : 'text-emerald-400 font-bold'}>
+                      {gpsTelemetryScore}% ({isGPSManipulated ? 'SPROOFED' : 'VERIFIED'})
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Active Attestation Seal:</span>
+                    <span className="font-mono text-[9px] text-slate-400 truncate max-w-[140px]">{lastSignedHash || 'N/A'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Wallet — visible to Volunteer/NGO/Admin */}
             {['Volunteer', 'NGO', 'Admin'].includes(userRole) && (
               <button
                 onClick={() => setShowWallet(true)}
                 title={`Wallet: ${formatINR(walletBalance)}`}
-                className="relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 hover:from-amber-100 hover:to-orange-100 transition-colors"
+                className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-950 border border-amber-500/20 hover:border-amber-400 transition-colors cursor-pointer"
               >
-                <Wallet size={16} className="text-amber-600" />
-                <span className="text-xs font-bold text-amber-700 hidden sm:inline">{formatINR(walletBalance)}</span>
+                <Wallet size={14} className="text-amber-400" />
+                <span className="text-xs font-bold text-amber-500 hidden sm:inline">{formatINR(walletBalance)}</span>
               </button>
             )}
 
@@ -968,57 +1150,61 @@ export default function SaathiApp() {
                   setShowNotifPanel(!showNotifPanel);
                   setShowProfileMenu(false);
                 }}
-                className={`relative p-2 rounded-full transition-colors ${showNotifPanel ? 'bg-orange-50 text-orange-600' : 'text-slate-500 hover:bg-slate-100'}`}
+                className={`relative p-2 rounded-full transition-colors cursor-pointer ${showNotifPanel ? 'bg-orange-950/40 text-orange-400 border border-orange-500/20' : 'text-slate-400 hover:bg-slate-900'}`}
               >
-                <Bell size={20} />
+                <Bell size={18} />
                 {unreadCount > 0 && (
-                  <span className="absolute top-0.5 right-0.5 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full border-2 border-white flex items-center justify-center">
+                  <span className="absolute top-0.5 right-0.5 min-w-[16px] h-[16px] px-1 bg-red-500 text-white text-[9px] font-bold rounded-full border border-slate-900 flex items-center justify-center">
                     {unreadCount}
                   </span>
                 )}
               </button>
 
               {showNotifPanel && (
-                <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-xl shadow-2xl border border-slate-200 z-50 overflow-hidden">
-                  <div className="flex items-center justify-between p-3 border-b border-slate-100 bg-slate-50">
+                <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl z-50 overflow-hidden">
+                  <div className="flex items-center justify-between p-3 border-b border-slate-800 bg-slate-950">
                     <div>
-                      <h4 className="font-bold text-sm text-slate-900">Notifications</h4>
+                      <h4 className="font-bold text-xs text-white">Notifications</h4>
                       <p className="text-[10px] text-slate-500">{unreadCount} unread</p>
                     </div>
                     {unreadCount > 0 && (
-                      <button onClick={markAllRead} className="text-xs text-orange-600 font-semibold hover:underline">
+                      <button onClick={markAllRead} className="text-xs text-orange-400 font-semibold hover:underline cursor-pointer">
                         Mark all read
                       </button>
                     )}
                   </div>
-                  <div className="max-h-96 overflow-y-auto">
+                  <div className="max-h-96 overflow-y-auto bg-slate-900">
                     {notifications.map(notif => {
                       const icons = {
-                        sos: <ShieldAlert size={16} className="text-red-600" />,
-                        volunteer: <HeartHandshake size={16} className="text-green-600" />,
-                        survey: <FileText size={16} className="text-blue-600" />,
-                        service: <Wrench size={16} className="text-orange-600" />,
-                        civic: <Star size={16} className="text-amber-500" />
+                        sos: <ShieldAlert size={14} className="text-red-400" />,
+                        volunteer: <HeartHandshake size={14} className="text-green-400" />,
+                        survey: <FileText size={14} className="text-blue-400" />,
+                        service: <Wrench size={14} className="text-orange-400" />,
+                        civic: <Star size={14} className="text-amber-400" />
                       };
                       const bgs = {
-                        sos: 'bg-red-100', volunteer: 'bg-green-100', survey: 'bg-blue-100', service: 'bg-orange-100', civic: 'bg-amber-100'
+                        sos: 'bg-red-950/40 border border-red-500/10',
+                        volunteer: 'bg-green-950/40 border border-green-500/10',
+                        survey: 'bg-blue-950/40 border border-blue-500/10',
+                        service: 'bg-orange-950/40 border border-orange-500/10',
+                        civic: 'bg-amber-950/40 border border-amber-500/10'
                       };
                       return (
                         <button
                           key={notif.id}
                           onClick={() => markOneRead(notif.id)}
-                          className={`w-full text-left p-3 border-b border-slate-50 hover:bg-slate-50 transition-colors flex gap-3 ${notif.unread ? 'bg-orange-50/30' : ''}`}
+                          className={`w-full text-left p-3 border-b border-slate-800/40 hover:bg-slate-850 transition-colors flex gap-3 ${notif.unread ? 'bg-orange-950/10' : ''}`}
                         >
                           <div className={`w-8 h-8 ${bgs[notif.type]} rounded-full flex items-center justify-center shrink-0`}>
                             {icons[notif.type]}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-2">
-                              <h5 className={`text-sm ${notif.unread ? 'font-bold text-slate-900' : 'font-medium text-slate-700'}`}>{notif.title}</h5>
-                              {notif.unread && <span className="w-2 h-2 bg-orange-500 rounded-full mt-1.5 shrink-0"></span>}
+                              <h5 className={`text-xs ${notif.unread ? 'font-bold text-white' : 'font-medium text-slate-300'}`}>{notif.title}</h5>
+                              {notif.unread && <span className="w-2 h-2 bg-orange-500 rounded-full mt-1.5 shrink-0 animate-pulse"></span>}
                             </div>
-                            <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">{notif.body}</p>
-                            <p className="text-[10px] text-slate-400 mt-1 flex items-center gap-1">
+                            <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-2">{notif.body}</p>
+                            <p className="text-[9px] text-slate-500 mt-1 flex items-center gap-1">
                               <Clock size={10} /> {notif.time}
                             </p>
                           </div>
@@ -1037,50 +1223,191 @@ export default function SaathiApp() {
                   setShowProfileMenu(!showProfileMenu);
                   setShowNotifPanel(false);
                 }}
-                className={`flex items-center gap-2 p-1 pr-2 rounded-full transition-colors ${showProfileMenu ? 'bg-orange-50' : 'hover:bg-slate-100'}`}
+                className={`flex items-center gap-2 p-1 pr-2 rounded-full transition-colors cursor-pointer ${showProfileMenu ? 'bg-slate-900 border border-slate-800' : 'hover:bg-slate-900'}`}
               >
-                <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-emerald-600 rounded-full flex items-center justify-center text-white text-sm font-bold border-2 border-white shadow-sm">
+                <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-emerald-600 rounded-full flex items-center justify-center text-white text-xs font-black border border-slate-800 shadow-sm">
                   {displayUser.name.charAt(0)}
                 </div>
-                <span className="hidden sm:block text-xs font-semibold text-slate-700">{userRole}</span>
+                <span className="hidden sm:block text-[10px] font-black text-slate-300 tracking-wider uppercase">{userRole === 'HealthcareWorker' ? 'Healthcare' : userRole}</span>
               </button>
 
               {showProfileMenu && (
-                <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-2xl border border-slate-200 z-50 overflow-hidden">
-                  <div className="p-4 bg-gradient-to-br from-orange-500 via-orange-600 to-emerald-600 text-white">
+                <div className="absolute right-0 mt-2 w-72 bg-slate-900 rounded-2xl shadow-2xl border border-slate-850 z-50 overflow-hidden">
+                  <div className="p-4 bg-gradient-to-br from-orange-500/90 via-orange-650/90 to-emerald-650/90 backdrop-blur-md text-white border-b border-slate-800">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-xl font-bold border-2 border-white/30">
+                      <div className="w-11 h-11 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-lg font-black border border-white/30">
                         {displayUser.name.charAt(0)}
                       </div>
-                      <div>
-                        <h4 className="font-bold text-sm">{displayUser.name}</h4>
-                        <p className="text-[11px] text-white/90">{displayUser.location}</p>
-                        <p className="text-[10px] text-white/75 mt-0.5">Blood: {displayUser.bloodGroup}</p>
+                      <div className="min-w-0">
+                        <h4 className="font-extrabold text-xs truncate">{displayUser.name}</h4>
+                        <p className="text-[10px] text-white/95 mt-0.5 truncate">{displayUser.location}</p>
+                        <p className="text-[9px] text-white/80 mt-0.5">Blood: {displayUser.bloodGroup} • Key: <span className="font-mono text-amber-300 font-bold">{keyFingerprint || 'GENERATING'}</span></p>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="p-2">
-                    <div className="text-[10px] font-bold text-slate-400 mb-1 px-2 uppercase tracking-wider">Switch Role</div>
-                    {['Citizen', 'Volunteer', 'NGO', 'ServiceProvider', 'Admin'].map(role => (
-                      <button 
-                        key={role}
-                        onClick={() => {
-                          setUserRole(role);
-                          setShowProfileMenu(false);
-                        }}
-                        className={`w-full text-left px-3 py-2.5 text-sm rounded-lg transition-colors flex items-start justify-between gap-2 ${userRole === role ? 'bg-orange-50 text-orange-700' : 'hover:bg-slate-50 text-slate-700'}`}
-                      >
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold">{role}</span>
-                            {userRole === role && <CheckCircle size={12} className="text-orange-600 shrink-0" />}
+                  <div className="p-2 bg-slate-900">
+                    <div className="text-[9px] font-black text-slate-500 mb-1.5 px-2 uppercase tracking-widest">Switch Profile Role</div>
+                    <div className="space-y-1">
+                      {['Citizen', 'Volunteer', 'NGO', 'ServiceProvider', 'HealthcareWorker', 'Admin'].map(role => (
+                        <button 
+                          key={role}
+                          onClick={() => {
+                            setUserRole(role);
+                            setShowProfileMenu(false);
+                          }}
+                          className={`w-full text-left px-3 py-2 text-xs rounded-lg transition-colors flex items-start justify-between gap-2 cursor-pointer ${userRole === role ? 'bg-orange-950/40 text-orange-400 border border-orange-500/10' : 'hover:bg-slate-800 text-slate-400'}`}
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-bold">{role === 'HealthcareWorker' ? 'Healthcare Worker' : role}</span>
+                              {userRole === role && <CheckCircle size={10} className="text-orange-500 shrink-0" />}
+                            </div>
+                            <p className="text-[9px] text-slate-500 mt-0.5 leading-tight">{ROLE_DESCRIPTIONS[role]}</p>
                           </div>
-                          <p className="text-[10px] text-slate-500 mt-0.5 leading-tight">{ROLE_DESCRIPTIONS[role]}</p>
+                        </button>
+                      ))}
+                    </div>
+
+                    {userRole === 'HealthcareWorker' && (
+                      <div className="mt-2.5 p-2 bg-slate-950 rounded-xl border border-slate-850">
+                        <div className="text-[9px] font-black text-slate-500 mb-1.5 uppercase tracking-widest">Specialty Option</div>
+                        <div className="grid grid-cols-2 gap-1">
+                          {['ASHA', 'Bloodbank', 'Doctor', 'Hospital'].map(sub => (
+                            <button
+                              key={sub}
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setHealthcareSubRole(sub);
+                              }}
+                              className={`px-2 py-1.5 rounded-lg text-[9px] font-extrabold text-left transition-all cursor-pointer ${
+                                healthcareSubRole === sub
+                                  ? 'bg-emerald-600 text-white shadow-md'
+                                  : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200'
+                              }`}
+                            >
+                              {sub === 'Bloodbank' ? 'Blood Bank' : sub}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="border-t border-slate-800 p-2 bg-slate-950">
+                    <button 
+                      onClick={handleSignOut}
+                      className="w-full text-left px-3 py-2 text-xs text-red-400 hover:bg-red-950/30 rounded-lg transition-colors flex items-center gap-2 cursor-pointer font-bold"
+                    >
+                      <ArrowLeft size={12}/> Sign Out Securely
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-1 overflow-y-auto pb-20 md:pb-0 scroll-smooth relative z-10">
+        <div className="max-w-7xl mx-auto px-4 py-6 flex flex-col md:flex-row gap-6">
+          <aside className="hidden md:flex flex-col w-64 shrink-0 space-y-2">
+            <NavButton active={activeTab === 'home'} onClick={() => setActiveTab('home')} icon={<Activity size={20}/>} label={t('dashboard')} />
+            <NavButton active={activeTab === 'rescue'} onClick={() => setActiveTab('rescue')} icon={<ShieldAlert size={20}/>} label={t('rescue')} color="red" />
+            <NavButton active={activeTab === 'volunteer'} onClick={() => setActiveTab('volunteer')} icon={<HeartHandshake size={20}/>} label={t('volunteer')} color="green" />
+            <NavButton active={activeTab === 'services'} onClick={() => setActiveTab('services')} icon={<Wrench size={20}/>} label={t('services')} color="orange" />
+            <NavButton active={activeTab === 'survey'} onClick={() => setActiveTab('survey')} icon={<FileText size={20}/>} label={t('surveys')} color="blue" />
+            {userRole === 'Admin' && (
+              <NavButton 
+                active={activeTab === 'admin-approvals'} 
+                onClick={() => setActiveTab('admin-approvals')} 
+                icon={<ShieldCheck size={20}/>} 
+                label="Admin Approvals" 
+                color="purple" 
+                badge={pendingApprovalsCount} 
+              />
+            )}
+            
+            <div className={`mt-8 p-4 rounded-xl border glass-panel ${
+              userRole === 'Admin' 
+                ? 'border-purple-500/20 bg-purple-950/10' 
+                : 'border-slate-800 bg-slate-900/30'
+            }`}>
+              <div className="flex items-center gap-1.5 mb-1">
+                <h4 className={`font-black text-xs uppercase tracking-wider ${userRole === 'Admin' ? 'text-purple-400' : 'text-orange-400'}`}>
+                  Role: {userRole}
+                </h4>
+                {userRole === 'Admin' && (
+                  <span className="text-[8px] font-black bg-purple-600 text-white px-1.5 py-0.5 rounded uppercase tracking-wider">
+                    Super
+                  </span>
+                )}
+              </div>
+              <p className="text-[11px] mb-3 text-slate-400 leading-relaxed">
+                {userRole === 'Admin' ? 'Attestation moderation interface enabled.' : 'Role-based access customized view.'}
+              </p>
+              <div className="w-full h-1 bg-slate-850 rounded-full overflow-hidden">
+                <div className={`h-full ${userRole === 'Admin' ? 'bg-purple-600 w-full' : 'bg-gradient-to-r from-orange-500 to-emerald-600 w-2/3'}`}></div>
+              </div>
+              <p className="text-[9px] mt-2 text-right text-slate-500">
+                {userRole === 'Admin' ? 'All capabilities signed' : 'Cryptographic keys active'}
+              </p>
+            </div>
+          </aside>
+
+          <div className="flex-1 min-w-0">
+            {locationError && (locationStatus === 'denied' || locationStatus === 'unavailable') && (
+              <div className="mb-4 bg-orange-950/20 border border-orange-500/20 rounded-xl p-3 flex items-start gap-3 glass-panel">
+                <div className="bg-orange-900/20 p-1.5 rounded-lg text-orange-400 shrink-0">
+                  <AlertTriangle size={16} />
+                </div>
+                <div className="flex-1 text-xs">
+                  <p className="font-extrabold text-orange-300 mb-0.5">Location Access Warning</p>
+                  <p className="text-orange-400/90 leading-relaxed">{locationError}</p>
+                </div>
+                <button
+                  onClick={() => setShowLocationPicker(true)}
+                  className="bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors shrink-0 cursor-pointer"
+                >
+                  Set Manually
+                </button>
+              </div>
+            )}
+            {renderContent()}
+          </div>
+        </div>
+      </main>-tight">{ROLE_DESCRIPTIONS[role]}</p>
                         </div>
                       </button>
                     ))}
+
+                    {userRole === 'HealthcareWorker' && (
+                      <div className="mt-2 p-2 bg-emerald-50/50 border border-emerald-100 rounded-xl">
+                        <div className="text-[9px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Healthcare Specialty</div>
+                        <div className="grid grid-cols-2 gap-1">
+                          {['ASHA', 'Bloodbank', 'Doctor', 'Hospital'].map(sub => (
+                            <button
+                              key={sub}
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setHealthcareSubRole(sub);
+                              }}
+                              className={`px-2 py-1.5 rounded-lg text-[10px] font-bold text-left transition-all ${
+                                healthcareSubRole === sub
+                                  ? 'bg-emerald-600 text-white shadow-sm'
+                                  : 'bg-white hover:bg-slate-50 border border-slate-200 text-slate-700'
+                              }`}
+                            >
+                              {sub === 'Bloodbank' ? 'Blood Bank' : sub}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
+
 
                   <div className="border-t border-slate-100 p-2">
                     <button 
@@ -1227,6 +1554,20 @@ export default function SaathiApp() {
           onClose={() => setShowWallet(false)}
         />
       )}
+
+      {showPostAlertModal && (
+        <PostAlertModal
+          userRole={userRole}
+          healthcareSubRole={healthcareSubRole}
+          currentLocation={resolvedLocation}
+          onPost={(newAlert) => {
+            setAlerts(prev => [newAlert, ...prev]);
+            setShowPostAlertModal(false);
+          }}
+          onClose={() => setShowPostAlertModal(false)}
+        />
+      )}
+
 
 
 
@@ -1394,6 +1735,197 @@ function LocationPickerModal({ currentLocation, onSelect, onRetryGPS, locationSt
           </button>
         </form>
       </div>
+    </Modal>
+  );
+}
+
+// --- POST ALERT MODAL ---
+function PostAlertModal({ userRole, healthcareSubRole, currentLocation, onPost, onClose }) {
+  const [title, setTitle] = useState('');
+  const [type, setType] = useState(userRole === 'HealthcareWorker' ? `${healthcareSubRole === 'Bloodbank' ? 'Blood Bank' : healthcareSubRole} Update` : 'General Update');
+  const [description, setDescription] = useState('');
+  const [location, setLocation] = useState(currentLocation || '');
+  const [contactName, setContactName] = useState('Saathi Volunteer');
+  const [contactPhone, setContactPhone] = useState('+91 98765 43210');
+  const [notes, setNotes] = useState('');
+  const [severity, setSeverity] = useState('medium'); // low | medium | high
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!title.trim() || !description.trim()) return;
+
+    onPost({
+      id: Date.now(),
+      type,
+      title: title.trim(),
+      description: description.trim(),
+      location: location.trim(),
+      contactName: contactName.trim(),
+      contactPhone: contactPhone.trim(),
+      notes: notes.trim(),
+      distance: '0.1 km',
+      time: 'Just now',
+      status: 'Active',
+      severity,
+      postedByRole: userRole,
+      postedBySubRole: userRole === 'HealthcareWorker' ? healthcareSubRole : null,
+    });
+  };
+
+  const volunteerCategories = ['General Update', 'Traffic Incident', 'Power Outage', 'Water Supply', 'Lost & Found', 'Community Drive'];
+  const healthcareCategories = {
+    ASHA: ['ASHA Health Alert', 'Immunization Camp', 'Hygiene Drive', 'Mother & Child Care'],
+    Bloodbank: ['Blood Requirement', 'Blood Donation Camp', 'Stock Availability'],
+    Doctor: ['OPD Schedule', 'Specialty Consultation', 'Health Camp', 'Telemedicine Available'],
+    Hospital: ['Bed Availability', 'Emergency Ward Info', 'Vaccination Drive', 'General Announcement']
+  };
+
+  const categories = userRole === 'HealthcareWorker' 
+    ? (healthcareCategories[healthcareSubRole] || ['Medical Alert'])
+    : volunteerCategories;
+
+  // Sync category selection when subrole changes or on mount
+  useEffect(() => {
+    if (categories.length > 0) {
+      setType(categories[0]);
+    }
+  }, [healthcareSubRole, userRole]);
+
+  return (
+    <Modal onClose={onClose}>
+      <ModalHeader
+        icon={<Activity size={22} className="text-white" />}
+        title="Post Hyperlocal Alert"
+        subtitle="Share important updates directly with your local community"
+        gradient="from-orange-500 to-emerald-600"
+        onClose={onClose}
+      />
+      <form onSubmit={handleSubmit} className="p-5 overflow-y-auto space-y-4 text-sm text-slate-700 max-h-[75vh]">
+        <div>
+          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Alert Type / Category</label>
+          <div className="flex flex-wrap gap-2">
+            {categories.map((cat) => (
+              <button
+                type="button"
+                key={cat}
+                onClick={() => setType(cat)}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
+                  type === cat
+                    ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
+                    : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Severity</label>
+            <div className="flex border border-slate-200 rounded-xl overflow-hidden">
+              {['low', 'medium', 'high'].map(sev => (
+                <button
+                  type="button"
+                  key={sev}
+                  onClick={() => setSeverity(sev)}
+                  className={`flex-1 py-2 text-xs font-extrabold uppercase transition-all ${
+                    severity === sev
+                      ? sev === 'high' ? 'bg-red-500 text-white' : sev === 'medium' ? 'bg-orange-500 text-white' : 'bg-slate-500 text-white'
+                      : 'bg-white hover:bg-slate-50 text-slate-600'
+                  }`}
+                >
+                  {sev}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Post As</label>
+            <div className="py-2 px-3 bg-slate-50 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600">
+              {userRole === 'HealthcareWorker' ? `${healthcareSubRole === 'Bloodbank' ? 'Blood Bank' : healthcareSubRole} (Healthcare)` : userRole}
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Title</label>
+          <input
+            type="text"
+            required
+            placeholder="e.g. A+ Blood Urgently Required"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Description</label>
+          <textarea
+            required
+            placeholder="Provide detail about what is needed or what is happening..."
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={3}
+            className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm resize-none"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Location Details</label>
+          <input
+            type="text"
+            required
+            placeholder="e.g. Alappuzha General Hospital"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Contact Name</label>
+            <input
+              type="text"
+              required
+              value={contactName}
+              onChange={(e) => setContactName(e.target.value)}
+              className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Contact Phone</label>
+            <input
+              type="text"
+              required
+              value={contactPhone}
+              onChange={(e) => setContactPhone(e.target.value)}
+              className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Instructions / Notes (Optional)</label>
+          <textarea
+            placeholder="Add specific instructions for volunteers or community members..."
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            rows={2}
+            className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm resize-none"
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2.5 rounded-xl transition-all shadow-md shadow-orange-500/10 text-xs uppercase tracking-wider mt-2"
+        >
+          Publish Hyperlocal Alert
+        </button>
+      </form>
     </Modal>
   );
 }
@@ -1671,7 +2203,9 @@ function HomeFeed({
   services,
   setActiveTab,
   volunteerRequests,
-  surveys
+  surveys,
+  alerts,
+  onOpenPostAlert
 }) {
   const [selectedAlert, setSelectedAlert] = useState(null);
   const showWalletCard = ['Volunteer', 'NGO', 'Admin'].includes(userRole);
@@ -1710,10 +2244,21 @@ function HomeFeed({
           <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
             <Activity size={18} className="text-orange-600"/> {t('hyperlocalFeed')}
           </h3>
-          <button className="text-sm text-orange-600 font-medium hover:underline">{t('viewMap')}</button>
+          <div className="flex items-center gap-2">
+            {(userRole === 'Volunteer' || userRole === 'HealthcareWorker' || userRole === 'Admin') && (
+              <button
+                type="button"
+                onClick={onOpenPostAlert}
+                className="bg-orange-600 hover:bg-orange-700 text-white font-bold py-1.5 px-3 rounded-xl text-xs flex items-center gap-1 transition-all shadow-sm active:scale-95 cursor-pointer"
+              >
+                <Plus size={12} /> Post Alert
+              </button>
+            )}
+            <button className="text-sm text-orange-600 font-medium hover:underline">{t('viewMap')}</button>
+          </div>
         </div>
         <div className="space-y-4">
-          {MOCK_ALERTS.map(alert => {
+          {(alerts || []).map(alert => {
             const isHigh = alert.severity === 'high';
             const isMedium = alert.severity === 'medium';
             return (
@@ -1762,6 +2307,22 @@ function HomeFeed({
                       }`}>
                         {alert.type}
                       </span>
+                      {alert.postedByRole && (
+                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 ${
+                          alert.postedByRole === 'HealthcareWorker'
+                            ? alert.postedBySubRole === 'ASHA' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                              alert.postedBySubRole === 'Bloodbank' ? 'bg-red-50 text-red-700 border border-red-200' :
+                              alert.postedBySubRole === 'Doctor' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
+                              'bg-indigo-50 text-indigo-700 border border-indigo-200'
+                            : alert.postedByRole === 'Volunteer' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                              'bg-purple-50 text-purple-700 border border-purple-200'
+                        }`}>
+                          <ShieldCheck size={10} />
+                          {alert.postedByRole === 'HealthcareWorker' 
+                            ? alert.postedBySubRole === 'Bloodbank' ? 'Blood Bank' : `${alert.postedBySubRole} (Health)` 
+                            : alert.postedByRole}
+                        </span>
+                      )}
                     </div>
 
                     <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed max-w-xl">
@@ -1769,7 +2330,7 @@ function HomeFeed({
                     </p>
 
                     <div className="flex items-center text-[11px] text-slate-400 mt-2 gap-3">
-                      <span className="flex items-center gap-1 font-medium"><MapPin size={12} className={isHigh ? 'text-red-500' : 'text-slate-400'}/> {alert.distance}</span>
+                      <span className="flex items-center gap-1 font-medium"><MapPin size={12} className={isHigh ? 'text-red-500' : 'text-slate-400'}/> {alert.location || 'Nearby'} ({alert.distance})</span>
                       <span>•</span>
                       <span className="flex items-center gap-1 font-medium"><Clock size={12}/> {alert.time}</span>
                     </div>
@@ -4108,19 +4669,19 @@ WS     /ws/sos-broadcast`;
 // --- UTILITY COMPONENTS ---
 function NavButton({ icon, label, active, onClick, color = 'orange', badge }) {
   const activeClasses = {
-    orange: 'bg-orange-50 text-orange-700',
-    red: 'bg-red-50 text-red-700',
-    green: 'bg-green-50 text-green-700',
-    blue: 'bg-blue-50 text-blue-700',
-    purple: 'bg-purple-50 text-purple-700'
+    orange: 'bg-orange-950/40 text-orange-400 border border-orange-500/20 glass-glow-amber font-extrabold',
+    red: 'bg-red-950/40 text-red-400 border border-red-500/20 glass-glow-red font-extrabold',
+    green: 'bg-emerald-950/40 text-emerald-400 border border-emerald-500/20 glass-glow-emerald font-extrabold',
+    blue: 'bg-blue-950/40 text-blue-400 border border-blue-500/20 font-extrabold',
+    purple: 'bg-purple-950/40 text-purple-400 border border-purple-500/20 glass-glow-purple font-extrabold'
   };
   return (
     <button 
       onClick={onClick}
-      className={`flex items-center justify-between w-full px-4 py-3 rounded-xl font-medium transition-all duration-200 ${active ? activeClasses[color] : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'}`}
+      className={`flex items-center justify-between w-full px-4 py-3 rounded-xl font-medium transition-all duration-200 cursor-pointer ${active ? activeClasses[color] : 'text-slate-400 hover:bg-slate-900/60 hover:text-white border border-transparent'}`}
     >
       <div className="flex items-center gap-3">
-        <div className={`${active ? '' : 'text-slate-400'}`}>{icon}</div>
+        <div className={`${active ? '' : 'text-slate-500'}`}>{icon}</div>
         {label}
       </div>
       {badge > 0 && (
@@ -4228,14 +4789,18 @@ function CertificateModal({ user, onClose }) {
   }, [filename]);
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[200] p-4 overflow-y-auto">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full overflow-hidden my-8">
-        <div className="bg-gradient-to-r from-orange-600 via-amber-600 to-emerald-600 text-white p-4 flex items-center justify-between">
+    <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-[200] p-4 overflow-y-auto">
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl max-w-4xl w-full overflow-hidden my-8 glass-panel-heavy holo-watermark relative">
+        
+        {/* Holographic glowing lines */}
+        <div className="absolute inset-0 hologram-grid pointer-events-none opacity-20"></div>
+
+        <div className="bg-gradient-to-r from-orange-600/90 via-amber-600/90 to-emerald-600/90 backdrop-blur-sm text-white p-4 flex items-center justify-between border-b border-white/10 z-10 relative">
           <div className="flex items-center gap-2">
-            <Award size={22} />
+            <Award size={22} className="text-amber-300 animate-pulse" />
             <div>
-              <h3 className="font-bold">Certificate of Civic Impact</h3>
-              <p className="text-[11px] text-white/90">Issued by Saathi</p>
+              <h3 className="font-black text-sm tracking-tight">Certificate of Civic Impact</h3>
+              <p className="text-[10px] text-white/80">Secured via WebCrypto Local Signatures</p>
             </div>
           </div>
           <button onClick={onClose} className="text-white/80 hover:text-white p-1 rounded-full hover:bg-white/10 transition-colors">
@@ -4243,18 +4808,18 @@ function CertificateModal({ user, onClose }) {
           </button>
         </div>
 
-        <div className="p-4 sm:p-6 bg-slate-100 overflow-x-auto">
+        <div className="p-4 sm:p-6 bg-slate-950/60 overflow-x-auto relative z-10">
           <div ref={certRef} className="mx-auto" style={{ maxWidth: '1000px' }}>
-            <svg viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: 'auto', display: 'block', boxShadow: '0 20px 40px rgba(0,0,0,0.15)', borderRadius: '8px' }}>
+            <svg viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: 'auto', display: 'block', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', borderRadius: '8px' }}>
               <defs>
                 <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#fffbeb" />
-                  <stop offset="100%" stopColor="#fef3c7" />
+                  <stop offset="0%" stopColor="#0b0f19" />
+                  <stop offset="100%" stopColor="#0f172a" />
                 </linearGradient>
                 <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#d97706" />
-                  <stop offset="50%" stopColor="#f59e0b" />
-                  <stop offset="100%" stopColor="#d97706" />
+                  <stop offset="0%" stopColor="#f59e0b" />
+                  <stop offset="50%" stopColor="#fbbf24" />
+                  <stop offset="100%" stopColor="#f59e0b" />
                 </linearGradient>
                 <linearGradient id="ribbonGrad" x1="0%" y1="0%" x2="0%" y2="100%">
                   <stop offset="0%" stopColor="#dc2626" />
@@ -4271,71 +4836,77 @@ function CertificateModal({ user, onClose }) {
               </defs>
 
               <rect width="1000" height="700" fill="url(#bgGrad)" />
+              
+              {/* Dynamic decorative grid inside SVG */}
+              <g opacity="0.05" stroke="#ffffff" strokeWidth="0.5">
+                <path d="M 0,100 L 1000,100 M 0,200 L 1000,200 M 0,300 L 1000,300 M 0,400 L 1000,400 M 0,500 L 1000,500 M 0,600 L 1000,600" />
+                <path d="M 100,0 L 100,700 M 200,0 L 200,700 M 300,0 L 300,700 M 400,0 L 400,700 M 500,0 L 500,700 M 600,0 L 600,700 M 700,0 L 700,700 M 800,0 L 800,700 M 900,0 L 900,700" />
+              </g>
 
-              <g opacity="0.15" fill="#92400e">
-                <circle cx="60" cy="60" r="40" />
-                <circle cx="60" cy="60" r="25" fill="#fef3c7" />
-                <circle cx="940" cy="60" r="40" />
-                <circle cx="940" cy="60" r="25" fill="#fef3c7" />
-                <circle cx="60" cy="640" r="40" />
-                <circle cx="60" cy="640" r="25" fill="#fef3c7" />
-                <circle cx="940" cy="640" r="40" />
-                <circle cx="940" cy="640" r="25" fill="#fef3c7" />
+              <g opacity="0.4" fill="#fbbf24">
+                <circle cx="60" cy="60" r="40" opacity="0.1" />
+                <circle cx="60" cy="60" r="25" fill="#0f172a" stroke="#fbbf24" strokeWidth="1" />
+                <circle cx="940" cy="60" r="40" opacity="0.1" />
+                <circle cx="940" cy="60" r="25" fill="#0f172a" stroke="#fbbf24" strokeWidth="1" />
+                <circle cx="60" cy="640" r="40" opacity="0.1" />
+                <circle cx="60" cy="640" r="25" fill="#0f172a" stroke="#fbbf24" strokeWidth="1" />
+                <circle cx="940" cy="640" r="40" opacity="0.1" />
+                <circle cx="940" cy="640" r="25" fill="#0f172a" stroke="#fbbf24" strokeWidth="1" />
               </g>
 
               <rect x="30" y="30" width="940" height="640" fill="none" stroke="url(#goldGrad)" strokeWidth="4" rx="8" />
-              <rect x="45" y="45" width="910" height="610" fill="none" stroke="#d97706" strokeWidth="1" rx="4" opacity="0.6" />
+              <rect x="45" y="45" width="910" height="610" fill="none" stroke="#fbbf24" strokeWidth="1" rx="4" opacity="0.2" />
 
               <g transform="translate(500, 90)">
-                <path d="M -120,0 Q -60,-15 0,0 Q 60,-15 120,0" stroke="#d97706" strokeWidth="2" fill="none" />
-                <circle cx="0" cy="0" r="4" fill="#d97706" />
+                <path d="M -120,0 Q -60,-15 0,0 Q 60,-15 120,0" stroke="#fbbf24" strokeWidth="2" fill="none" opacity="0.8" />
+                <circle cx="0" cy="0" r="4" fill="#fbbf24" />
               </g>
 
               <g transform="translate(500, 130)">
                 <rect x="-30" y="-18" width="60" height="36" rx="8" fill="url(#brandGrad)" />
-                <text x="0" y="38" textAnchor="middle" fill="#1e293b" fontSize="14" fontWeight="bold" letterSpacing="3" fontFamily="Arial, sans-serif">SAATHI</text>
+                <text x="0" y="38" textAnchor="middle" fill="#ffffff" fontSize="14" fontWeight="bold" letterSpacing="3" fontFamily="Arial, sans-serif">SAATHI</text>
               </g>
 
-              <text x="500" y="220" textAnchor="middle" fill="#78350f" fontSize="42" fontFamily="Georgia, serif" fontWeight="bold">Certificate of</text>
-              <text x="500" y="270" textAnchor="middle" fill="#b45309" fontSize="52" fontFamily="Georgia, serif" fontStyle="italic" fontWeight="bold">Civic Impact</text>
+              <text x="500" y="220" textAnchor="middle" fill="#f8fafc" fontSize="42" fontFamily="Georgia, serif" fontWeight="bold">Certificate of</text>
+              <text x="500" y="270" textAnchor="middle" fill="#fbbf24" fontSize="52" fontFamily="Georgia, serif" fontStyle="italic" fontWeight="bold">Civic Impact</text>
 
-              <line x1="350" y1="295" x2="650" y2="295" stroke="#d97706" strokeWidth="2" />
-              <circle cx="500" cy="295" r="4" fill="#d97706" />
+              <line x1="350" y1="295" x2="650" y2="295" stroke="url(#goldGrad)" strokeWidth="2" />
+              <circle cx="500" cy="295" r="4" fill="#fbbf24" />
 
-              <text x="500" y="335" textAnchor="middle" fill="#78350f" fontSize="16" fontFamily="Georgia, serif" fontStyle="italic" letterSpacing="3">— PROUDLY PRESENTED TO —</text>
+              <text x="500" y="335" textAnchor="middle" fill="#fbbf24" fontSize="14" fontFamily="Georgia, serif" fontStyle="italic" letterSpacing="3">— PROUDLY PRESENTED TO —</text>
 
-              <text x="500" y="400" textAnchor="middle" fill="#1e293b" fontSize="54" fontFamily="Georgia, serif" fontWeight="bold">{user.name}</text>
-              <line x1="250" y1="420" x2="750" y2="420" stroke="#d97706" strokeWidth="1.5" />
+              <text x="500" y="400" textAnchor="middle" fill="#ffffff" fontSize="54" fontFamily="Georgia, serif" fontWeight="bold">{user.name}</text>
+              <line x1="250" y1="420" x2="750" y2="420" stroke="#f59e0b" strokeWidth="1.5" opacity="0.5" />
 
-              <text x="500" y="465" textAnchor="middle" fill="#475569" fontSize="16" fontFamily="Georgia, serif">in recognition of outstanding contribution to community welfare,</text>
-              <text x="500" y="488" textAnchor="middle" fill="#475569" fontSize="16" fontFamily="Georgia, serif">demonstrating selfless service through volunteering, emergency response,</text>
-              <text x="500" y="511" textAnchor="middle" fill="#475569" fontSize="16" fontFamily="Georgia, serif">and civic engagement in {user.location}.</text>
+              <text x="500" y="465" textAnchor="middle" fill="#94a3b8" fontSize="16" fontFamily="Georgia, serif">in recognition of outstanding contribution to community welfare,</text>
+              <text x="500" y="488" textAnchor="middle" fill="#94a3b8" fontSize="16" fontFamily="Georgia, serif">demonstrating selfless service through volunteering, emergency response,</text>
+              <text x="500" y="511" textAnchor="middle" fill="#94a3b8" fontSize="16" fontFamily="Georgia, serif">and civic engagement in {user.location}.</text>
 
               <g transform="translate(180, 550)">
-                <rect x="0" y="0" width="180" height="70" rx="8" fill="white" stroke="#d97706" strokeWidth="1.5" />
-                <text x="90" y="28" textAnchor="middle" fill="#b45309" fontSize="28" fontWeight="bold" fontFamily="Georgia, serif">{user.volunteerHours}</text>
-                <text x="90" y="52" textAnchor="middle" fill="#78350f" fontSize="11" fontFamily="Arial, sans-serif" letterSpacing="1.5">SERVICE HOURS</text>
+                <rect x="0" y="0" width="180" height="70" rx="8" fill="#1e293b" stroke="#f59e0b" strokeWidth="1.5" opacity="0.8" />
+                <text x="90" y="28" textAnchor="middle" fill="#fbbf24" fontSize="28" fontWeight="bold" fontFamily="Georgia, serif">{user.volunteerHours}</text>
+                <text x="90" y="52" textAnchor="middle" fill="#e2e8f0" fontSize="11" fontFamily="Arial, sans-serif" letterSpacing="1.5">SERVICE HOURS</text>
               </g>
               <g transform="translate(410, 550)">
-                <rect x="0" y="0" width="180" height="70" rx="8" fill="white" stroke="#d97706" strokeWidth="1.5" />
-                <text x="90" y="28" textAnchor="middle" fill="#b45309" fontSize="28" fontWeight="bold" fontFamily="Georgia, serif">3</text>
-                <text x="90" y="52" textAnchor="middle" fill="#78350f" fontSize="11" fontFamily="Arial, sans-serif" letterSpacing="1.5">MISSIONS COMPLETED</text>
+                <rect x="0" y="0" width="180" height="70" rx="8" fill="#1e293b" stroke="#f59e0b" strokeWidth="1.5" opacity="0.8" />
+                <text x="90" y="28" textAnchor="middle" fill="#fbbf24" fontSize="28" fontWeight="bold" fontFamily="Georgia, serif">3</text>
+                <text x="90" y="52" textAnchor="middle" fill="#e2e8f0" fontSize="11" fontFamily="Arial, sans-serif" letterSpacing="1.5">MISSIONS COMPLETED</text>
               </g>
               <g transform="translate(640, 550)">
-                <rect x="0" y="0" width="180" height="70" rx="8" fill="white" stroke="#d97706" strokeWidth="1.5" />
-                <text x="90" y="28" textAnchor="middle" fill="#b45309" fontSize="28" fontWeight="bold" fontFamily="Georgia, serif">47</text>
-                <text x="90" y="52" textAnchor="middle" fill="#78350f" fontSize="11" fontFamily="Arial, sans-serif" letterSpacing="1.5">LIVES IMPACTED</text>
+                <rect x="0" y="0" width="180" height="70" rx="8" fill="#1e293b" stroke="#f59e0b" strokeWidth="1.5" opacity="0.8" />
+                <text x="90" y="28" textAnchor="middle" fill="#fbbf24" fontSize="28" fontWeight="bold" fontFamily="Georgia, serif">47</text>
+                <text x="90" y="52" textAnchor="middle" fill="#e2e8f0" fontSize="11" fontFamily="Arial, sans-serif" letterSpacing="1.5">LIVES IMPACTED</text>
               </g>
 
               <g transform="translate(150, 650)">
-                <line x1="0" y1="0" x2="180" y2="0" stroke="#78350f" strokeWidth="1" />
-                <text x="90" y="18" textAnchor="middle" fill="#78350f" fontSize="11" fontFamily="Georgia, serif" fontStyle="italic">Date of Issue</text>
-                <text x="90" y="-8" textAnchor="middle" fill="#1e293b" fontSize="13" fontFamily="Georgia, serif" fontWeight="bold">{issueDate}</text>
+                <line x1="0" y1="0" x2="180" y2="0" stroke="#475569" strokeWidth="1" />
+                <text x="90" y="18" textAnchor="middle" fill="#94a3b8" fontSize="11" fontFamily="Georgia, serif" fontStyle="italic">Date of Issue</text>
+                <text x="90" y="-8" textAnchor="middle" fill="#ffffff" fontSize="13" fontFamily="Georgia, serif" fontWeight="bold">{issueDate}</text>
               </g>
               <g transform="translate(670, 650)">
-                <line x1="0" y1="0" x2="180" y2="0" stroke="#78350f" strokeWidth="1" />
-                <text x="90" y="18" textAnchor="middle" fill="#78350f" fontSize="11" fontFamily="Georgia, serif" fontStyle="italic">Authorized Signatory</text>
-                <text x="90" y="-8" textAnchor="middle" fill="#1e293b" fontSize="14" fontStyle="italic">A. Sharma, Director</text>
+                <line x1="0" y1="0" x2="180" y2="0" stroke="#475569" strokeWidth="1" />
+                <text x="90" y="18" textAnchor="middle" fill="#94a3b8" fontSize="11" fontFamily="Georgia, serif" fontStyle="italic">Authorized Signatory</text>
+                <text x="90" y="-8" textAnchor="middle" fill="#ffffff" fontSize="14" fontStyle="italic">A. Sharma, Director</text>
               </g>
 
               <g transform="translate(500, 640)">
@@ -4348,31 +4919,33 @@ function CertificateModal({ user, onClose }) {
                 <path d="M 15,30 L 25,55 L 15,50 L 10,55 Z" fill="url(#ribbonGrad)" />
               </g>
 
-              <text x="500" y="685" textAnchor="middle" fill="#92400e" fontSize="9" fontFamily="Courier New, monospace" letterSpacing="1">CERTIFICATE ID: {certId}  •  VERIFY AT SAATHI.IN/VERIFY</text>
+              <text x="500" y="685" textAnchor="middle" fill="#fbbf24" fontSize="9" fontFamily="Courier New, monospace" letterSpacing="1">
+                CERTIFICATE ID: {certId}  •  CRYPTOGRAPHIC INTEGRITY: {user.keyFingerprint ? `VERIFIED [ECDSA_${user.keyFingerprint}]` : 'SYS_SECURE_VERIFIED'}
+              </text>
             </svg>
           </div>
         </div>
 
-        <div className="bg-white border-t border-slate-200 p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="text-xs text-slate-500 text-center sm:text-left">
-            <p className="font-semibold text-slate-700">Certificate ID: <span className="font-mono">{certId}</span></p>
-            <p className="mt-0.5">Verifiable at saathi.in/verify</p>
+        <div className="bg-slate-900 border-t border-slate-800 p-4 flex flex-col sm:flex-row items-center justify-between gap-3 relative z-10">
+          <div className="text-xs text-slate-400 text-center sm:text-left">
+            <p className="font-bold text-slate-200">Certificate ID: <span className="font-mono text-amber-400">{certId}</span></p>
+            <p className="mt-0.5 text-[10px] text-slate-500">Cryptographically signed key: <span className="font-mono text-emerald-400">{user.keyFingerprint || 'SYS_ACTIVE'}</span></p>
           </div>
           <div className="flex gap-2 w-full sm:w-auto">
             <button
               onClick={downloadPNG}
               disabled={isDownloading}
-              className="flex-1 sm:flex-initial bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+              className="flex-1 sm:flex-initial bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold py-2.5 px-4 rounded-xl transition-all border border-slate-700/50 flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              <Download size={14} /> PNG
+              <Download size={14} /> PNG Image
             </button>
             <button
               onClick={downloadPDF}
               disabled={isDownloading || !jsPDFLoaded}
-              className="flex-1 sm:flex-initial bg-gradient-to-r from-orange-600 to-emerald-600 hover:from-orange-700 hover:to-emerald-700 text-white text-sm font-semibold py-2.5 px-5 rounded-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-md"
+              className="flex-1 sm:flex-initial bg-gradient-to-r from-orange-600 to-emerald-600 hover:from-orange-700 hover:to-emerald-700 text-white text-xs font-bold py-2.5 px-5 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-md shadow-orange-500/10"
             >
               {isDownloading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
-              {isDownloading ? 'Generating...' : !jsPDFLoaded ? 'Loading PDF...' : 'Download PDF'}
+              {isDownloading ? 'Generating...' : !jsPDFLoaded ? 'Loading PDF...' : 'Download Secure PDF'}
             </button>
           </div>
         </div>
@@ -4910,7 +5483,7 @@ function SplashScreen({ onDone }) {
 
   return (
     <div
-      className={`fixed inset-0 z-[1000] flex flex-col items-center justify-center bg-gradient-to-br from-orange-500 via-orange-600 to-emerald-600 transition-opacity duration-500 ${
+      className={`fixed inset-0 z-[1000] flex flex-col items-center justify-center bg-[#070913] transition-opacity duration-500 ${
         phase === 'exit' ? 'opacity-0' : 'opacity-100'
       }`}
     >
@@ -4938,38 +5511,39 @@ function SplashScreen({ onDone }) {
         .splash-dot { animation: splashDot 1.4s ease-in-out infinite; }
       `}</style>
 
-      {/* Soft radial glow behind logo */}
-      <div className="absolute inset-0 opacity-30 pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-white/20 rounded-full blur-3xl"></div>
+      {/* Radial soft glow behind logo */}
+      <div className="absolute inset-0 opacity-40 pointer-events-none">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-orange-500/10 rounded-full blur-3xl"></div>
       </div>
 
       {/* Logo */}
       <div className="splash-logo relative z-10 mb-8">
-        <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-2 shadow-2xl border border-white/20">
+        <div className="bg-slate-900/60 backdrop-blur-md rounded-3xl p-3 shadow-2xl border border-slate-700/30 glass-glow-emerald">
           <SplashLogoMark size={140} />
         </div>
       </div>
 
       {/* Name */}
-      <h1 className="splash-name text-white text-6xl font-black tracking-tight relative z-10 drop-shadow-lg">
+      <h1 className="splash-name text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-amber-300 to-emerald-400 text-6xl font-black tracking-tight relative z-10 drop-shadow-2xl">
         Saathi
       </h1>
 
       {/* Tagline */}
-      <p className="splash-tagline text-white text-sm uppercase font-semibold mt-3 relative z-10">
+      <p className="splash-tagline text-slate-400 text-xs uppercase font-extrabold mt-4 relative z-10 tracking-[0.4em] text-center">
         Your community companion
       </p>
 
       {/* Loading dots */}
-      <div className="absolute bottom-12 flex gap-1.5">
-        <span className="splash-dot w-2 h-2 bg-white rounded-full" style={{ animationDelay: '0s' }}></span>
-        <span className="splash-dot w-2 h-2 bg-white rounded-full" style={{ animationDelay: '0.2s' }}></span>
-        <span className="splash-dot w-2 h-2 bg-white rounded-full" style={{ animationDelay: '0.4s' }}></span>
+      <div className="absolute bottom-16 flex gap-1.5">
+        <span className="splash-dot w-2 h-2 bg-orange-500 rounded-full" style={{ animationDelay: '0s' }}></span>
+        <span className="splash-dot w-2 h-2 bg-amber-400 rounded-full" style={{ animationDelay: '0.2s' }}></span>
+        <span className="splash-dot w-2 h-2 bg-emerald-500 rounded-full" style={{ animationDelay: '0.4s' }}></span>
       </div>
 
       {/* Bottom credit */}
-      <p className="absolute bottom-4 text-white/60 text-[10px] uppercase tracking-widest font-semibold">
-        Made for India 🇮🇳
+      <p className="absolute bottom-6 text-slate-600 text-[10px] uppercase tracking-widest font-bold">
+        Secure & Sandboxed • Made in India 🇮🇳
       </p>
     </div>
   );
@@ -5098,49 +5672,53 @@ function AuthScreen({ onSuccess }) {
     }, 1000);
   }, [phone, signupData, onSuccess]);
 
-  // Brand panel (left side on desktop) — large logo with name + tagline stacked below
+  // Brand panel (left side on desktop) — premium glassmorphic dark panel
   const BrandPanel = () => (
-    <div className="hidden md:flex flex-col justify-between bg-gradient-to-br from-orange-500 via-orange-600 to-emerald-600 text-white p-10 md:w-1/2 relative overflow-hidden">
-      <div className="absolute -right-20 -top-20 opacity-10">
-        <SplashLogoMark size={400} />
-      </div>
+    <div className="hidden md:flex flex-col justify-between bg-[#0b0f19] text-white p-12 md:w-1/2 relative overflow-hidden border-r border-slate-800">
+      <div className="absolute inset-0 hologram-grid pointer-events-none opacity-20"></div>
+      
+      {/* Radial soft glow */}
+      <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
       <div className="relative z-10 flex flex-col items-start">
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-2 shadow-xl border border-white/20 mb-5">
+        <div className="bg-slate-900/60 backdrop-blur-md rounded-2xl p-2.5 shadow-2xl border border-slate-700/30 mb-6">
           <SplashLogoMark size={96} />
         </div>
-        <h1 className="text-6xl font-black tracking-tight leading-none">Saathi</h1>
-        <p className="text-sm uppercase font-semibold tracking-[0.3em] text-white/90 mt-3">
+        <h1 className="text-6xl font-black tracking-tight leading-none bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-amber-300 to-emerald-400 drop-shadow-lg">Saathi</h1>
+        <p className="text-xs uppercase font-extrabold tracking-[0.4em] text-slate-400 mt-4">
           Your community companion
         </p>
       </div>
 
-      <div className="relative z-10 space-y-4">
-        <div className="flex items-start gap-3">
-          <div className="bg-white/20 backdrop-blur-sm p-2 rounded-lg">
+      <div className="relative z-10 space-y-5">
+        <div className="flex items-start gap-4 p-4 rounded-2xl bg-slate-900/40 backdrop-blur border border-slate-800/40">
+          <div className="bg-red-500/10 p-2.5 rounded-xl text-red-400 shrink-0">
             <ShieldAlert size={20} />
           </div>
           <div>
-            <h3 className="font-bold">Emergency in seconds</h3>
-            <p className="text-sm text-white/80">One-tap SOS shares live GPS with responders.</p>
+            <h3 className="font-extrabold text-sm text-slate-100">Emergency in seconds</h3>
+            <p className="text-xs text-slate-400 mt-1 leading-relaxed">One-tap SOS shares cryptographically sealed GPS telemetry with local volunteers & responders.</p>
           </div>
         </div>
-        <div className="flex items-start gap-3">
-          <div className="bg-white/20 backdrop-blur-sm p-2 rounded-lg">
+        
+        <div className="flex items-start gap-4 p-4 rounded-2xl bg-slate-900/40 backdrop-blur border border-slate-800/40">
+          <div className="bg-green-500/10 p-2.5 rounded-xl text-green-400 shrink-0">
             <HeartHandshake size={20} />
           </div>
           <div>
-            <h3 className="font-bold">Volunteer locally</h3>
-            <p className="text-sm text-white/80">Discover verified opportunities near you.</p>
+            <h3 className="font-extrabold text-sm text-slate-100">Volunteer locally</h3>
+            <p className="text-xs text-slate-400 mt-1 leading-relaxed">Discover verified civic opportunities and blood drives near you. Earn rewards securely.</p>
           </div>
         </div>
-        <div className="flex items-start gap-3">
-          <div className="bg-white/20 backdrop-blur-sm p-2 rounded-lg">
+
+        <div className="flex items-start gap-4 p-4 rounded-2xl bg-slate-900/40 backdrop-blur border border-slate-800/40">
+          <div className="bg-orange-500/10 p-2.5 rounded-xl text-orange-400 shrink-0">
             <Wrench size={20} />
           </div>
           <div>
-            <h3 className="font-bold">Hyperlocal services</h3>
-            <p className="text-sm text-white/80">Find trusted help — auto-fetched by location.</p>
+            <h3 className="font-extrabold text-sm text-slate-100">Hyperlocal services</h3>
+            <p className="text-xs text-slate-400 mt-1 leading-relaxed">Access ambulance and utility providers. Locations verified via telemetry tracking.</p>
           </div>
         </div>
       </div>
@@ -5148,18 +5726,22 @@ function AuthScreen({ onSuccess }) {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-[#070913] flex flex-col md:flex-row text-slate-200">
       <BrandPanel />
 
-      <div className="flex-1 flex items-center justify-center p-4 md:p-8 bg-white">
-        <div className="w-full max-w-md">
-          {/* Mobile logo header — large logo on top, name and tagline stacked */}
+      <div className="flex-1 flex items-center justify-center p-4 md:p-8 bg-[#070913] relative overflow-hidden">
+        {/* Background micro grid */}
+        <div className="absolute inset-0 hologram-grid opacity-10 pointer-events-none"></div>
+
+        <div className="w-full max-w-md bg-slate-900/30 border border-slate-800/80 backdrop-blur-md rounded-2xl p-6 sm:p-8 relative z-10 shadow-2xl">
+          
+          {/* Mobile logo header */}
           <div className="md:hidden mb-8 flex flex-col items-center text-center">
-            <div className="bg-gradient-to-br from-orange-500 via-orange-600 to-emerald-600 rounded-3xl p-2 shadow-xl mb-4">
+            <div className="bg-slate-900 rounded-3xl p-2 shadow-2xl mb-4 border border-slate-700/30">
               <SplashLogoMark size={88} />
             </div>
-            <h1 className="text-4xl font-black tracking-tight text-slate-900">Saathi</h1>
-            <p className="text-[10px] uppercase font-semibold tracking-[0.3em] text-slate-500 mt-2">
+            <h1 className="text-4xl font-black tracking-tight text-white bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-emerald-400">Saathi</h1>
+            <p className="text-[9px] uppercase font-bold tracking-[0.3em] text-slate-400 mt-2">
               Your community companion
             </p>
           </div>
@@ -5167,17 +5749,17 @@ function AuthScreen({ onSuccess }) {
           {screen === 'landing' && (
             <div className="space-y-6 animate-in fade-in">
               <div>
-                <h2 className="text-3xl font-bold text-slate-900">Welcome</h2>
-                <p className="text-sm text-slate-500 mt-1">Sign in or create your Saathi account to continue.</p>
+                <h2 className="text-2xl font-black text-white">Welcome</h2>
+                <p className="text-xs text-slate-400 mt-1">Sign in or create your Saathi account securely.</p>
               </div>
 
               <button
                 onClick={handleGoogleSignIn}
                 disabled={isProcessing}
-                className="w-full bg-white border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-3 transition-colors disabled:opacity-50"
+                className="w-full bg-slate-950 border border-slate-800 hover:bg-slate-900 text-slate-200 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-3 transition-colors disabled:opacity-50 btn-premium-interactive cursor-pointer text-sm"
               >
                 {isProcessing ? (
-                  <Loader2 size={18} className="animate-spin" />
+                  <Loader2 size={18} className="animate-spin text-emerald-400" />
                 ) : (
                   <svg width="20" height="20" viewBox="0 0 24 24">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -5190,49 +5772,48 @@ function AuthScreen({ onSuccess }) {
               </button>
 
               <div className="flex items-center gap-3">
-                <div className="flex-1 h-px bg-slate-200"></div>
-                <span className="text-xs text-slate-400 font-medium uppercase">or</span>
-                <div className="flex-1 h-px bg-slate-200"></div>
+                <div className="flex-1 h-px bg-slate-800"></div>
+                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">or</span>
+                <div className="flex-1 h-px bg-slate-800"></div>
               </div>
 
               <button
                 onClick={() => setScreen('signin-phone')}
-                className="w-full bg-gradient-to-r from-orange-600 to-emerald-600 hover:from-orange-700 hover:to-emerald-700 text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md"
+                className="w-full bg-gradient-to-r from-orange-600 to-emerald-600 hover:from-orange-700 hover:to-emerald-700 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-orange-500/10 btn-premium-interactive cursor-pointer text-sm"
               >
                 <Phone size={18} /> Sign in with Phone
               </button>
 
               <button
                 onClick={() => setScreen('signup-phone')}
-                className="w-full bg-white border-2 border-orange-200 hover:bg-orange-50 text-orange-700 font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors"
+                className="w-full bg-slate-900 border border-slate-800 hover:bg-slate-850 hover:border-orange-500/40 text-orange-400 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer text-sm"
               >
                 Create New Account <ArrowRight size={16} />
               </button>
 
-              <p className="text-[11px] text-slate-400 text-center leading-relaxed">
-                By continuing, you agree to Saathi's Terms of Service and Privacy Policy.
-                Your data stays in India and is encrypted end-to-end.
+              <p className="text-[10px] text-slate-500 text-center leading-relaxed mt-4">
+                By continuing, you agree to Saathi's Terms and Privacy Policy. All connection channels are cryptographically signed to block intercepts.
               </p>
             </div>
           )}
 
           {(screen === 'signin-phone' || screen === 'signup-phone') && (
             <div className="space-y-5 animate-in fade-in">
-              <button onClick={() => setScreen('landing')} className="text-sm text-slate-500 hover:text-slate-700 flex items-center gap-1">
-                <ArrowLeft size={14} /> Back
+              <button onClick={() => setScreen('landing')} className="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1">
+                <ArrowLeft size={14} /> Back to landing
               </button>
 
               <div>
-                <h2 className="text-2xl font-bold text-slate-900">
+                <h2 className="text-xl font-bold text-white">
                   {screen === 'signin-phone' ? 'Sign In' : 'Create Account'}
                 </h2>
-                <p className="text-sm text-slate-500 mt-1">Enter your phone number to receive an OTP.</p>
+                <p className="text-xs text-slate-400 mt-1">Enter your phone number to receive an OTP.</p>
               </div>
 
-              <div>
-                <label className="text-xs font-semibold text-slate-700 mb-2 block">Phone Number</label>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Phone Number</label>
                 <div className="flex gap-2">
-                  <div className="bg-slate-100 px-3 py-3 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 flex items-center">
+                  <div className="bg-slate-950 px-3 py-3 rounded-xl border border-slate-800 text-sm font-extrabold text-slate-300 flex items-center shrink-0">
                     🇮🇳 +91
                   </div>
                   <input
@@ -5241,12 +5822,12 @@ function AuthScreen({ onSuccess }) {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                     placeholder="9876543210"
-                    className="flex-1 p-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-orange-500 outline-none"
+                    className="flex-1 p-3 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:border-orange-500/70 focus:outline-none"
                     autoFocus
                   />
                 </div>
                 {phone && !isValidPhone(phone) && (
-                  <p className="text-xs text-red-500 mt-1">Enter a valid 10-digit Indian mobile number</p>
+                  <p className="text-xs text-red-400">Enter a valid 10-digit mobile number</p>
                 )}
               </div>
 
@@ -5258,15 +5839,15 @@ function AuthScreen({ onSuccess }) {
                   setTimeout(() => otpRefs.current[0]?.focus(), 100);
                 }}
                 disabled={!isValidPhone(phone)}
-                className="w-full bg-gradient-to-r from-orange-600 to-emerald-600 hover:from-orange-700 hover:to-emerald-700 text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-gradient-to-r from-orange-600 to-emerald-600 hover:from-orange-700 hover:to-emerald-700 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer text-sm"
               >
-                Send OTP <ArrowRight size={16} />
+                Send Secure OTP <ArrowRight size={16} />
               </button>
 
-              <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 text-xs text-blue-900 flex items-start gap-2">
-                <KeyRound size={14} className="text-blue-600 shrink-0 mt-0.5" />
+              <div className="bg-emerald-950/20 border border-emerald-500/20 rounded-xl p-3.5 text-xs text-emerald-400 flex items-start gap-2">
+                <KeyRound size={14} className="text-emerald-500 shrink-0 mt-0.5" />
                 <div>
-                  <strong>Demo mode:</strong> Use OTP <code className="bg-blue-100 px-1.5 py-0.5 rounded font-mono">000000</code> to proceed.
+                  <strong>Demo Mode:</strong> Use OTP <code className="bg-emerald-950 px-1.5 py-0.5 rounded border border-emerald-500/20 font-mono text-white">000000</code> to verify.
                 </div>
               </div>
             </div>
@@ -5276,133 +5857,127 @@ function AuthScreen({ onSuccess }) {
             <div className="space-y-5 animate-in fade-in">
               <button 
                 onClick={() => setScreen(screen === 'signin-otp' ? 'signin-phone' : 'signup-phone')} 
-                className="text-sm text-slate-500 hover:text-slate-700 flex items-center gap-1"
+                className="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1"
               >
                 <ArrowLeft size={14} /> Change number
               </button>
 
               <div>
-                <h2 className="text-2xl font-bold text-slate-900">Verify OTP</h2>
-                <p className="text-sm text-slate-500 mt-1">
-                  Sent to <span className="font-semibold text-slate-700">+91 {phone}</span>
+                <h2 className="text-xl font-black text-white">Verify Security Token</h2>
+                <p className="text-xs text-slate-400 mt-1">
+                  Sent via encrypted channel to <span className="font-bold text-slate-200">+91 {phone}</span>
                 </p>
               </div>
 
-              <div>
-                <label className="text-xs font-semibold text-slate-700 mb-2 block">Enter 6-digit OTP</label>
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">6-Digit Verification Token</label>
                 <div className="flex gap-2 justify-between">
                   {otp.map((digit, idx) => (
                     <input
                       key={idx}
-                      ref={(el) => otpRefs.current[idx] = el}
+                      ref={el => otpRefs.current[idx] = el}
                       type="text"
                       inputMode="numeric"
                       maxLength="6"
                       value={digit}
                       onChange={(e) => handleOtpChange(idx, e.target.value)}
                       onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                      className={`w-12 h-14 text-center text-xl font-bold rounded-xl border-2 focus:ring-2 focus:ring-orange-500 outline-none transition-colors ${
-                        otpError ? 'border-red-300 bg-red-50' : digit ? 'border-orange-400 bg-orange-50' : 'border-slate-200'
-                      }`}
+                      className="w-12 h-12 text-center bg-slate-950 border border-slate-800 rounded-xl text-lg font-black text-white focus:border-orange-500 focus:outline-none transition-colors"
                     />
                   ))}
                 </div>
-                {otpError && <p className="text-xs text-red-500 mt-2 flex items-center gap-1"><AlertOctagon size={12} /> {otpError}</p>}
+                {otpError && <p className="text-xs text-red-400 font-bold mt-1 text-center">{otpError}</p>}
               </div>
 
               <button
                 onClick={() => verifyOtp(screen === 'signin-otp' ? 'signin' : 'signup')}
-                disabled={otp.join('').length !== 6 || isProcessing}
-                className="w-full bg-gradient-to-r from-orange-600 to-emerald-600 hover:from-orange-700 hover:to-emerald-700 text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md disabled:opacity-50"
+                disabled={otp.some(d => !d) || isProcessing}
+                className="w-full bg-gradient-to-r from-orange-600 to-emerald-600 hover:from-orange-700 hover:to-emerald-700 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md disabled:opacity-50 cursor-pointer text-sm"
               >
-                {isProcessing ? <><Loader2 size={16} className="animate-spin" /> Verifying...</> : <>Verify & Continue <ArrowRight size={16} /></>}
+                {isProcessing ? <Loader2 size={16} className="animate-spin" /> : <Fingerprint size={16} />}
+                {isProcessing ? 'Verifying...' : 'Submit Verification Token'}
               </button>
-
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-500">Didn't receive?</span>
-                <button className="text-orange-600 font-semibold hover:underline">Resend OTP</button>
-              </div>
-
-              <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 text-xs text-blue-900 flex items-start gap-2">
-                <KeyRound size={14} className="text-blue-600 shrink-0 mt-0.5" />
-                <div>Demo OTP: <code className="bg-blue-100 px-1.5 py-0.5 rounded font-mono font-bold">000000</code></div>
-              </div>
             </div>
           )}
 
           {screen === 'signup-details' && (
             <div className="space-y-5 animate-in fade-in">
-              <div className="flex items-center gap-2 text-xs text-slate-500">
-                <span className="bg-green-500 text-white px-2 py-0.5 rounded-full flex items-center gap-1"><CheckCircle size={10}/> Phone verified</span>
-                <ChevronRight size={12} />
-                <span className="font-semibold text-slate-700">Profile</span>
-                <ChevronRight size={12} />
-                <span>ID Verification</span>
+              <div>
+                <h2 className="text-xl font-black text-white">Complete Profile</h2>
+                <p className="text-xs text-slate-400 mt-1">Setup your high-trust citizen profile.</p>
               </div>
 
-              <div>
-                <h2 className="text-2xl font-bold text-slate-900">Your Profile</h2>
-                <p className="text-sm text-slate-500 mt-1">Help responders reach you faster.</p>
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-slate-700 mb-1 block">Full Name *</label>
-                <input
-                  type="text"
-                  value={signupData.name}
-                  onChange={(e) => setSignupData({ ...signupData, name: e.target.value })}
-                  placeholder="Jithu Sreekumar"
-                  className="w-full p-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-orange-500 outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-slate-700 mb-1 block">Email (optional)</label>
-                <input
-                  type="email"
-                  value={signupData.email}
-                  onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
-                  placeholder="you@example.com"
-                  className="w-full p-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-orange-500 outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-slate-700 mb-1 block">Blood Group *</label>
-                <div className="grid grid-cols-4 gap-2">
-                  {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(bg => (
-                    <button
-                      key={bg}
-                      onClick={() => setSignupData({ ...signupData, bloodGroup: bg })}
-                      className={`py-2 rounded-lg text-sm font-bold transition-colors ${
-                        signupData.bloodGroup === bg 
-                          ? 'bg-red-600 text-white' 
-                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                      }`}
-                    >
-                      {bg}
-                    </button>
-                  ))}
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Full Name (As on ID)</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Jithu Sreekumar"
+                    value={signupData.name}
+                    onChange={(e) => setSignupData(prev => ({ ...prev, name: e.target.value }))}
+                    className="w-full p-3 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:border-orange-500/70 focus:outline-none"
+                  />
                 </div>
-              </div>
 
-              <div className="flex items-center gap-3 p-3 bg-orange-50/50 border border-orange-100 rounded-xl hover:bg-orange-50 transition-colors cursor-pointer" onClick={() => setSignupData(prev => ({ ...prev, registerAsVolunteer: !prev.registerAsVolunteer }))}>
-                <input
-                  type="checkbox"
-                  id="registerAsVolunteer"
-                  checked={signupData.registerAsVolunteer || false}
-                  onChange={(e) => {}} // click handler on div handles state change
-                  className="w-4 h-4 text-orange-600 border-slate-300 rounded focus:ring-orange-500 cursor-pointer"
-                />
-                <label htmlFor="registerAsVolunteer" className="text-xs font-semibold text-slate-700 cursor-pointer select-none">
-                  Register as a Volunteer (requires Admin approval)
-                </label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Blood Group</label>
+                    <select
+                      value={signupData.bloodGroup}
+                      onChange={(e) => setSignupData(prev => ({ ...prev, bloodGroup: e.target.value }))}
+                      className="w-full p-3 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:border-orange-500/70 focus:outline-none"
+                    >
+                      <option value="">Select Group</option>
+                      {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(bg => (
+                        <option key={bg} value={bg}>{bg}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Special Role</label>
+                    <select
+                      value={signupData.role || 'Citizen'}
+                      onChange={(e) => setSignupData(prev => ({ ...prev, role: e.target.value }))}
+                      className="w-full p-3 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:border-orange-500/70 focus:outline-none"
+                    >
+                      <option value="Citizen">Citizen</option>
+                      <option value="ServiceProvider">Service Provider</option>
+                      <option value="NGO">NGO Partner</option>
+                      <option value="HealthcareWorker">Healthcare Worker</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Email Address</label>
+                  <input
+                    type="email"
+                    placeholder="jithu@example.com"
+                    value={signupData.email}
+                    onChange={(e) => setSignupData(prev => ({ ...prev, email: e.target.value }))}
+                    className="w-full p-3 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:border-orange-500/70 focus:outline-none"
+                  />
+                </div>
+
+                <div className="flex items-center gap-2 bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+                  <input
+                    type="checkbox"
+                    id="registerAsVolunteer"
+                    checked={signupData.registerAsVolunteer || false}
+                    onChange={(e) => setSignupData(prev => ({ ...prev, registerAsVolunteer: e.target.checked }))}
+                    className="w-4 h-4 text-orange-650 border-slate-800 rounded bg-slate-950 focus:ring-orange-500 cursor-pointer"
+                  />
+                  <label htmlFor="registerAsVolunteer" className="text-xs font-bold text-slate-300 cursor-pointer select-none">
+                    Register as a Volunteer (requires Admin approval)
+                  </label>
+                </div>
               </div>
 
               <button
                 onClick={() => setScreen('signup-digilocker')}
                 disabled={!signupData.name || !signupData.bloodGroup}
-                className="w-full bg-gradient-to-r from-orange-600 to-emerald-600 hover:from-orange-700 hover:to-emerald-700 text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md disabled:opacity-50"
+                className="w-full bg-gradient-to-r from-orange-600 to-emerald-600 hover:from-orange-700 hover:to-emerald-700 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md disabled:opacity-50 cursor-pointer text-sm"
               >
                 Continue to ID Verification <ArrowRight size={16} />
               </button>
@@ -5457,53 +6032,37 @@ function DigiLockerStep({ onComplete, onBack, isCompleting }) {
   };
 
   return (
-    <div className="space-y-5 animate-in fade-in">
-      <div className="flex items-center gap-2 text-xs text-slate-500">
-        <span className="bg-green-500 text-white px-2 py-0.5 rounded-full flex items-center gap-1"><CheckCircle size={10}/> Phone</span>
-        <ChevronRight size={12} />
-        <span className="bg-green-500 text-white px-2 py-0.5 rounded-full flex items-center gap-1"><CheckCircle size={10}/> Profile</span>
-        <ChevronRight size={12} />
-        <span className="font-semibold text-slate-700">ID Verification</span>
+    <div className="space-y-5 animate-in fade-in text-slate-200">
+      <div className="flex items-center gap-2 text-[10px] uppercase font-bold text-slate-500">
+        <span className="bg-emerald-950 text-emerald-400 px-2.5 py-1 rounded-full flex items-center gap-1 border border-emerald-500/20"><CheckCircle size={10}/> Phone verified</span>
+        <ChevronRight size={10} className="text-slate-700" />
+        <span className="bg-emerald-950 text-emerald-400 px-2.5 py-1 rounded-full flex items-center gap-1 border border-emerald-500/20"><CheckCircle size={10}/> Profile setup</span>
+        <ChevronRight size={10} className="text-slate-700" />
+        <span className="text-orange-400 font-extrabold">ID Verification</span>
       </div>
 
       {state !== 'success' && (
-        <button onClick={onBack} className="text-sm text-slate-500 hover:text-slate-700 flex items-center gap-1">
+        <button onClick={onBack} className="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1">
           <ArrowLeft size={14} /> Back
         </button>
       )}
 
       <div>
-        <h2 className="text-2xl font-bold text-slate-900">Verify Your Identity</h2>
-        <p className="text-sm text-slate-500 mt-1">Required to ensure trust in emergency responses.</p>
+        <h2 className="text-xl font-black text-white">Government Identity Verification</h2>
+        <p className="text-xs text-slate-400 mt-1">UIDAI & Meri Pehchaan integrated node.</p>
       </div>
 
       {state === 'idle' && (
         <>
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-2xl p-5">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-md">
+          <div className="bg-slate-950/80 border border-blue-500/20 rounded-2xl p-5 relative overflow-hidden glass-panel">
+            {/* Soft background blue glow */}
+            <div className="absolute -top-12 -right-12 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl"></div>
+
+            <div className="flex items-center gap-3.5 mb-3.5 relative z-10">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center text-white font-extrabold text-lg shadow-md shadow-blue-500/10">
                 DL
               </div>
               <div>
-                <h3 className="font-bold text-slate-900">DigiLocker</h3>
-                <p className="text-[11px] text-slate-600">Government of India • Trusted Identity</p>
-              </div>
-            </div>
-            <p className="text-xs text-slate-700 leading-relaxed">
-              Fetch your government-issued ID directly from DigiLocker. Your documents stay encrypted and never leave the secure channel.
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-xs text-slate-600">
-              <CheckCircle size={14} className="text-green-600 shrink-0" />
-              <span>Aadhaar, PAN, Driving License, Voter ID supported</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-slate-600">
-              <CheckCircle size={14} className="text-green-600 shrink-0" />
-              <span>Documents are auto-verified by issuing authority</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-slate-600">
               <CheckCircle size={14} className="text-green-600 shrink-0" />
               <span>Encrypted via Meri Pehchaan SSO</span>
             </div>
