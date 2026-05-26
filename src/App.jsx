@@ -788,14 +788,20 @@ export default function SaathiApp() {
 
   // Fetch live location on mount
   useEffect(() => {
+    // Detect iframe sandbox — common in preview environments
+    const inIframe = window.self !== window.top;
+    if (inIframe) {
+      // In sandbox preview, immediately enter manual mode to avoid flickering geolocation errors
+      setLocationStatus('manual');
+      setLocationError('');
+      return;
+    }
+
     if (!navigator.geolocation) {
       setLocationStatus('unavailable');
       setLocationError('Geolocation is not supported in this browser.');
       return;
     }
-
-    // Detect iframe sandbox — common in preview environments
-    const inIframe = window.self !== window.top;
 
     setLocationStatus('requesting');
     navigator.geolocation.getCurrentPosition(
@@ -2734,16 +2740,32 @@ function RescueModule({
               src={`https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${mapLat}%2C${mapLng}`}
             ></iframe>
 
-            {locationStatus === 'granted' && (
-              <div className="absolute top-3 left-3 bg-slate-950/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md border border-emerald-500/20 text-xs font-semibold text-emerald-400 flex items-center gap-1.5 z-20 gpu-stabilized">
-                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                Live GPS Active
-              </div>
-            )}
-            {locationStatus === 'denied' && (
-              <div className="absolute top-3 left-3 bg-slate-950/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md border border-orange-500/20 text-xs font-semibold text-orange-400 flex items-center gap-1.5 z-20 gpu-stabilized">
-                <AlertTriangle size={12} />
-                Using fallback location
+            {(locationStatus === 'granted' || locationStatus === 'manual' || locationStatus === 'denied' || locationStatus === 'unavailable') && (
+              <div 
+                className={`absolute top-3 left-3 bg-slate-950/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md text-xs font-semibold flex items-center gap-1.5 z-20 transition-all duration-300 gpu-stabilized ${
+                  locationStatus === 'granted'
+                    ? 'border border-emerald-500/20 text-emerald-400'
+                    : locationStatus === 'manual'
+                    ? 'border border-blue-500/20 text-blue-400'
+                    : 'border border-orange-500/20 text-orange-400'
+                }`}
+              >
+                {locationStatus === 'granted' ? (
+                  <>
+                    <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                    Live GPS Active
+                  </>
+                ) : locationStatus === 'manual' ? (
+                  <>
+                    <MapPin size={12} className="text-blue-400" />
+                    Manual Location Set
+                  </>
+                ) : (
+                  <>
+                    <AlertTriangle size={12} className="text-orange-400 animate-pulse" />
+                    Using fallback location
+                  </>
+                )}
               </div>
             )}
 
