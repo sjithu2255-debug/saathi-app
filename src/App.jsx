@@ -37,17 +37,41 @@ function SaathiLogo({ size = 32, showWordmark = false, variant = 'default' }) {
             <stop offset="0%" stopColor="#10b981" />
             <stop offset="100%" stopColor="#047857" />
           </linearGradient>
+          <linearGradient id={`${id}-glass`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.8" />
+            <stop offset="35%" stopColor="#ffffff" stopOpacity="0.15" />
+            <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+          </linearGradient>
+          {/* Small Crossed Swords Definition */}
+          <g id={`${id}-sword`}>
+            {/* Blade */}
+            <path d="M 0 -18 L 1.5 2 L -1.5 2 Z" fill="#e2e8f0" />
+            <line x1="0" y1="-18" x2="0" y2="2" stroke="#94a3b8" strokeWidth="0.3" />
+            {/* Guard */}
+            <path d="M -4 2 L 4 2 L 4 3 L -4 3 Z" fill="#fbbf24" rx="0.5" />
+            {/* Hilt */}
+            <rect x="-0.8" y="3" width="1.6" height="5" rx="0.3" fill="#78350f" />
+            {/* Pommel */}
+            <circle cx="0" cy="8.8" r="0.8" fill="#fbbf24" />
+          </g>
         </defs>
         <rect width="64" height="64" rx="14" fill={`url(#${id}-grad)`} />
         <rect x="2" y="2" width="60" height="60" rx="12" fill="none" stroke="white" strokeOpacity="0.15" strokeWidth="1" />
+        
+        {/* Crossed Swords in background */}
+        <use href={`#${id}-sword`} x="32" y="32" transform="rotate(-40 32 32)" opacity="0.9" />
+        <use href={`#${id}-sword`} x="32" y="32" transform="rotate(40 32 32)" opacity="0.9" />
+
         <path d="M 32 14 L 18 18 L 18 32 Q 18 42 32 50 L 32 14 Z" fill={`url(#${id}-shield)`} opacity="0.95" />
         <path d="M 32 22 Q 32 18 36 18 Q 44 18 44 26 Q 44 34 32 44 Q 32 32 32 22 Z" fill={`url(#${id}-heart)`} opacity="0.95" />
-        <circle cx="32" cy="32" r="4" fill="white" />
-        <circle cx="32" cy="32" r="2" fill="#1e293b" />
+        <circle cx="32" cy="32" r="3.5" fill="white" opacity="0.9" />
+
+        {/* Diagonal glassy shine overlay */}
+        <path d="M 0 0 L 64 0 L 0 64 Z" fill={`url(#${id}-glass)`} />
       </svg>
       {showWordmark && (
         <div className="flex flex-col leading-none">
-          <span className="font-bold text-xl tracking-tight text-slate-900">{BRAND.name}</span>
+          <span className="font-bold text-xl tracking-tight text-[#f97316]">{BRAND.name}</span>
           {variant === 'full' && (
             <span className="text-[9px] text-slate-500 uppercase tracking-widest mt-0.5">{BRAND.tagline}</span>
           )}
@@ -6400,13 +6424,37 @@ function SplashLogoMark({ size = 140 }) {
           <stop offset="0%" stopColor="#ffffff" />
           <stop offset="100%" stopColor="#fef3c7" />
         </radialGradient>
+        <linearGradient id={`${id}-glass`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.85" />
+          <stop offset="35%" stopColor="#ffffff" stopOpacity="0.18" />
+          <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+        </linearGradient>
+        {/* Small Crossed Swords Definition */}
+        <g id={`${id}-sword`}>
+          {/* Blade */}
+          <path d="M 0 -18 L 1.5 2 L -1.5 2 Z" fill="#e2e8f0" />
+          <line x1="0" y1="-18" x2="0" y2="2" stroke="#94a3b8" strokeWidth="0.3" />
+          {/* Guard */}
+          <path d="M -4 2 L 4 2 L 4 3 L -4 3 Z" fill="#fbbf24" rx="0.5" />
+          {/* Hilt */}
+          <rect x="-0.8" y="3" width="1.6" height="5" rx="0.3" fill="#78350f" />
+          {/* Pommel */}
+          <circle cx="0" cy="8.8" r="0.8" fill="#fbbf24" />
+        </g>
       </defs>
       <rect width="64" height="64" rx="14" fill={`url(#${id}-grad)`} />
       <rect x="2" y="2" width="60" height="60" rx="12" fill="none" stroke="white" strokeOpacity="0.25" strokeWidth="1.5" />
+      
+      {/* Crossed Swords in background */}
+      <use href={`#${id}-sword`} x="32" y="32" transform="rotate(-40 32 32)" opacity="0.9" />
+      <use href={`#${id}-sword`} x="32" y="32" transform="rotate(40 32 32)" opacity="0.9" />
+
       <path d="M 32 14 L 18 18 L 18 32 Q 18 42 32 50 L 32 14 Z" fill={`url(#${id}-shield)`} />
       <path d="M 32 22 Q 32 18 36 18 Q 44 18 44 26 Q 44 34 32 44 Q 32 32 32 22 Z" fill={`url(#${id}-heart)`} />
-      <circle cx="32" cy="32" r="5" fill={`url(#${id}-center)`} stroke="#1e293b" strokeWidth="0.5" />
-      <circle cx="32" cy="32" r="2.5" fill="#1e293b" />
+      <circle cx="32" cy="32" r="4.5" fill={`url(#${id}-center)`} opacity="0.95" />
+
+      {/* Diagonal glassy shine overlay */}
+      <path d="M 0 0 L 64 0 L 0 64 Z" fill={`url(#${id}-glass)`} />
     </svg>
   );
 }
