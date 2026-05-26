@@ -24,13 +24,10 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Configure Git
+      - name: Checkout Code (Anonymous Clone)
         run: |
-          git config --global http.version HTTP/1.1
-          git config --global http.postBuffer 524288000
-
-      - name: Checkout
-        uses: actions/checkout@v4
+          git clone https://github.com/sjithu2255-debug/saathi-app.git .
+          git checkout ${{ github.sha }}
       
       - name: Setup Node
         uses: actions/setup-node@v4
