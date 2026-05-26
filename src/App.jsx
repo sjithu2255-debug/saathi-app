@@ -6198,7 +6198,7 @@ function SplashScreen({ onDone }) {
     const t2 = setTimeout(() => setPhase('exit'), 2200);
     const t3 = setTimeout(() => onDone(), 2700);
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
-  }, [onDone]);
+  }, []);
 
   return (
     <div
