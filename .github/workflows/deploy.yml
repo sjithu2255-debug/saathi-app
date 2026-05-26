@@ -5,6 +5,9 @@ on:
     branches: ["main"]
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
 permissions:
   contents: read
   pages: write
@@ -21,6 +24,11 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
+      - name: Configure Git
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 524288000
+
       - name: Checkout
         uses: actions/checkout@v4
       
