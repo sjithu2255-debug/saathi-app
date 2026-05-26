@@ -730,6 +730,7 @@ export default function SaathiApp() {
       if (dist > 150) {
         isImpossibleVelocity = true;
       }
+      
     }
     
     if (isStaticOrZeroAccuracy || isImpossibleVelocity) {
