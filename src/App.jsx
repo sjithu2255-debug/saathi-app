@@ -1609,11 +1609,12 @@ export default function SaathiApp() {
               type="button"
               onClick={startSOSCountdown}
               disabled={sosCountdown !== null}
-              className="flex items-center justify-center w-14 h-14 md:w-16 md:h-16 bg-red-600 hover:bg-red-700 hover:scale-105 active:scale-95 text-white rounded-full shadow-2xl transition-all relative group"
+              className="flex items-center gap-2.5 px-4 py-3 md:px-5 md:py-3.5 bg-red-600 hover:bg-red-700 hover:scale-105 active:scale-95 text-white rounded-full shadow-2xl transition-all relative group cursor-pointer"
               title={t('triggerSOS')}
             >
               <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-25 group-hover:opacity-40"></div>
-              <ShieldAlert size={28} className="relative z-10" />
+              <ShieldAlert size={18} className="relative z-10 animate-pulse" />
+              <span className="text-xs md:text-sm font-black tracking-wider relative z-10 uppercase">SOS HELP</span>
             </button>
           )}
         </div>
