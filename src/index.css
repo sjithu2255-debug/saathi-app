@@ -160,12 +160,10 @@
 @keyframes pulse-emergency {
   0%, 100% {
     opacity: 1;
-    transform: scale(1);
     box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
   }
   50% {
     opacity: 0.85;
-    transform: scale(1.05);
     box-shadow: 0 0 0 15px rgba(239, 68, 68, 0);
   }
 }
@@ -182,3 +180,19 @@
     box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
   }
 }
+
+/* GPU Stabilization utilities to completely eliminate rendering flicker and layout vibration */
+.gpu-stabilized {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  will-change: transform, opacity;
+  -webkit-font-smoothing: subpixel-antialiased;
+}
+
+.animate-pulse {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  will-change: opacity;
+}
+

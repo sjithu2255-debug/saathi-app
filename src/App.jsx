@@ -1084,7 +1084,7 @@ export default function SaathiApp() {
           </div>
           
           <div 
-            className={`flex items-center space-x-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all border cursor-default select-none pointer-events-none ${
+            className={`flex items-center space-x-2 px-3 py-1.5 rounded-full text-xs font-bold transition-colors duration-200 border cursor-default select-none pointer-events-none gpu-stabilized ${
               locationStatus === 'granted' ? 'bg-emerald-950/40 text-emerald-400 border-emerald-500/20' :
               locationStatus === 'manual' ? 'bg-blue-950/40 text-blue-400 border-blue-500/20' :
               locationStatus === 'requesting' ? 'bg-blue-950/40 text-blue-400 border-blue-500/20' :
@@ -2716,7 +2716,7 @@ function RescueModule({
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-xl font-black text-white">Emergency & Rescue</h2>
             {isSOSActive ? (
-              <span className="bg-red-950/90 text-red-400 text-xs font-black px-3.5 py-1.5 rounded-full flex items-center gap-1.5 border border-red-500/30 pulse-glow-sos">
+              <span className="bg-red-950/90 text-red-400 text-xs font-black px-3.5 py-1.5 rounded-full flex items-center gap-1.5 border border-red-500/30 pulse-glow-sos gpu-stabilized">
                 <Radio size={14} className="animate-pulse" /> Broadcasting Location
               </span>
             ) : (
@@ -2735,13 +2735,13 @@ function RescueModule({
             ></iframe>
 
             {locationStatus === 'granted' && (
-              <div className="absolute top-3 left-3 bg-slate-950/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md border border-emerald-500/20 text-xs font-semibold text-emerald-400 flex items-center gap-1.5 z-20">
+              <div className="absolute top-3 left-3 bg-slate-950/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md border border-emerald-500/20 text-xs font-semibold text-emerald-400 flex items-center gap-1.5 z-20 gpu-stabilized">
                 <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
                 Live GPS Active
               </div>
             )}
             {locationStatus === 'denied' && (
-              <div className="absolute top-3 left-3 bg-slate-950/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md border border-orange-500/20 text-xs font-semibold text-orange-400 flex items-center gap-1.5 z-20">
+              <div className="absolute top-3 left-3 bg-slate-950/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md border border-orange-500/20 text-xs font-semibold text-orange-400 flex items-center gap-1.5 z-20 gpu-stabilized">
                 <AlertTriangle size={12} />
                 Using fallback location
               </div>
