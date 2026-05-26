@@ -1119,6 +1119,12 @@ export default function SaathiApp() {
         .light-theme .shadow-2xl {
           box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08) !important;
         }
+        /* Correct hardcoded dark text in headings during Dark Mode */
+        :not(.light-theme) h2.text-slate-900,
+        :not(.light-theme) h3.text-slate-800,
+        :not(.light-theme) h3.text-slate-900 {
+          color: #f1f5f9 !important;
+        }
       `}</style>
       
       {/* Background Holographic Grid */}
