@@ -714,13 +714,19 @@ export default function SaathiApp() {
     }
   }, [keyPair]);
 
+  const userCoordsRef = useRef(null);
+  useEffect(() => {
+    userCoordsRef.current = userCoords;
+  }, [userCoords]);
+
   // Geolocation Anti-Spoof Attestation
   const updateGPSAttestation = useCallback((newCoords) => {
     if (!newCoords) return;
     const isStaticOrZeroAccuracy = newCoords.accuracy === 0;
     let isImpossibleVelocity = false;
-    if (userCoords) {
-      const dist = haversineKm(userCoords.lat, userCoords.lng, newCoords.lat, newCoords.lng);
+    const prevCoords = userCoordsRef.current;
+    if (prevCoords) {
+      const dist = haversineKm(prevCoords.lat, prevCoords.lng, newCoords.lat, newCoords.lng);
       if (dist > 150) {
         isImpossibleVelocity = true;
       }
@@ -735,7 +741,7 @@ export default function SaathiApp() {
       setGpsTelemetryScore(100);
       setSecurityScore(100);
     }
-  }, [userCoords]);
+  }, []);
 
   // Wallet — lifted to root so all modules can credit/debit
   const [walletBalance, setWalletBalance] = useState(245); // demo starting balance
@@ -1090,7 +1096,7 @@ export default function SaathiApp() {
           </div>
           
           <div 
-            className={`flex items-center space-x-2 px-3 py-1.5 rounded-full text-xs font-bold transition-colors duration-200 border cursor-default select-none pointer-events-none gpu-stabilized ${
+            className={`flex items-center space-x-2 px-3 py-1.5 rounded-full text-xs font-bold transition-colors duration-200 border cursor-default select-none pointer-events-none ${
               locationStatus === 'granted' ? 'bg-emerald-950/40 text-emerald-400 border-emerald-500/20' :
               locationStatus === 'manual' ? 'bg-blue-950/40 text-blue-400 border-blue-500/20' :
               locationStatus === 'requesting' ? 'bg-blue-950/40 text-blue-400 border-blue-500/20' :
@@ -2742,7 +2748,7 @@ function RescueModule({
 
             {(locationStatus === 'granted' || locationStatus === 'manual' || locationStatus === 'denied' || locationStatus === 'unavailable') && (
               <div 
-                className={`absolute top-3 left-3 bg-slate-950/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md text-xs font-semibold flex items-center gap-1.5 z-20 transition-all duration-300 gpu-stabilized ${
+                className={`absolute top-3 left-3 bg-slate-950/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md text-xs font-semibold flex items-center gap-1.5 z-20 transition-all duration-300 ${
                   locationStatus === 'granted'
                     ? 'border border-emerald-500/20 text-emerald-400'
                     : locationStatus === 'manual'
