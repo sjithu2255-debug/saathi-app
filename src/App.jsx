@@ -569,7 +569,6 @@ const downloadBlob = (blob, filename) => {
 // --- MAIN APP ---
 export default function SaathiApp() {
   const [showSplash, setShowSplash] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authedUser, setAuthedUser] = useState(null);
   const [activeTab, setActiveTab] = useState('home');
@@ -1046,84 +1045,84 @@ export default function SaathiApp() {
   }
 
   return (
-    <div className={`flex flex-col h-screen font-sans overflow-hidden relative ${isDarkMode ? 'bg-[#070913] text-slate-200' : 'bg-slate-50 text-slate-900 light-theme'}`}>
+    <div className="flex flex-col h-screen font-sans overflow-hidden bg-[#070913] text-slate-200 relative">
       <style>{`
-        /* Light theme overrides */
-        .light-theme {
-          background-color: #f8fafc !important;
-          color: #0f172a !important;
-        }
-        .light-theme .hologram-grid {
-          opacity: 0.03 !important;
-        }
-        .light-theme header,
-        .light-theme .bg-\[\#0b0f19\]\/80 {
-          background-color: rgba(255, 255, 255, 0.85) !important;
-          border-color: #e2e8f0 !important;
-          color: #0f172a !important;
-        }
-        .light-theme .text-slate-200,
-        .light-theme .text-slate-300,
-        .light-theme .text-slate-400,
-        .light-theme .text-white {
-          color: #1e293b !important;
-        }
-        .light-theme .text-slate-500 {
-          color: #64748b !important;
-        }
-        .light-theme .bg-slate-900,
-        .light-theme .bg-slate-950,
-        .light-theme .bg-\[\#0b0f19\] {
-          background-color: #ffffff !important;
-          border-color: #e2e8f0 !important;
-        }
-        .light-theme .border-slate-800,
-        .light-theme .border-slate-800\/80,
-        .light-theme .border-slate-700 {
-          border-color: #e2e8f0 !important;
-        }
-        .light-theme input,
-        .light-theme select,
-        .light-theme textarea {
-          background-color: #ffffff !important;
-          color: #0f172a !important;
-          border-color: #cbd5e1 !important;
-        }
-        .light-theme .bg-orange-950\/40 {
-          background-color: #ffedd5 !important;
-          color: #ea580c !important;
-          border-color: #fed7aa !important;
-        }
-        .light-theme .bg-emerald-950\/40 {
-          background-color: #d1fae5 !important;
-          color: #059669 !important;
-          border-color: #a7f3d0 !important;
-        }
-        .light-theme .bg-blue-950\/40 {
-          background-color: #dbeafe !important;
-          color: #1d4ed8 !important;
-          border-color: #bfdbfe !important;
-        }
-        .light-theme .bg-red-950\/40 {
-          background-color: #fee2e2 !important;
-          color: #b91c1c !important;
-          border-color: #fca5a5 !important;
-        }
-        .light-theme button:hover:not(.bg-orange-600, .bg-emerald-600, .bg-red-600, .bg-transparent, .text-white) {
-          background-color: #f1f5f9 !important;
-        }
-        .light-theme .modal-header,
-        .light-theme .bg-gradient-to-r {
-          color: #ffffff !important;
-        }
-        .light-theme .shadow-2xl {
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08) !important;
-        }
-        /* Correct hardcoded dark text in headings during Dark Mode */
-        :not(.light-theme) h2.text-slate-900,
-        :not(.light-theme) h3.text-slate-800,
-        :not(.light-theme) h3.text-slate-900 {
+        /* Premium, cohesive dark theme overrides globally */
+        body, html {
+          background-color: #070913 !important;
           color: #f1f5f9 !important;
+        }
+
+        /* Force dark theme for all white background elements */
+        .bg-white,
+        .bg-slate-50,
+        .modal-content,
+        div[class*="bg-white"],
+        nav[class*="bg-white"],
+        header[class*="bg-white"] {
+          background-color: #0b0f19 !important;
+          color: #e2e8f0 !important;
+        }
+
+        /* Make card and element borders dark and clean */
+        .border-slate-200,
+        .border-slate-300,
+        .border-slate-100,
+        .border-slate-250,
+        .border-dashed {
+          border-color: #1e293b !important;
+        }
+
+        /* Form inputs, textareas, selects look stunning in dark mode */
+        input, select, textarea,
+        input[class*="bg-white"],
+        select[class*="bg-white"],
+        textarea[class*="bg-white"] {
+          background-color: #0d1527 !important;
+          color: #f8fafc !important;
+          border-color: #1e293b !important;
+        }
+
+        /* Correct all dark slate text colors to look premium bright slate-white */
+        .text-slate-900,
+        .text-slate-800,
+        .text-slate-700,
+        .text-slate-600,
+        h2, h3, h4, h5, h6 {
+          color: #f1f5f9 !important;
+        }
+
+        /* Muted helper text should be readable but secondary */
+        .text-slate-500,
+        .text-slate-400 {
+          color: #94a3b8 !important;
+        }
+
+        /* Secondary cards or inner widgets should have a slightly different dark background */
+        .bg-slate-50,
+        .bg-slate-100,
+        div[class*="bg-slate-50"],
+        div[class*="bg-slate-100"] {
+          background-color: #0e1726 !important;
+        }
+
+        /* Buttons and hover states should look premium */
+        button[class*="hover:bg-slate-50"]:hover,
+        button[class*="hover:bg-slate-100"]:hover,
+        .hover\:bg-slate-50:hover,
+        .hover\:bg-slate-100:hover {
+          background-color: #1e293b !important;
+        }
+
+        /* Text selections inside chat and lists */
+        .bg-white .text-slate-800,
+        .bg-white .text-slate-700 {
+          color: #f1f5f9 !important;
+        }
+
+        /* Pinned badges and alerts */
+        .bg-orange-950\/40, .bg-emerald-950\/40, .bg-blue-950\/40, .bg-red-950\/40 {
+          border-color: rgba(249, 115, 22, 0.15) !important;
         }
       `}</style>
       
@@ -1271,16 +1270,6 @@ export default function SaathiApp() {
                 <span className="text-xs font-bold text-amber-500 hidden sm:inline">{formatINR(walletBalance)}</span>
               </button>
             )}
-
-            {/* Theme Toggle Button */}
-            <button
-              onClick={() => setIsDarkMode(!isDarkMode)}
-              title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
-              className="p-2 rounded-full transition-colors cursor-pointer text-slate-400 hover:bg-slate-900 border border-transparent hover:border-slate-800/30 flex items-center justify-center"
-            >
-              {isDarkMode ? <Sun size={18} className="text-amber-400" /> : <Moon size={18} className="text-slate-700" />}
-            </button>
-
             <div className="relative" data-dropdown>
               <button 
                 onClick={(e) => {
