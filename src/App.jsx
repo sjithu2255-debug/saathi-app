@@ -637,6 +637,7 @@ export default function SaathiApp() {
   const [gpsTelemetryScore, setGpsTelemetryScore] = useState(100);
   const [gpsLogs, setGpsLogs] = useState([]);
   const countdownTimerRef = useRef(null);
+  const displayUser = authedUser || MOCK_USER;
 
   // Active DevTools open detection logic
   useEffect(() => {
