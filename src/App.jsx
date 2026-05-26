@@ -581,6 +581,40 @@ export default function SaathiApp() {
     { id: 1, name: "Amit Sharma", phone: "+91 98765 43220", email: "amit.sharma@example.com", status: "pending", date: "1 day ago", idType: "Aadhaar Card", idNumber: "XXXX XXXX 8892" },
     { id: 2, name: "Priya Patel", phone: "+91 98765 43221", email: "priya.patel@example.com", status: "pending", date: "2 hours ago", idType: "PAN Card", idNumber: "ABCDE5678G" },
   ]);
+  const [bloodRequests, setBloodRequests] = useState([
+    {
+      id: 1,
+      patientName: "K. R. Vijayan",
+      bloodType: "O+",
+      unitsNeeded: 3,
+      hospital: "Alappuzha General Hospital (Ward 5)",
+      doctorContact: "+91 94472 12345",
+      approvalLetter: "req_cert_vijayan.pdf",
+      requestorName: "Jithu Sreekumar",
+      requestorPhone: "+91 98765 43210",
+      status: "approved",
+      responses: [
+        { name: "Rahul S.", phone: "+91 94460 54321", status: "pledged" }
+      ],
+      date: "1 day ago",
+      distance: "1.2 km"
+    },
+    {
+      id: 2,
+      patientName: "Amina Beevi",
+      bloodType: "B-",
+      unitsNeeded: 2,
+      hospital: "Medical College Hospital, Alappuzha (ICU Wing)",
+      doctorContact: "+91 98450 98765",
+      approvalLetter: "doc_cert_amina.png",
+      requestorName: "Salim Khan",
+      requestorPhone: "+91 98765 88888",
+      status: "pending",
+      responses: [],
+      date: "Just now",
+      distance: "3.4 km"
+    }
+  ]);
   const [activeChatUser, setActiveChatUser] = useState(null);
   const [showNotifPanel, setShowNotifPanel] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -947,17 +981,18 @@ export default function SaathiApp() {
   const pendingApprovalsCount = useMemo(() => {
     return volunteerRequests.filter(r => r.status === 'pending').length +
            services.filter(s => s.status === 'pending').length +
-           surveys.filter(s => s.status === 'pending').length;
-  }, [volunteerRequests, services, surveys]);
+           surveys.filter(s => s.status === 'pending').length +
+           (bloodRequests || []).filter(r => r.status === 'pending').length;
+  }, [volunteerRequests, services, surveys, bloodRequests]);
 
   const renderContent = () => {
     switch (activeTab) {
       case 'home': return <HomeFeed t={t} startSOSCountdown={startSOSCountdown} isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onViewCertificate={() => setShowCertificate(true)} userRole={userRole} walletBalance={walletBalance} onOpenWallet={() => setShowWallet(true)} volunteerApplicationStatus={volunteerApplicationStatus} setVolunteerApplicationStatus={setVolunteerApplicationStatus} setVolunteerRequests={setVolunteerRequests} displayUser={displayUser} services={services} setActiveTab={setActiveTab} volunteerRequests={volunteerRequests} surveys={surveys} alerts={alerts} onOpenPostAlert={() => setShowPostAlertModal(true)} />;
-      case 'rescue': return <RescueModule isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onOpenChat={setActiveChatUser} userCoords={userCoords} locationStatus={locationStatus} />;
+      case 'rescue': return <RescueModule isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onOpenChat={setActiveChatUser} userCoords={userCoords} locationStatus={locationStatus} bloodRequests={bloodRequests} setBloodRequests={setBloodRequests} userRole={userRole} addWalletTxn={addWalletTxn} creditMicro={creditMicro} showEarning={showEarning} keyFingerprint={keyFingerprint} signActionPayload={signActionPayload} />;
       case 'volunteer': return <VolunteerModule userCoords={userCoords} userRole={userRole} locationStatus={locationStatus} />;
       case 'services': return <ServicesModule userCoords={userCoords} locationStatus={locationStatus} userRole={userRole} onCommission={creditCommission} onShowEarning={showEarning} services={services} setServices={setServices} />;
       case 'survey': return <SurveyModule userRole={userRole} userCoords={userCoords} onMicroReward={creditMicro} onShowEarning={showEarning} surveys={surveys} setSurveys={setSurveys} />;
-      case 'admin-approvals': return <AdminApprovalsModule volunteerRequests={volunteerRequests} setVolunteerRequests={setVolunteerRequests} services={services} setServices={setServices} surveys={surveys} setSurveys={setSurveys} userRole={userRole} setUserRole={setUserRole} setVolunteerApplicationStatus={setVolunteerApplicationStatus} displayUser={displayUser} addWalletTxn={addWalletTxn} />;
+      case 'admin-approvals': return <AdminApprovalsModule volunteerRequests={volunteerRequests} setVolunteerRequests={setVolunteerRequests} services={services} setServices={setServices} surveys={surveys} setSurveys={setSurveys} userRole={userRole} setUserRole={setUserRole} setVolunteerApplicationStatus={setVolunteerApplicationStatus} displayUser={displayUser} addWalletTxn={addWalletTxn} bloodRequests={bloodRequests} setBloodRequests={setBloodRequests} creditMicro={creditMicro} showEarning={showEarning} />;
       default: return <HomeFeed t={t} startSOSCountdown={startSOSCountdown} isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onViewCertificate={() => setShowCertificate(true)} userRole={userRole} walletBalance={walletBalance} onOpenWallet={() => setShowWallet(true)} volunteerApplicationStatus={volunteerApplicationStatus} setVolunteerApplicationStatus={setVolunteerApplicationStatus} setVolunteerRequests={setVolunteerRequests} displayUser={displayUser} services={services} setActiveTab={setActiveTab} volunteerRequests={volunteerRequests} surveys={surveys} alerts={alerts} onOpenPostAlert={() => setShowPostAlertModal(true)} />;
     }
   };
@@ -1318,12 +1353,12 @@ export default function SaathiApp() {
             <NavButton active={activeTab === 'volunteer'} onClick={() => setActiveTab('volunteer')} icon={<HeartHandshake size={20}/>} label={t('volunteer')} color="green" />
             <NavButton active={activeTab === 'services'} onClick={() => setActiveTab('services')} icon={<Wrench size={20}/>} label={t('services')} color="orange" />
             <NavButton active={activeTab === 'survey'} onClick={() => setActiveTab('survey')} icon={<FileText size={20}/>} label={t('surveys')} color="blue" />
-            {userRole === 'Admin' && (
+            {['Admin', 'Volunteer'].includes(userRole) && (
               <NavButton 
                 active={activeTab === 'admin-approvals'} 
                 onClick={() => setActiveTab('admin-approvals')} 
                 icon={<ShieldCheck size={20}/>} 
-                label="Admin Approvals" 
+                label="Approvals Hub" 
                 color="purple" 
                 badge={pendingApprovalsCount} 
               />
@@ -1377,120 +1412,6 @@ export default function SaathiApp() {
             {renderContent()}
           </div>
         </div>
-      </main>-tight">{ROLE_DESCRIPTIONS[role]}</p>
-                        </div>
-                      </button>
-                    ))}
-
-                    {userRole === 'HealthcareWorker' && (
-                      <div className="mt-2 p-2 bg-emerald-50/50 border border-emerald-100 rounded-xl">
-                        <div className="text-[9px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Healthcare Specialty</div>
-                        <div className="grid grid-cols-2 gap-1">
-                          {['ASHA', 'Bloodbank', 'Doctor', 'Hospital'].map(sub => (
-                            <button
-                              key={sub}
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setHealthcareSubRole(sub);
-                              }}
-                              className={`px-2 py-1.5 rounded-lg text-[10px] font-bold text-left transition-all ${
-                                healthcareSubRole === sub
-                                  ? 'bg-emerald-600 text-white shadow-sm'
-                                  : 'bg-white hover:bg-slate-50 border border-slate-200 text-slate-700'
-                              }`}
-                            >
-                              {sub === 'Bloodbank' ? 'Blood Bank' : sub}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-
-                  <div className="border-t border-slate-100 p-2">
-                    <button 
-                      onClick={handleSignOut}
-                      className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-2"
-                    >
-                      <ArrowLeft size={14}/> Sign Out
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <main className="flex-1 overflow-y-auto pb-20 md:pb-0 scroll-smooth">
-        <div className="max-w-7xl mx-auto px-4 py-6 flex flex-col md:flex-row gap-6">
-          <aside className="hidden md:flex flex-col w-64 shrink-0 space-y-2">
-            <NavButton active={activeTab === 'home'} onClick={() => setActiveTab('home')} icon={<Activity size={20}/>} label={t('dashboard')} />
-            <NavButton active={activeTab === 'rescue'} onClick={() => setActiveTab('rescue')} icon={<ShieldAlert size={20}/>} label={t('rescue')} color="red" />
-            <NavButton active={activeTab === 'volunteer'} onClick={() => setActiveTab('volunteer')} icon={<HeartHandshake size={20}/>} label={t('volunteer')} color="green" />
-            <NavButton active={activeTab === 'services'} onClick={() => setActiveTab('services')} icon={<Wrench size={20}/>} label={t('services')} color="orange" />
-            <NavButton active={activeTab === 'survey'} onClick={() => setActiveTab('survey')} icon={<FileText size={20}/>} label={t('surveys')} color="blue" />
-            {userRole === 'Admin' && (
-              <NavButton 
-                active={activeTab === 'admin-approvals'} 
-                onClick={() => setActiveTab('admin-approvals')} 
-                icon={<ShieldCheck size={20}/>} 
-                label="Admin Approvals" 
-                color="purple" 
-                badge={pendingApprovalsCount} 
-              />
-            )}
-            
-            <div className={`mt-8 p-4 rounded-xl border ${
-              userRole === 'Admin' 
-                ? 'bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-200' 
-                : 'bg-gradient-to-br from-orange-50 to-emerald-50 border-orange-100'
-            }`}>
-              <div className="flex items-center gap-1.5 mb-1">
-                <h4 className={`font-semibold text-sm ${userRole === 'Admin' ? 'text-purple-800' : 'text-orange-800'}`}>
-                  Role: {userRole}
-                </h4>
-                {userRole === 'Admin' && (
-                  <span className="text-[9px] font-bold bg-purple-600 text-white px-1.5 py-0.5 rounded uppercase tracking-wider">
-                    Super
-                  </span>
-                )}
-              </div>
-              <p className={`text-xs mb-3 ${userRole === 'Admin' ? 'text-purple-700' : 'text-orange-600'}`}>
-                {userRole === 'Admin' ? 'Full platform access enabled.' : 'RBAC customized dashboard view.'}
-              </p>
-              <div className={`w-full h-1.5 rounded-full overflow-hidden ${userRole === 'Admin' ? 'bg-purple-200' : 'bg-orange-200'}`}>
-                <div className={`h-full ${userRole === 'Admin' ? 'bg-purple-600 w-full' : 'bg-gradient-to-r from-orange-500 to-emerald-600 w-2/3'}`}></div>
-              </div>
-              <p className={`text-[10px] mt-2 text-right ${userRole === 'Admin' ? 'text-purple-500' : 'text-orange-500'}`}>
-                {userRole === 'Admin' ? 'All permissions granted' : 'Profile 66% complete'}
-              </p>
-            </div>
-          </aside>
-
-          <div className="flex-1 min-w-0">
-            {locationError && (locationStatus === 'denied' || locationStatus === 'unavailable') && (
-              <div className="mb-4 bg-orange-50 border border-orange-200 rounded-xl p-3 flex items-start gap-3">
-                <div className="bg-orange-100 p-1.5 rounded-lg text-orange-600 shrink-0">
-                  <AlertTriangle size={16} />
-                </div>
-                <div className="flex-1 text-xs">
-                  <p className="font-bold text-orange-900 mb-0.5">Location unavailable</p>
-                  <p className="text-orange-700">{locationError}</p>
-                </div>
-                <button
-                  onClick={() => setShowLocationPicker(true)}
-                  className="bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors shrink-0"
-                >
-                  Set Manually
-                </button>
-              </div>
-            )}
-            {renderContent()}
-          </div>
-        </div>
       </main>
 
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-50">
@@ -1499,7 +1420,7 @@ export default function SaathiApp() {
           <MobileNavButton active={activeTab === 'rescue'} onClick={() => setActiveTab('rescue')} icon={<ShieldAlert size={22}/>} label={t('rescue')} color="text-red-600" />
           <MobileNavButton active={activeTab === 'volunteer'} onClick={() => setActiveTab('volunteer')} icon={<HeartHandshake size={22}/>} label={t('volunteer')} />
           <MobileNavButton active={activeTab === 'services'} onClick={() => setActiveTab('services')} icon={<Wrench size={22}/>} label={t('services')} />
-          {userRole === 'Admin' ? (
+          {['Admin', 'Volunteer'].includes(userRole) ? (
             <MobileNavButton active={activeTab === 'admin-approvals'} onClick={() => setActiveTab('admin-approvals')} icon={<ShieldCheck size={22}/>} label="Approvals" color="text-purple-600" badge={pendingApprovalsCount} />
           ) : (
             <MobileNavButton active={activeTab === 'survey'} onClick={() => setActiveTab('survey')} icon={<FileText size={22}/>} label={t('surveys')} />
@@ -2572,10 +2493,48 @@ function HomeFeed({
 }
 
 // --- RESCUE ---
-function RescueModule({ isSOSActive, setIsSOSActive, liveLocation, onOpenChat, userCoords, locationStatus }) {
+function RescueModule({ 
+  isSOSActive, 
+  setIsSOSActive, 
+  liveLocation, 
+  onOpenChat, 
+  userCoords, 
+  locationStatus,
+  bloodRequests = [],
+  setBloodRequests,
+  userRole,
+  addWalletTxn,
+  creditMicro,
+  showEarning,
+  keyFingerprint,
+  signActionPayload
+}) {
+  const [subModule, setSubModule] = useState('sos'); // 'sos' | 'blood'
   const [customIncident, setCustomIncident] = useState("");
   const [aiAdvice, setAiAdvice] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  
+  // Blood specific local states
+  const [showRequestModal, setShowRequestModal] = useState(false);
+  const [selectedRequestForPledge, setSelectedRequestForPledge] = useState(null);
+  
+  // New request form state
+  const [patientName, setPatientName] = useState("");
+  const [bloodType, setBloodType] = useState("O+");
+  const [unitsNeeded, setUnitsNeeded] = useState(2);
+  const [hospital, setHospital] = useState("");
+  const [doctorContact, setDoctorContact] = useState("");
+  const [requestorPhone, setRequestorPhone] = useState("");
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [isSubmittingRequest, setIsSubmittingRequest] = useState(false);
+  const [formError, setFormError] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
+  
+  // Pledge form state
+  const [pledgeName, setPledgeName] = useState("");
+  const [pledgePhone, setPledgePhone] = useState("");
+  const [isSubmittingPledge, setIsSubmittingPledge] = useState(false);
+  const [pledgeError, setPledgeError] = useState("");
 
   const mapLat = userCoords?.lat ?? 11.0168;
   const mapLng = userCoords?.lng ?? 76.9558;
@@ -2595,141 +2554,695 @@ function RescueModule({ isSOSActive, setIsSOSActive, liveLocation, onOpenChat, u
     setIsAnalyzing(false);
   };
 
+  // Simulate file upload
+  const handleSimulateUpload = () => {
+    if (!patientName.trim()) {
+      setFormError("Please enter the patient name first before uploading.");
+      return;
+    }
+    setFormError("");
+    setUploadedFile({
+      name: `requisition_slip_${patientName.toLowerCase().replace(/\s+/g, '_') || 'patient'}.pdf`,
+      size: "1.4 MB",
+      type: "application/pdf"
+    });
+  };
+
+  const handleCreateBloodRequest = async (e) => {
+    e.preventDefault();
+    setFormError("");
+    setSuccessMsg("");
+
+    if (!patientName.trim() || !hospital.trim() || !doctorContact.trim() || !requestorPhone.trim()) {
+      setFormError("Please fill out all required fields.");
+      return;
+    }
+
+    if (!uploadedFile) {
+      setFormError("Please upload/attach the doctor's requisition slip.");
+      return;
+    }
+
+    // Basic phone validation
+    const phoneRegex = /^[6-9]\d{9}$|^(\+91)?\s?[6-9]\d{9}$/;
+    if (!phoneRegex.test(doctorContact)) {
+      setFormError("Please enter a valid 10-digit doctor's contact number.");
+      return;
+    }
+    if (!phoneRegex.test(requestorPhone)) {
+      setFormError("Please enter a valid 10-digit requestor contact number.");
+      return;
+    }
+
+    setIsSubmittingRequest(true);
+    
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1200));
+
+    const newRequest = {
+      id: Date.now(),
+      patientName,
+      bloodType,
+      unitsNeeded: parseInt(unitsNeeded),
+      hospital,
+      doctorContact,
+      approvalLetter: uploadedFile.name,
+      requestorName: "Jithu Sreekumar",
+      requestorPhone,
+      status: "pending",
+      responses: [],
+      date: "Just now",
+      distance: "0.4 km"
+    };
+
+    // Attest & Sign with WebCrypto
+    if (signActionPayload) {
+      await signActionPayload('BLOOD_REQUEST_SUBMIT', newRequest);
+    }
+
+    setBloodRequests(prev => [newRequest, ...prev]);
+    setIsSubmittingRequest(false);
+    setSuccessMsg("Your blood request has been successfully submitted and is under verification by Saathi Volunteers/Admins!");
+    
+    // Reset form
+    setPatientName("");
+    setBloodType("O+");
+    setUnitsNeeded(2);
+    setHospital("");
+    setDoctorContact("");
+    setRequestorPhone("");
+    setUploadedFile(null);
+    
+    setTimeout(() => {
+      setShowRequestModal(false);
+      setSuccessMsg("");
+    }, 3000);
+  };
+
+  const handlePledgeBlood = async (e) => {
+    e.preventDefault();
+    setPledgeError("");
+
+    if (!pledgeName.trim() || !pledgePhone.trim()) {
+      setPledgeError("Please enter your name and contact details.");
+      return;
+    }
+
+    setIsSubmittingPledge(true);
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    const pledge = {
+      name: pledgeName,
+      phone: pledgePhone,
+      status: "pledged"
+    };
+
+    setBloodRequests(prev => prev.map(req => {
+      if (req.id === selectedRequestForPledge.id) {
+        return {
+          ...req,
+          responses: [...req.responses, pledge]
+        };
+      }
+      return req;
+    }));
+
+    // Micro-reward if volunteer
+    if (['Volunteer', 'Admin'].includes(userRole) && creditMicro) {
+      creditMicro(50, `Pledged blood donation for ${selectedRequestForPledge.patientName}`);
+      if (showEarning) showEarning(50, 'micro');
+    }
+
+    setIsSubmittingPledge(false);
+    setSelectedRequestForPledge(null);
+    setPledgeName("");
+    setPledgePhone("");
+  };
+
+  const activeVerifiedRequests = (bloodRequests || []).filter(r => r.status === 'approved');
+  const userPendingRequests = (bloodRequests || []).filter(r => r.status === 'pending');
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between mb-2">
-        <h2 className="text-2xl font-bold text-slate-900">Emergency & Rescue</h2>
-        {isSOSActive ? (
-          <span className="bg-red-100 text-red-700 text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm border border-red-200">
-            <Radio size={14} className="animate-pulse" /> Broadcasting Location
-          </span>
-        ) : (
-          <span className="bg-slate-100 text-slate-600 text-xs font-bold px-2 py-1 rounded flex items-center gap-1">Standby</span>
-        )}
+      {/* Tab Selectors */}
+      <div className="flex border-b border-slate-800/80 p-1 bg-slate-950/40 rounded-xl max-w-sm">
+        <button
+          onClick={() => setSubModule('sos')}
+          className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 text-xs font-black uppercase tracking-wider rounded-lg transition-all ${
+            subModule === 'sos'
+              ? 'bg-red-950/80 border border-red-500/30 text-red-400'
+              : 'text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          <Radio size={14} className={subModule === 'sos' ? 'animate-pulse' : ''} />
+          Emergency SOS
+        </button>
+        <button
+          onClick={() => setSubModule('blood')}
+          className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 text-xs font-black uppercase tracking-wider rounded-lg transition-all ${
+            subModule === 'blood'
+              ? 'bg-rose-950/80 border border-rose-500/30 text-rose-400'
+              : 'text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          <HeartHandshake size={14} className={subModule === 'blood' ? 'animate-pulse' : ''} />
+          Blood Help
+        </button>
       </div>
 
-      <div className={`w-full h-72 rounded-2xl relative overflow-hidden border-2 transition-colors duration-300 ${isSOSActive ? 'border-red-400' : 'border-slate-300'} shadow-inner bg-slate-100`}>
-        <iframe
-          title="Map"
-          width="100%"
-          height="100%"
-          style={{ border: 0, position: 'absolute', zIndex: 0 }}
-          loading="lazy"
-          src={`https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${mapLat}%2C${mapLng}`}
-        ></iframe>
-
-        {locationStatus === 'granted' && (
-          <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md border border-green-200 text-xs font-semibold text-green-700 flex items-center gap-1.5 z-20">
-            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-            Live GPS Active
+      {subModule === 'sos' ? (
+        <>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-xl font-black text-white">Emergency & Rescue</h2>
+            {isSOSActive ? (
+              <span className="bg-red-950/90 text-red-400 text-xs font-black px-3.5 py-1.5 rounded-full flex items-center gap-1.5 border border-red-500/30 pulse-glow-sos">
+                <Radio size={14} className="animate-pulse" /> Broadcasting Location
+              </span>
+            ) : (
+              <span className="bg-slate-900/50 border border-slate-800 text-slate-400 text-[10px] uppercase font-bold tracking-widest px-2.5 py-1 rounded-full flex items-center gap-1">Standby</span>
+            )}
           </div>
-        )}
-        {locationStatus === 'denied' && (
-          <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md border border-orange-200 text-xs font-semibold text-orange-700 flex items-center gap-1.5 z-20">
-            <AlertTriangle size={12} />
-            Using fallback location
-          </div>
-        )}
 
-        {isSOSActive && (
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none z-10">
-            <div className="absolute w-24 h-24 bg-red-500/40 rounded-full animate-ping"></div>
-            <div className="absolute w-12 h-12 bg-red-500/60 rounded-full animate-pulse"></div>
-            <div className="relative w-5 h-5 bg-red-600 rounded-full border-4 border-white shadow-xl flex items-center justify-center z-10">
-              <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
-            </div>
-            <div className="absolute top-6 whitespace-nowrap bg-white px-3 py-1 rounded-lg shadow-lg border border-slate-200 text-xs font-bold text-slate-800 z-20 flex flex-col items-center">
-              <span>You are here</span>
-              <span className="text-[10px] text-slate-500 font-mono mt-0.5">{liveLocation?.lat}, {liveLocation?.lng}</span>
-            </div>
-          </div>
-        )}
-      </div>
+          <div className={`w-full h-72 rounded-2xl relative overflow-hidden border transition-colors duration-300 ${isSOSActive ? 'border-red-500/40' : 'border-slate-800'} shadow-xl bg-slate-950`}>
+            <iframe
+              title="Map"
+              width="100%"
+              height="100%"
+              style={{ border: 0, position: 'absolute', zIndex: 0, opacity: 0.8 }}
+              loading="lazy"
+              src={`https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${mapLat}%2C${mapLng}`}
+            ></iframe>
 
-      <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-        <h3 className="font-bold text-slate-800 mb-3 flex items-center gap-2">
-          <AlertTriangle size={18} className="text-orange-500"/> Describe Emergency (AI Triage)
-        </h3>
-        <div className="flex flex-col md:flex-row gap-3">
-          <textarea 
-            placeholder="E.g., 'Snake bite on the leg, person is feeling dizzy...'"
-            value={customIncident}
-            onChange={(e) => setCustomIncident(e.target.value)}
-            className="flex-1 p-3 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-purple-500 outline-none resize-none h-16"
-          />
-          <button 
-            onClick={handleAnalyzeEmergency}
-            disabled={isAnalyzing || !customIncident.trim()}
-            className="md:w-48 flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2 px-4 rounded-lg text-sm font-semibold hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 transition-all"
-          >
-            {isAnalyzing ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
-            {isAnalyzing ? "Analyzing..." : "Get AI Advice"}
-          </button>
-        </div>
-        {aiAdvice && (
-          <div className="mt-4 p-4 bg-purple-50 border border-purple-100 rounded-lg text-sm text-purple-900">
-            <h4 className="font-bold mb-2 flex items-center gap-1 text-purple-700"><Sparkles size={14}/> Immediate AI Guidance:</h4>
-            <div className="whitespace-pre-wrap text-xs leading-relaxed">{aiAdvice}</div>
-          </div>
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-          <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <PhoneCall size={18} className="text-orange-500"/> Emergency Contacts
-          </h3>
-          <div className="space-y-3">
-            {MOCK_CONTACTS.map((contact, idx) => (
-              <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100">
-                <div>
-                  <h4 className="font-medium text-sm text-slate-900">{contact.name}</h4>
-                  <p className="text-xs text-slate-500 font-mono mt-0.5">{contact.phone}</p>
-                </div>
-                {isSOSActive ? (
-                  <span className="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded-full font-bold flex items-center gap-1">
-                    <CheckCircle size={10} /> Notified
-                  </span>
-                ) : (
-                  <button className="text-slate-400 hover:text-orange-600"><PhoneCall size={16} /></button>
-                )}
+            {locationStatus === 'granted' && (
+              <div className="absolute top-3 left-3 bg-slate-950/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md border border-emerald-500/20 text-xs font-semibold text-emerald-400 flex items-center gap-1.5 z-20">
+                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                Live GPS Active
               </div>
-            ))}
+            )}
+            {locationStatus === 'denied' && (
+              <div className="absolute top-3 left-3 bg-slate-950/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md border border-orange-500/20 text-xs font-semibold text-orange-400 flex items-center gap-1.5 z-20">
+                <AlertTriangle size={12} />
+                Using fallback location
+              </div>
+            )}
+
+            {isSOSActive && (
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none z-10">
+                <div className="absolute w-24 h-24 bg-red-500/30 rounded-full animate-ping"></div>
+                <div className="absolute w-12 h-12 bg-red-500/50 rounded-full animate-pulse"></div>
+                <div className="relative w-5 h-5 bg-red-600 rounded-full border-4 border-white shadow-xl flex items-center justify-center z-10">
+                  <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                </div>
+                <div className="absolute top-6 whitespace-nowrap bg-slate-950 border border-red-500/20 px-3 py-1 rounded-lg shadow-lg text-xs font-bold text-red-400 z-20 flex flex-col items-center">
+                  <span>You are here</span>
+                  <span className="text-[9px] text-slate-500 font-mono mt-0.5">{liveLocation?.lat}, {liveLocation?.lng}</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="bg-slate-900/40 p-5 rounded-2xl shadow-xl border border-slate-800/80 relative overflow-hidden glass-panel">
+            <div className="absolute -top-12 -right-12 w-32 h-32 bg-purple-500/5 rounded-full blur-2xl"></div>
+            <h3 className="font-bold text-white mb-3 flex items-center gap-2">
+              <AlertTriangle size={18} className="text-orange-500"/> Describe Emergency (AI Triage)
+            </h3>
+            <div className="flex flex-col md:flex-row gap-3">
+              <textarea 
+                placeholder="E.g., 'Snake bite on the leg, person is feeling dizzy...'"
+                value={customIncident}
+                onChange={(e) => setCustomIncident(e.target.value)}
+                className="flex-1 p-3 rounded-xl border border-slate-800 bg-slate-950 text-slate-200 text-sm focus:ring-2 focus:ring-purple-500 outline-none resize-none h-16"
+              />
+              <button 
+                onClick={handleAnalyzeEmergency}
+                disabled={isAnalyzing || !customIncident.trim()}
+                className="md:w-48 flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2 px-4 rounded-xl text-sm font-semibold hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 transition-all btn-premium-interactive cursor-pointer"
+              >
+                {isAnalyzing ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
+                {isAnalyzing ? "Analyzing..." : "Get AI Advice"}
+              </button>
+            </div>
+            {aiAdvice && (
+              <div className="mt-4 p-4 bg-purple-950/20 border border-purple-500/20 rounded-xl text-sm text-purple-200">
+                <h4 className="font-bold mb-2 flex items-center gap-1 text-purple-400"><Sparkles size={14}/> Immediate AI Guidance:</h4>
+                <div className="whitespace-pre-wrap text-xs leading-relaxed">{aiAdvice}</div>
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-slate-900/40 p-5 rounded-2xl shadow-xl border border-slate-800/80 glass-panel">
+              <h3 className="font-bold text-white mb-4 flex items-center gap-2">
+                <PhoneCall size={18} className="text-orange-500"/> Emergency Contacts
+              </h3>
+              <div className="space-y-3">
+                {MOCK_CONTACTS.map((contact, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-3 bg-slate-950/50 rounded-xl border border-slate-800/50">
+                    <div>
+                      <h4 className="font-bold text-sm text-slate-200">{contact.name}</h4>
+                      <p className="text-xs text-slate-500 font-mono mt-0.5">{contact.phone}</p>
+                    </div>
+                    {isSOSActive ? (
+                      <span className="text-[10px] bg-green-950 text-green-400 border border-green-500/20 px-2.5 py-1 rounded-full font-bold flex items-center gap-1">
+                        <CheckCircle size={10} /> Notified
+                      </span>
+                    ) : (
+                      <button className="text-slate-500 hover:text-orange-400 cursor-pointer"><PhoneCall size={16} /></button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-slate-900/40 p-5 rounded-2xl shadow-xl border border-slate-800/80 glass-panel">
+              <h3 className="font-bold text-white mb-4 flex items-center gap-2">
+                <Users size={18} className="text-green-500"/> Nearby Responders
+              </h3>
+              <div className="space-y-3">
+                {MOCK_RESPONDERS.map(responder => {
+                  const colorStyles = {
+                    green: 'border-green-500/20 bg-green-950/10 text-slate-200',
+                    blue: 'border-blue-500/20 bg-blue-950/10 text-slate-200'
+                  };
+                  const btnStyles = {
+                    green: 'bg-green-950 text-green-400 border border-green-500/20 hover:bg-green-900/30',
+                    blue: 'bg-blue-950 text-blue-400 border border-blue-500/20 hover:bg-blue-900/30'
+                  };
+                  return (
+                    <div key={responder.id} className={`border-l-4 ${responder.color === 'green' ? 'border-l-emerald-500' : 'border-l-blue-500'} ${colorStyles[responder.color]} pl-3 py-2 rounded-r-xl flex justify-between items-center`}>
+                      <div>
+                        <h4 className="font-bold text-sm text-slate-200">{responder.name}</h4>
+                        <p className="text-xs text-slate-500 mt-0.5">{responder.type} • {responder.distance} away</p>
+                      </div>
+                      <button 
+                        onClick={() => onOpenChat(responder)}
+                        className={`${btnStyles[responder.color]} p-2 rounded-full transition-colors cursor-pointer`}
+                      >
+                        <MessageSquare size={16} />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </>
+      ) : (
+        /* BLOOD HELP SUBMODULE */
+        <div className="space-y-5">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-rose-950/15 border border-rose-500/20 rounded-2xl p-5 relative overflow-hidden glass-panel">
+            <div className="absolute -top-12 -right-12 w-32 h-32 bg-rose-500/10 rounded-full blur-2xl"></div>
+            <div className="relative z-10">
+              <h2 className="text-lg font-black text-white flex items-center gap-2">
+                <HeartHandshake size={20} className="text-rose-500" /> Saathi Blood Assist Network
+              </h2>
+              <p className="text-xs text-slate-400 mt-1 max-w-md leading-relaxed">
+                Connect patients requiring urgent blood donations with nearby verified citizens and volunteers. All requests require doctor verification.
+              </p>
+            </div>
+            <button
+              onClick={() => setShowRequestModal(true)}
+              className="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-md shadow-rose-500/10 hover:shadow-rose-500/25 btn-premium-interactive cursor-pointer relative z-10"
+            >
+              <Plus size={16} /> Raise Request
+            </button>
+          </div>
+
+          {/* Pending Verification Warnings for Current User */}
+          {userPendingRequests.length > 0 && (
+            <div className="bg-amber-950/20 border border-amber-500/30 rounded-2xl p-4 space-y-2">
+              <h4 className="text-xs font-extrabold text-amber-400 flex items-center gap-1.5">
+                <Clock size={14} className="animate-spin" /> Blood Requests Pending Audit
+              </h4>
+              <div className="space-y-2">
+                {userPendingRequests.map(req => (
+                  <div key={req.id} className="text-xs text-slate-300 flex justify-between items-center bg-slate-950/40 p-2.5 rounded-lg border border-slate-800">
+                    <div>
+                      <span className="font-bold text-white">{req.patientName}</span> ({req.bloodType}) • {req.hospital}
+                    </div>
+                    <span className="text-[9px] bg-amber-950 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded uppercase font-bold tracking-wider">
+                      Under Review
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Active Verified Requests Grid */}
+          <div className="space-y-4">
+            <h3 className="text-xs uppercase font-extrabold text-slate-400 tracking-widest flex items-center gap-1">
+              <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+              Active verified blood requirements
+            </h3>
+
+            {activeVerifiedRequests.length === 0 ? (
+              <div className="bg-slate-900/20 border border-slate-800/80 border-dashed rounded-2xl p-12 text-center text-slate-500 glass-panel">
+                <HeartHandshake size={48} className="mx-auto text-slate-700 mb-3" />
+                <p className="font-bold text-slate-400 text-sm">No active blood requests in your area</p>
+                <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Create a request if you have an emergency, or stay on standby to donate.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {activeVerifiedRequests.map(req => {
+                  const pledgedUnits = req.responses.length;
+                  const percentComplete = Math.min(100, Math.round((pledgedUnits / req.unitsNeeded) * 100));
+                  const isCompleted = pledgedUnits >= req.unitsNeeded;
+
+                  return (
+                    <div key={req.id} className="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 shadow-xl glass-panel relative overflow-hidden flex flex-col justify-between">
+                      {/* Top Corner Glow Accents */}
+                      <div className="absolute -top-12 -right-12 w-28 h-28 bg-rose-500/5 rounded-full blur-2xl"></div>
+
+                      <div className="space-y-3.5">
+                        <div className="flex items-start justify-between gap-3 relative z-10">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 bg-rose-950/80 border border-rose-500/30 text-rose-500 rounded-xl flex items-center justify-center font-black text-xl shadow-inner animate-pulse">
+                              {req.bloodType}
+                            </div>
+                            <div>
+                              <h4 className="font-black text-white text-base leading-tight">{req.patientName}</h4>
+                              <p className="text-[10px] text-slate-400 font-bold mt-0.5 uppercase tracking-wider">{req.hospital}</p>
+                            </div>
+                          </div>
+                          <span className="text-[10px] bg-slate-950 text-slate-400 px-2 py-0.5 rounded border border-slate-800 font-mono">
+                            {req.distance} away
+                          </span>
+                        </div>
+
+                        {/* Verification details and clinic tags */}
+                        <div className="flex flex-wrap gap-2 text-[10px]">
+                          <span className="bg-emerald-950/60 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-full flex items-center gap-1 font-bold">
+                            <ShieldCheck size={11} /> Dr. Verified ({req.doctorContact})
+                          </span>
+                          <span className="bg-slate-950/60 text-slate-300 border border-slate-800 px-2.5 py-1 rounded-full flex items-center gap-1 font-semibold">
+                            <Clock size={11} /> {req.date}
+                          </span>
+                        </div>
+
+                        {/* Progress Bar (Pledges) */}
+                        <div className="space-y-1.5">
+                          <div className="flex justify-between text-xs font-bold">
+                            <span className="text-slate-400">Donation Progress</span>
+                            <span className={isCompleted ? 'text-emerald-400' : 'text-rose-400'}>
+                              {pledgedUnits} of {req.unitsNeeded} units pledged ({percentComplete}%)
+                            </span>
+                          </div>
+                          <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+                            <div 
+                              className={`h-full transition-all duration-500 ${isCompleted ? 'bg-gradient-to-r from-emerald-500 to-teal-400' : 'bg-gradient-to-r from-rose-500 to-red-500 animate-pulse'}`}
+                              style={{ width: `${percentComplete}%` }}
+                            ></div>
+                          </div>
+                        </div>
+
+                        {/* Pledges List */}
+                        {req.responses.length > 0 && (
+                          <div className="space-y-1 bg-slate-950/30 p-2.5 border border-slate-800/40 rounded-xl">
+                            <p className="text-[9px] uppercase font-black text-slate-500 tracking-wider">Current Pledges</p>
+                            <div className="space-y-1">
+                              {req.responses.map((resp, i) => (
+                                <div key={i} className="text-xs text-slate-300 flex items-center gap-1.5">
+                                  <span className="w-1.5 h-1.5 bg-rose-500 rounded-full"></span>
+                                  <span className="font-bold text-white">{resp.name}</span> pledged to donate
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Action Button */}
+                      <div className="mt-5 border-t border-slate-800/40 pt-4 flex gap-2">
+                        <button
+                          onClick={() => onOpenChat({ name: req.requestorName, phone: req.requestorPhone, type: 'Blood Requestor' })}
+                          className="flex-1 bg-slate-950 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white text-xs font-black py-2.5 rounded-xl transition-all flex items-center justify-center gap-1 cursor-pointer"
+                        >
+                          <MessageSquare size={13} /> Chat Requestor
+                        </button>
+
+                        {isCompleted ? (
+                          <div className="flex-1 bg-emerald-950/60 border border-emerald-500/20 text-emerald-400 text-xs font-black py-2.5 rounded-xl flex items-center justify-center gap-1 select-none">
+                            <CheckCircle size={13} /> Ready / Fulfilled
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setSelectedRequestForPledge(req)}
+                            className="flex-1 bg-rose-600 hover:bg-rose-700 text-white text-xs font-black py-2.5 rounded-xl transition-all shadow-md shadow-rose-500/10 hover:shadow-rose-500/20 btn-premium-interactive cursor-pointer flex items-center justify-center gap-1"
+                          >
+                            <HeartHandshake size={13} /> Pledge Donation
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
+      )}
 
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-          <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <Users size={18} className="text-green-500"/> Nearby Responders
-          </h3>
-          <div className="space-y-3">
-            {MOCK_RESPONDERS.map(responder => {
-              const colorStyles = {
-                green: 'border-green-500 bg-green-50',
-                blue: 'border-blue-500 bg-blue-50'
-              };
-              const btnStyles = {
-                green: 'bg-green-100 text-green-700 hover:bg-green-200',
-                blue: 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-              };
-              return (
-                <div key={responder.id} className={`border-l-4 ${colorStyles[responder.color]} pl-3 py-2 rounded-r-lg flex justify-between items-center`}>
-                  <div>
-                    <h4 className="font-bold text-sm text-slate-900">{responder.name}</h4>
-                    <p className="text-xs text-slate-500 mt-0.5">{responder.type} • {responder.distance} away</p>
+      {/* RAISE BLOOD REQUEST MODAL */}
+      {showRequestModal && (
+        <Modal onClose={() => setShowRequestModal(false)} maxWidth="max-w-lg">
+          <ModalHeader 
+            icon={<HeartHandshake size={20} className="text-rose-500 animate-pulse" />} 
+            title="Create Blood Request Nodes" 
+            subtitle="Clinical Requisition Registry Form" 
+            gradient="from-rose-950 to-slate-950 border-b border-rose-500/20" 
+            onClose={() => setShowRequestModal(false)} 
+          />
+          <form onSubmit={handleCreateBloodRequest} className="p-6 space-y-4 overflow-y-auto bg-slate-950 text-slate-200">
+            {formError && (
+              <div className="p-3 bg-red-950/50 border border-red-500/30 text-red-400 text-xs font-bold rounded-xl flex items-center gap-1.5 animate-shake">
+                <AlertTriangle size={14} className="shrink-0" />
+                <span>{formError}</span>
+              </div>
+            )}
+            {successMsg && (
+              <div className="p-3 bg-emerald-950/50 border border-emerald-500/30 text-emerald-400 text-xs font-bold rounded-xl flex items-center gap-1.5">
+                <CheckCircle size={14} className="shrink-0 animate-bounce" />
+                <span>{successMsg}</span>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Patient Name</label>
+                <input 
+                  type="text" 
+                  value={patientName}
+                  onChange={(e) => setPatientName(e.target.value)}
+                  placeholder="E.g., K. R. Vijayan" 
+                  className="w-full p-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs focus:ring-2 focus:ring-rose-500 outline-none"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Blood Type</label>
+                  <select 
+                    value={bloodType}
+                    onChange={(e) => setBloodType(e.target.value)}
+                    className="w-full p-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white focus:ring-2 focus:ring-rose-500 outline-none cursor-pointer"
+                  >
+                    {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(t => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Units Needed</label>
+                  <input 
+                    type="number" 
+                    min="1" 
+                    max="10"
+                    value={unitsNeeded}
+                    onChange={(e) => setUnitsNeeded(e.target.value)}
+                    className="w-full p-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs focus:ring-2 focus:ring-rose-500 outline-none"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Hospital Delivery Location</label>
+              <input 
+                type="text" 
+                value={hospital}
+                onChange={(e) => setHospital(e.target.value)}
+                placeholder="E.g. Alappuzha General Hospital (Ward 5)" 
+                className="w-full p-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs focus:ring-2 focus:ring-rose-500 outline-none"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Doctor's Contact number</label>
+                <input 
+                  type="tel" 
+                  value={doctorContact}
+                  onChange={(e) => setDoctorContact(e.target.value)}
+                  placeholder="10-digit Mobile Number" 
+                  className="w-full p-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs focus:ring-2 focus:ring-rose-500 outline-none"
+                  required
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Requestor Phone</label>
+                <input 
+                  type="tel" 
+                  value={requestorPhone}
+                  onChange={(e) => setRequestorPhone(e.target.value)}
+                  placeholder="10-digit Mobile Number" 
+                  className="w-full p-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs focus:ring-2 focus:ring-rose-500 outline-none"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Simulated Attachment Upload */}
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400">
+                Attach Doctor's Requisition/Approval Letter <span className="text-red-500">*</span>
+              </label>
+              
+              {uploadedFile ? (
+                <div className="p-3 bg-slate-900 border border-emerald-500/20 rounded-xl flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <FileText size={18} className="text-emerald-400" />
+                    <div>
+                      <p className="text-xs font-bold text-white truncate max-w-[200px]">{uploadedFile.name}</p>
+                      <p className="text-[9px] text-slate-500">{uploadedFile.size}</p>
+                    </div>
                   </div>
                   <button 
-                    onClick={() => onOpenChat(responder)}
-                    className={`${btnStyles[responder.color]} p-2 rounded-full transition-colors`}
+                    type="button" 
+                    onClick={() => setUploadedFile(null)}
+                    className="text-xs text-red-400 hover:text-red-300 font-bold px-2 py-1 rounded hover:bg-red-950/20 transition-all cursor-pointer"
                   >
-                    <MessageSquare size={16} />
+                    Remove
                   </button>
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+              ) : (
+                <div 
+                  onClick={handleSimulateUpload}
+                  className="border-2 border-dashed border-slate-800 hover:border-rose-500/30 rounded-2xl p-5 text-center cursor-pointer transition-all bg-slate-950"
+                >
+                  <Paperclip size={24} className="mx-auto text-slate-500 mb-2 hover:text-rose-400 transition-colors" />
+                  <p className="text-xs font-bold text-slate-400">Simulate Requisition Slip Attachment</p>
+                  <p className="text-[10px] text-slate-600 mt-0.5">PDF or Image scan from official hospital letterhead required.</p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-start gap-2 pt-2">
+              <input 
+                type="checkbox" 
+                id="attest" 
+                className="mt-0.5 rounded bg-slate-900 border-slate-800 text-rose-600 focus:ring-rose-500 cursor-pointer"
+                required 
+              />
+              <label htmlFor="attest" className="text-[10px] text-slate-400 leading-normal select-none cursor-pointer">
+                I attest that this is a verified medical emergency, and the uploaded requisition letter is a genuine clinical slip signed by a registered practitioner.
+              </label>
+            </div>
+
+            <div className="flex gap-3 pt-4 border-t border-slate-800/40">
+              <button
+                type="button"
+                onClick={() => setShowRequestModal(false)}
+                className="flex-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-white text-xs font-black py-2.5 rounded-xl transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmittingRequest}
+                className="flex-1 bg-rose-600 hover:bg-rose-700 text-white text-xs font-black py-2.5 rounded-xl transition-all shadow-md shadow-rose-500/10 hover:shadow-rose-500/20 flex items-center justify-center gap-1.5 cursor-pointer btn-premium-interactive"
+              >
+                {isSubmittingRequest ? <Loader2 size={14} className="animate-spin" /> : <HeartHandshake size={14} />}
+                {isSubmittingRequest ? "Signing & Submitting..." : "Attest & Submit"}
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {/* PLEDGE DONATION MODAL */}
+      {selectedRequestForPledge && (
+        <Modal onClose={() => setSelectedRequestForPledge(null)} maxWidth="max-w-md">
+          <ModalHeader 
+            icon={<HeartHandshake size={20} className="text-rose-400" />} 
+            title={`Pledge Donation: ${selectedRequestForPledge.bloodType}`} 
+            subtitle={`Beneficiary: ${selectedRequestForPledge.patientName}`} 
+            gradient="from-rose-950 to-slate-950 border-b border-rose-500/20" 
+            onClose={() => setSelectedRequestForPledge(null)} 
+          />
+          <form onSubmit={handlePledgeBlood} className="p-6 space-y-4 bg-slate-950 text-slate-200">
+            <div className="bg-slate-900/50 border border-rose-500/20 p-4 rounded-xl space-y-2">
+              <p className="text-xs text-slate-300 leading-relaxed">
+                By pledging, you represent that you are an eligible donor (18-65 years, &gt;45kg, with no recent infections or donations within 90 days) and will travel to the delivery hospital:
+              </p>
+              <p className="text-xs text-white font-bold uppercase tracking-wider flex items-center gap-1.5">
+                <MapPin size={12} className="text-rose-500" /> {selectedRequestForPledge.hospital}
+              </p>
+            </div>
+
+            {pledgeError && (
+              <div className="p-2.5 bg-red-950/50 border border-red-500/30 text-red-400 text-xs font-bold rounded-xl flex items-center gap-1.5 animate-shake">
+                <AlertTriangle size={12} />
+                <span>{pledgeError}</span>
+              </div>
+            )}
+
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Your Full Name</label>
+              <input 
+                type="text" 
+                value={pledgeName}
+                onChange={(e) => setPledgeName(e.target.value)}
+                placeholder="E.g., Ramesh Kumar" 
+                className="w-full p-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs focus:ring-2 focus:ring-rose-500 outline-none"
+                required
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Your Phone number</label>
+              <input 
+                type="tel" 
+                value={pledgePhone}
+                onChange={(e) => setPledgePhone(e.target.value)}
+                placeholder="E.g. +91 94460 XXXXX" 
+                className="w-full p-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs focus:ring-2 focus:ring-rose-500 outline-none"
+                required
+              />
+            </div>
+
+            <div className="flex gap-3 pt-4 border-t border-slate-800/40">
+              <button
+                type="button"
+                onClick={() => setSelectedRequestForPledge(null)}
+                className="flex-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-white text-xs font-black py-2.5 rounded-xl transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmittingPledge}
+                className="flex-1 bg-rose-600 hover:bg-rose-700 text-white text-xs font-black py-2.5 rounded-xl transition-all shadow-md shadow-rose-500/10 hover:shadow-rose-500/20 flex items-center justify-center gap-1.5 cursor-pointer btn-premium-interactive"
+              >
+                {isSubmittingPledge ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
+                {isSubmittingPledge ? "Submitting..." : "Confirm Pledge"}
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
     </div>
   );
 }
@@ -4299,13 +4812,19 @@ function AdminApprovalsModule({
   setUserRole, 
   setVolunteerApplicationStatus,
   displayUser,
-  addWalletTxn
+  addWalletTxn,
+  bloodRequests = [],
+  setBloodRequests,
+  creditMicro,
+  showEarning
 }) {
   const [subTab, setSubTab] = useState('volunteers');
+  const [selectedDocPreview, setSelectedDocPreview] = useState(null); // for inspecting requisition slips
 
   const pendingVolunteers = volunteerRequests.filter(r => r.status === 'pending');
   const pendingServices = services.filter(s => s.status === 'pending');
   const pendingSurveys = surveys.filter(s => s.status === 'pending');
+  const pendingBlood = (bloodRequests || []).filter(r => r.status === 'pending');
 
   const handleApproveVolunteer = (id, name) => {
     setVolunteerRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'approved' } : r));
@@ -4347,60 +4866,96 @@ function AdminApprovalsModule({
     setSurveys(prev => prev.filter(s => s.id !== id));
   };
 
+  const handleApproveBlood = (id, patientName) => {
+    setBloodRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'approved' } : r));
+    // Reward the volunteer who verified the blood request
+    if (userRole === 'Volunteer' && creditMicro) {
+      creditMicro(25, `Audit: Verified blood request for ${patientName}`);
+      if (showEarning) showEarning(25, 'micro');
+    }
+  };
+
+  const handleRejectBlood = (id) => {
+    setBloodRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'rejected' } : r));
+  };
+
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-slate-900">Admin Control Center</h2>
-        <p className="text-sm text-slate-500">Manage pending registration, service onboarding, and civic survey requests.</p>
+      <div className="bg-[#0b0f19]/80 border border-slate-800/80 p-5 rounded-2xl relative overflow-hidden glass-panel">
+        <div className="absolute -top-12 -right-12 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl"></div>
+        <div className="relative z-10">
+          <h2 className="text-xl font-black text-white flex items-center gap-2">
+            <ShieldCheck size={22} className="text-purple-400" /> Saathi Approvals Hub
+          </h2>
+          <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+            Verify and audit volunteer registrations, service listings, civic surveys, and high-priority blood requests to maintain platform integrity.
+          </p>
+        </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-slate-200 overflow-x-auto">
+      <div className="flex border-b border-slate-800 overflow-x-auto">
         <button
           onClick={() => setSubTab('volunteers')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold whitespace-nowrap border-b-2 transition-all ${
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-black uppercase tracking-wider whitespace-nowrap border-b-2 transition-all ${
             subTab === 'volunteers'
-              ? 'border-purple-600 text-purple-700 font-bold'
-              : 'border-transparent text-slate-500 hover:text-slate-700'
+              ? 'border-purple-500 text-purple-400 font-bold'
+              : 'border-transparent text-slate-500 hover:text-slate-300'
           }`}
         >
-          <HeartHandshake size={16} />
+          <HeartHandshake size={14} />
           Volunteer Requests
           {pendingVolunteers.length > 0 && (
-            <span className="bg-purple-100 text-purple-700 text-xs font-bold px-2 py-0.5 rounded-full">
+            <span className="bg-purple-950 text-purple-400 border border-purple-500/20 text-[10px] font-bold px-2 py-0.5 rounded-full">
               {pendingVolunteers.length}
             </span>
           )}
         </button>
         <button
           onClick={() => setSubTab('services')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold whitespace-nowrap border-b-2 transition-all ${
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-black uppercase tracking-wider whitespace-nowrap border-b-2 transition-all ${
             subTab === 'services'
-              ? 'border-purple-600 text-purple-700 font-bold'
-              : 'border-transparent text-slate-500 hover:text-slate-700'
+              ? 'border-purple-500 text-purple-400 font-bold'
+              : 'border-transparent text-slate-500 hover:text-slate-300'
           }`}
         >
-          <Wrench size={16} />
+          <Wrench size={14} />
           Service Listings
           {pendingServices.length > 0 && (
-            <span className="bg-purple-100 text-purple-700 text-xs font-bold px-2 py-0.5 rounded-full">
+            <span className="bg-purple-950 text-purple-400 border border-purple-500/20 text-[10px] font-bold px-2 py-0.5 rounded-full">
               {pendingServices.length}
             </span>
           )}
         </button>
         <button
           onClick={() => setSubTab('surveys')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold whitespace-nowrap border-b-2 transition-all ${
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-black uppercase tracking-wider whitespace-nowrap border-b-2 transition-all ${
             subTab === 'surveys'
-              ? 'border-purple-600 text-purple-700 font-bold'
-              : 'border-transparent text-slate-500 hover:text-slate-700'
+              ? 'border-purple-500 text-purple-400 font-bold'
+              : 'border-transparent text-slate-500 hover:text-slate-300'
           }`}
         >
-          <FileText size={16} />
+          <FileText size={14} />
           Civic Surveys
           {pendingSurveys.length > 0 && (
-            <span className="bg-purple-100 text-purple-700 text-xs font-bold px-2 py-0.5 rounded-full">
+            <span className="bg-purple-950 text-purple-400 border border-purple-500/20 text-[10px] font-bold px-2 py-0.5 rounded-full">
               {pendingSurveys.length}
+            </span>
+          )}
+        </button>
+        <button
+          onClick={() => setSubTab('blood')}
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-black uppercase tracking-wider whitespace-nowrap border-b-2 transition-all ${
+            subTab === 'blood'
+              ? 'border-purple-500 text-purple-400 font-bold'
+              : 'border-transparent text-slate-500 hover:text-slate-300'
+          }`}
+        >
+          <HeartHandshake size={14} className="text-rose-500 animate-pulse" />
+          Blood Requests
+          {pendingBlood.length > 0 && (
+            <span className="bg-rose-950 text-rose-400 border border-rose-500/20 text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse">
+              {pendingBlood.length}
             </span>
           )}
         </button>
@@ -4563,7 +5118,171 @@ function AdminApprovalsModule({
             )}
           </div>
         )}
+
+        {subTab === 'blood' && (
+          <div className="space-y-3">
+            {pendingBlood.length === 0 ? (
+              <div className="bg-[#0b0f19]/20 border border-slate-800/80 border-dashed rounded-2xl p-12 text-center text-slate-500 glass-panel">
+                <CheckCircle size={36} className="mx-auto text-emerald-500 mb-3 animate-pulse" />
+                <p className="font-bold text-slate-400 text-sm">No pending blood requests to verify</p>
+                <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">All submitted requirements have been successfully audited and updated.</p>
+              </div>
+            ) : (
+              pendingBlood.map(req => (
+                <div key={req.id} className="bg-[#0b0f19]/60 border border-slate-850 rounded-2xl p-5 shadow-xl glass-panel relative overflow-hidden transition-all hover:border-purple-500/20">
+                  <div className="absolute -top-12 -right-12 w-28 h-28 bg-rose-500/5 rounded-full blur-2xl"></div>
+                  
+                  <div className="flex flex-col md:flex-row items-start justify-between gap-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-12 h-12 bg-rose-950/80 border border-rose-500/30 text-rose-500 rounded-xl flex items-center justify-center font-black text-lg animate-pulse shrink-0">
+                        {req.bloodType}
+                      </div>
+                      <div className="space-y-1">
+                        <h4 className="font-black text-white text-base leading-tight">Patient: {req.patientName}</h4>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{req.hospital}</p>
+                        <p className="text-xs text-slate-400">
+                          <strong>Units Required:</strong> {req.unitsNeeded} units
+                        </p>
+                        <p className="text-[11px] text-slate-500 font-semibold mt-1">
+                          Raised by: {req.requestorName} • Phone: {req.requestorPhone}
+                        </p>
+                        
+                        {/* Clinical requisition preview area */}
+                        <div className="mt-3 bg-slate-950/80 border border-slate-900 rounded-xl p-3 max-w-sm space-y-2.5 relative">
+                          <p className="text-[9px] uppercase font-black text-slate-500 tracking-wider">Clinical Requisition slip</p>
+                          <div className="flex items-center gap-2">
+                            <FileText size={18} className="text-rose-500 shrink-0 animate-pulse" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-extrabold text-slate-300 truncate">{req.approvalLetter}</p>
+                              <p className="text-[9px] text-slate-500">Official Practitioner Requisition Attested</p>
+                            </div>
+                          </div>
+                          <button 
+                            type="button"
+                            onClick={() => setSelectedDocPreview(req)}
+                            className="w-full text-center py-2 bg-slate-900 hover:bg-slate-850 text-[10px] text-purple-400 hover:text-purple-300 rounded-lg transition-colors font-black uppercase tracking-wider cursor-pointer border border-slate-800"
+                          >
+                            Inspect Attested Slip
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-col items-end gap-2 text-right">
+                      <span className="text-[10px] bg-amber-950/60 text-amber-400 border border-amber-500/20 px-2.5 py-1 rounded-full font-bold uppercase tracking-wider animate-pulse">
+                        Awaiting Verification
+                      </span>
+                      <span className="text-[10px] text-slate-500 font-bold flex items-center gap-1">
+                        <Phone size={10} /> Doctor Contact: {req.doctorContact}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-3 mt-5 border-t border-slate-800/40 pt-4">
+                    <button
+                      onClick={() => handleRejectBlood(req.id)}
+                      className="flex-1 bg-slate-950 hover:bg-red-950/20 border border-slate-800 hover:border-red-500/30 text-slate-400 hover:text-red-400 text-xs font-black py-2.5 rounded-xl transition-all cursor-pointer"
+                    >
+                      Reject Request
+                    </button>
+                    
+                    <button
+                      onClick={() => {
+                        // Phone lines secure simulator
+                        alert(`Contact verified! Practitioner confirmed clinical case details, hospital bed assignment, and signature authenticity.`);
+                      }}
+                      className="bg-slate-950 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white text-xs font-black py-2.5 px-4 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <Phone size={14} className="text-emerald-400" /> Dial Doctor
+                    </button>
+
+                    <button
+                      onClick={() => handleApproveBlood(req.id, req.patientName)}
+                      className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black py-2.5 rounded-xl transition-all shadow-md shadow-emerald-500/10 hover:shadow-emerald-500/20 cursor-pointer flex items-center justify-center gap-1.5 btn-premium-interactive"
+                    >
+                      <CheckCircle size={14} /> Approve & Publish
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
       </div>
+
+      {/* DETAILED DOCUMENT INSPECTION MODAL */}
+      {selectedDocPreview && (
+        <Modal onClose={() => setSelectedDocPreview(null)} maxWidth="max-w-md" zIndex="z-[300]">
+          <ModalHeader 
+            icon={<ShieldCheck size={20} className="text-purple-400" />} 
+            title="Inspect Requisition Slip" 
+            subtitle="Saathi Decentralized Verification Hub" 
+            gradient="from-purple-950 to-slate-950 border-b border-purple-500/20" 
+            onClose={() => setSelectedDocPreview(null)} 
+          />
+          <div className="p-6 space-y-4 bg-slate-950 text-slate-200">
+            {/* Holographic Watermark Letterhead slip */}
+            <div className="border border-slate-800/80 rounded-2xl p-5 relative overflow-hidden bg-slate-900/60 holo-watermark security-scanner security-scanner-green">
+              {/* Top Banner of Hospital */}
+              <div className="text-center border-b border-slate-800/60 pb-3 mb-3">
+                <h4 className="text-xs font-black text-white tracking-widest uppercase">General Hospital Requisition Slip</h4>
+                <p className="text-[8px] text-slate-400">Government Registry Node • Kerala Department of Health</p>
+              </div>
+
+              <div className="space-y-2 text-[10px] text-slate-300">
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-bold uppercase">Patient:</span>
+                  <span className="font-extrabold text-white">{selectedDocPreview.patientName}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-bold uppercase">Required Blood:</span>
+                  <span className="font-extrabold text-rose-500">{selectedDocPreview.bloodType}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-bold uppercase">Quantity Required:</span>
+                  <span className="font-extrabold text-white">{selectedDocPreview.unitsNeeded} Units</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-bold uppercase">Hospital / Wing:</span>
+                  <span className="font-extrabold text-white truncate max-w-[150px]">{selectedDocPreview.hospital}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-bold uppercase">Verify Doctor:</span>
+                  <span className="font-extrabold text-emerald-400">Verified ({selectedDocPreview.doctorContact})</span>
+                </div>
+              </div>
+
+              {/* Holographic digital stamp seal */}
+              <div className="mt-5 flex items-center justify-between border-t border-slate-850 pt-3">
+                <div className="flex flex-col">
+                  <span className="text-[7px] text-slate-500 uppercase tracking-widest font-black">Cryptographic Attestation</span>
+                  <span className="font-mono text-[8px] text-slate-400">SAATHI_ECDSA_P256_VERIFIED</span>
+                </div>
+                <div className="w-12 h-12 rounded-full border border-purple-500/20 bg-purple-950/40 flex items-center justify-center text-[10px] font-black text-purple-400 uppercase tracking-widest rotate-12">
+                  SECURE
+                </div>
+              </div>
+            </div>
+
+            <div className="p-3 bg-purple-950/20 border border-purple-500/20 rounded-xl text-xs text-purple-200 leading-normal flex items-start gap-2">
+              <ShieldCheck size={16} className="text-purple-400 shrink-0 mt-0.5" />
+              <span>
+                Verify that the practitioner contact matches the clinical database registration before publishing the request. Once approved, the alert becomes instantly active for nearby users.
+              </span>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setSelectedDocPreview(null)}
+                className="w-full bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-xs font-black py-2.5 rounded-xl transition-all cursor-pointer"
+              >
+                Close Audit View
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
@@ -6063,20 +6782,24 @@ function DigiLockerStep({ onComplete, onBack, isCompleting }) {
                 DL
               </div>
               <div>
-              <CheckCircle size={14} className="text-green-600 shrink-0" />
-              <span>Encrypted via Meri Pehchaan SSO</span>
+                <h3 className="font-bold text-white">DigiLocker</h3>
+                <p className="text-[11px] text-slate-400">Government of India • Trusted Identity</p>
+              </div>
             </div>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Fetch your government-issued ID directly from DigiLocker. Your documents stay encrypted and never leave the secure channel.
+            </p>
           </div>
 
           <button
             onClick={handleConnect}
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md"
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer"
           >
             <Fingerprint size={18} /> Connect with DigiLocker
           </button>
 
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-900 flex items-start gap-2">
-            <ShieldAlert size={14} className="text-amber-600 shrink-0 mt-0.5" />
+          <div className="bg-amber-950/20 border border-amber-500/20 rounded-xl p-3 text-xs text-amber-400 flex items-start gap-2">
+            <ShieldAlert size={14} className="text-amber-500 shrink-0 mt-0.5" />
             <div>ID verification is mandatory for Saathi to prevent misuse of SOS and protect verified responders.</div>
           </div>
         </>
