@@ -877,6 +877,7 @@ function SaathiApp() {
   const [surveys, setSurveys] = useState(MOCK_SURVEYS);
   const [alerts, setAlerts] = useState(MOCK_ALERTS);
   const [showPostAlertModal, setShowPostAlertModal] = useState(false);
+  const [editingAlert, setEditingAlert] = useState(null);
   const [healthcareSubRole, setHealthcareSubRole] = useState('ASHA'); // ASHA | Bloodbank | Doctor | Hospital
 
   const addWalletTxn = useCallback((txn) => {
@@ -1119,13 +1120,13 @@ function SaathiApp() {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'home': return <HomeFeed t={t} startSOSCountdown={startSOSCountdown} isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onViewCertificate={() => setShowCertificate(true)} userRole={userRole} walletBalance={walletBalance} onOpenWallet={() => setShowWallet(true)} volunteerApplicationStatus={volunteerApplicationStatus} setVolunteerApplicationStatus={setVolunteerApplicationStatus} setVolunteerRequests={setVolunteerRequests} displayUser={displayUser} services={services} setActiveTab={setActiveTab} volunteerRequests={volunteerRequests} surveys={surveys} alerts={alerts} onOpenPostAlert={() => setShowPostAlertModal(true)} bloodRequests={bloodRequests} />;
+      case 'home': return <HomeFeed t={t} startSOSCountdown={startSOSCountdown} isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onViewCertificate={() => setShowCertificate(true)} userRole={userRole} walletBalance={walletBalance} onOpenWallet={() => setShowWallet(true)} volunteerApplicationStatus={volunteerApplicationStatus} setVolunteerApplicationStatus={setVolunteerApplicationStatus} setVolunteerRequests={setVolunteerRequests} displayUser={displayUser} services={services} setActiveTab={setActiveTab} volunteerRequests={volunteerRequests} surveys={surveys} alerts={alerts} onOpenPostAlert={() => { setEditingAlert(null); setShowPostAlertModal(true); }} bloodRequests={bloodRequests} onEditAlert={(alert) => { setEditingAlert(alert); setShowPostAlertModal(true); }} onRemoveAlert={(id) => setAlerts(prev => prev.filter(a => a.id !== id))} />;
       case 'rescue': return <RescueModule isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onOpenChat={setActiveChatUser} userCoords={userCoords} locationStatus={locationStatus} bloodRequests={bloodRequests} setBloodRequests={setBloodRequests} userRole={userRole} addWalletTxn={addWalletTxn} creditMicro={creditMicro} showEarning={showEarning} keyFingerprint={keyFingerprint} signActionPayload={signActionPayload} />;
       case 'volunteer': return <VolunteerModule userCoords={userCoords} userRole={userRole} locationStatus={locationStatus} />;
       case 'services': return <ServicesModule userCoords={userCoords} locationStatus={locationStatus} userRole={userRole} onCommission={creditCommission} onShowEarning={showEarning} services={services} setServices={setServices} />;
       case 'survey': return <SurveyModule userRole={userRole} userCoords={userCoords} onMicroReward={creditMicro} onShowEarning={showEarning} surveys={surveys} setSurveys={setSurveys} />;
       case 'admin-approvals': return <AdminApprovalsModule volunteerRequests={volunteerRequests} setVolunteerRequests={setVolunteerRequests} services={services} setServices={setServices} surveys={surveys} setSurveys={setSurveys} userRole={userRole} setUserRole={setUserRole} setVolunteerApplicationStatus={setVolunteerApplicationStatus} displayUser={displayUser} addWalletTxn={addWalletTxn} bloodRequests={bloodRequests} setBloodRequests={setBloodRequests} creditMicro={creditMicro} showEarning={showEarning} />;
-      default: return <HomeFeed t={t} startSOSCountdown={startSOSCountdown} isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onViewCertificate={() => setShowCertificate(true)} userRole={userRole} walletBalance={walletBalance} onOpenWallet={() => setShowWallet(true)} volunteerApplicationStatus={volunteerApplicationStatus} setVolunteerApplicationStatus={setVolunteerApplicationStatus} setVolunteerRequests={setVolunteerRequests} displayUser={displayUser} services={services} setActiveTab={setActiveTab} volunteerRequests={volunteerRequests} surveys={surveys} alerts={alerts} onOpenPostAlert={() => setShowPostAlertModal(true)} bloodRequests={bloodRequests} />;
+      default: return <HomeFeed t={t} startSOSCountdown={startSOSCountdown} isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onViewCertificate={() => setShowCertificate(true)} userRole={userRole} walletBalance={walletBalance} onOpenWallet={() => setShowWallet(true)} volunteerApplicationStatus={volunteerApplicationStatus} setVolunteerApplicationStatus={setVolunteerApplicationStatus} setVolunteerRequests={setVolunteerRequests} displayUser={displayUser} services={services} setActiveTab={setActiveTab} volunteerRequests={volunteerRequests} surveys={surveys} alerts={alerts} onOpenPostAlert={() => { setEditingAlert(null); setShowPostAlertModal(true); }} bloodRequests={bloodRequests} onEditAlert={(alert) => { setEditingAlert(alert); setShowPostAlertModal(true); }} onRemoveAlert={(id) => setAlerts(prev => prev.filter(a => a.id !== id))} />;
     }
   };
 
@@ -1751,11 +1752,21 @@ function SaathiApp() {
           userRole={userRole}
           healthcareSubRole={healthcareSubRole}
           currentLocation={resolvedLocation}
+          editAlert={editingAlert}
           onPost={(newAlert) => {
-            setAlerts(prev => [newAlert, ...prev]);
+            setAlerts(prev => {
+              const existingIndex = prev.findIndex(a => a.id === newAlert.id);
+              if (existingIndex >= 0) {
+                const updated = [...prev];
+                updated[existingIndex] = newAlert;
+                return updated;
+              }
+              return [newAlert, ...prev];
+            });
             setShowPostAlertModal(false);
+            setEditingAlert(null);
           }}
-          onClose={() => setShowPostAlertModal(false)}
+          onClose={() => { setShowPostAlertModal(false); setEditingAlert(null); }}
           t={t}
         />
       )}
@@ -1933,22 +1944,22 @@ function LocationPickerModal({ currentLocation, onSelect, onRetryGPS, locationSt
 }
 
 // --- POST ALERT MODAL ---
-function PostAlertModal({ userRole, healthcareSubRole, currentLocation, onPost, onClose, t }) {
-  const [title, setTitle] = useState('');
-  const [type, setType] = useState(userRole === 'HealthcareWorker' ? `${healthcareSubRole === 'Bloodbank' ? 'Blood Bank' : healthcareSubRole} Update` : 'General Update');
-  const [description, setDescription] = useState('');
-  const [location, setLocation] = useState(currentLocation || '');
+function PostAlertModal({ userRole, healthcareSubRole, currentLocation, onPost, onClose, t, editAlert = null }) {
+  const [title, setTitle] = useState(editAlert ? (editAlert.title || '') : '');
+  const [type, setType] = useState(editAlert ? editAlert.type : (userRole === 'HealthcareWorker' ? `${healthcareSubRole === 'Bloodbank' ? 'Blood Bank' : healthcareSubRole} Update` : 'General Update'));
+  const [description, setDescription] = useState(editAlert ? editAlert.description : '');
+  const [location, setLocation] = useState(editAlert ? editAlert.location : (currentLocation || ''));
   const [contactName, setContactName] = useState('Saathi Volunteer');
   const [contactPhone, setContactPhone] = useState('+91 98765 43210');
   const [notes, setNotes] = useState('');
-  const [severity, setSeverity] = useState('medium'); // low | medium | high
+  const [severity, setSeverity] = useState(editAlert ? editAlert.severity : 'medium'); // low | medium | high
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!title.trim() || !description.trim()) return;
 
     onPost({
-      id: Date.now(),
+      id: editAlert ? editAlert.id : Date.now(),
       type,
       title: title.trim(),
       description: description.trim(),
@@ -2571,7 +2582,23 @@ function HomeFeed({
                   </div>
                 </div>
 
-                <div className="flex items-center justify-end shrink-0 sm:self-center">
+                <div className="flex items-center justify-end shrink-0 sm:self-center gap-3">
+                  {userRole === 'Admin' && (
+                    <div className="flex gap-2 mr-2">
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); onEditAlert && onEditAlert(alert); }}
+                        className="text-xs bg-slate-800 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg transition-colors font-medium border border-slate-700 hover:border-blue-500"
+                      >
+                        Edit
+                      </button>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); onRemoveAlert && onRemoveAlert(alert.id); }}
+                        className="text-xs bg-slate-800 hover:bg-rose-600 text-white px-3 py-1.5 rounded-lg transition-colors font-medium border border-slate-700 hover:border-rose-500"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )}
                   <div className="flex items-center gap-1 text-xs font-bold text-orange-500 group-hover:translate-x-1 transition-transform duration-200">
                     View & Action
                     <ChevronRight size={16} />
