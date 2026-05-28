@@ -18,56 +18,19 @@ const BRAND = {
 };
 
 function SaathiLogo({ size = 32, showWordmark = false, variant = 'default' }) {
-  // Stable ID per instance — avoid regenerating on every render
-  const id = useMemo(() => `lg${Math.random().toString(36).slice(2, 7)}`, []);
   return (
-    <div className="flex items-center gap-2 border-none outline-none">
-      <svg width={size} height={size} viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, border: 'none', outline: 'none' }} className="border-none outline-none">
-        <defs>
-          <linearGradient id={`${id}-grad`} x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#f97316" />
-            <stop offset="50%" stopColor="#ea580c" />
-            <stop offset="100%" stopColor="#059669" />
-          </linearGradient>
-          <linearGradient id={`${id}-shield`} x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#fb923c" />
-            <stop offset="100%" stopColor="#ea580c" />
-          </linearGradient>
-          <linearGradient id={`${id}-heart`} x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#10b981" />
-            <stop offset="100%" stopColor="#047857" />
-          </linearGradient>
-          <linearGradient id={`${id}-glass`} x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.8" />
-            <stop offset="35%" stopColor="#ffffff" stopOpacity="0.15" />
-            <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
-          </linearGradient>
-          {/* Small Crossed Swords Definition */}
-          <g id={`${id}-sword`}>
-            {/* Blade */}
-            <path d="M 0 -18 L 1.5 2 L -1.5 2 Z" fill="#e2e8f0" />
-            <line x1="0" y1="-18" x2="0" y2="2" stroke="#94a3b8" strokeWidth="0.3" />
-            {/* Guard */}
-            <path d="M -4 2 L 4 2 L 4 3 L -4 3 Z" fill="#fbbf24" rx="0.5" />
-            {/* Hilt */}
-            <rect x="-0.8" y="3" width="1.6" height="5" rx="0.3" fill="#78350f" />
-            {/* Pommel */}
-            <circle cx="0" cy="8.8" r="0.8" fill="#fbbf24" />
-          </g>
-        </defs>
-        <rect width="64" height="64" rx="14" fill={`url(#${id}-grad)`} stroke="none" strokeWidth="0" />
-        
-        {/* Crossed Swords in background */}
-        <use href={`#${id}-sword`} x="32" y="32" transform="rotate(-40 32 32)" opacity="0.9" />
-        <use href={`#${id}-sword`} x="32" y="32" transform="rotate(40 32 32)" opacity="0.9" />
-
-        <path d="M 32 14 L 18 18 L 18 32 Q 18 42 32 50 L 32 14 Z" fill={`url(#${id}-shield)`} opacity="0.95" />
-        <path d="M 32 22 Q 32 18 36 18 Q 44 18 44 26 Q 44 34 32 44 Q 32 32 32 22 Z" fill={`url(#${id}-heart)`} opacity="0.95" />
-        <circle cx="32" cy="32" r="3.5" fill="white" opacity="0.9" />
-
-        {/* Diagonal glassy shine overlay */}
-        <path d="M 0 0 L 64 0 L 0 64 Z" fill={`url(#${id}-glass)`} />
-      </svg>
+    <div className="flex items-center gap-2">
+      <img 
+        src="/logo.png" 
+        alt="Saathi Logo"
+        style={{ 
+          width: size, 
+          height: size, 
+          filter: 'drop-shadow(0 0 12px rgba(16, 185, 129, 0.6)) drop-shadow(0 0 20px rgba(245, 158, 11, 0.4))' 
+        }} 
+        className="flex-shrink-0"
+      />
+      
       {showWordmark && (
         <div className="flex flex-col leading-none">
           <span className="font-bold text-xl tracking-tight text-[#f97316]">{BRAND.name}</span>
@@ -6624,58 +6587,17 @@ function SplashScreen({ onDone }) {
 
 // Larger, more detailed logo mark for splash & auth screens
 function SplashLogoMark({ size = 140 }) {
-  const id = useMemo(() => `splash${Math.random().toString(36).slice(2, 7)}`, []);
   return (
-    <svg width={size} height={size} viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" style={{ border: 'none', outline: 'none' }} className="border-none outline-none">
-      <defs>
-        <linearGradient id={`${id}-grad`} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#fbbf24" />
-          <stop offset="50%" stopColor="#f97316" />
-          <stop offset="100%" stopColor="#059669" />
-        </linearGradient>
-        <linearGradient id={`${id}-shield`} x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#fcd34d" />
-          <stop offset="100%" stopColor="#ea580c" />
-        </linearGradient>
-        <linearGradient id={`${id}-heart`} x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#34d399" />
-          <stop offset="100%" stopColor="#047857" />
-        </linearGradient>
-        <radialGradient id={`${id}-center`} cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#ffffff" />
-          <stop offset="100%" stopColor="#fef3c7" />
-        </radialGradient>
-        <linearGradient id={`${id}-glass`} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.85" />
-          <stop offset="35%" stopColor="#ffffff" stopOpacity="0.18" />
-          <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
-        </linearGradient>
-        {/* Small Crossed Swords Definition */}
-        <g id={`${id}-sword`}>
-          {/* Blade */}
-          <path d="M 0 -18 L 1.5 2 L -1.5 2 Z" fill="#e2e8f0" />
-          <line x1="0" y1="-18" x2="0" y2="2" stroke="#94a3b8" strokeWidth="0.3" />
-          {/* Guard */}
-          <path d="M -4 2 L 4 2 L 4 3 L -4 3 Z" fill="#fbbf24" rx="0.5" />
-          {/* Hilt */}
-          <rect x="-0.8" y="3" width="1.6" height="5" rx="0.3" fill="#78350f" />
-          {/* Pommel */}
-          <circle cx="0" cy="8.8" r="0.8" fill="#fbbf24" />
-        </g>
-      </defs>
-      <rect width="64" height="64" rx="14" fill={`url(#${id}-grad)`} stroke="none" strokeWidth="0" />
-      
-      {/* Crossed Swords in background */}
-      <use href={`#${id}-sword`} x="32" y="32" transform="rotate(-40 32 32)" opacity="0.9" />
-      <use href={`#${id}-sword`} x="32" y="32" transform="rotate(40 32 32)" opacity="0.9" />
-
-      <path d="M 32 14 L 18 18 L 18 32 Q 18 42 32 50 L 32 14 Z" fill={`url(#${id}-shield)`} />
-      <path d="M 32 22 Q 32 18 36 18 Q 44 18 44 26 Q 44 34 32 44 Q 32 32 32 22 Z" fill={`url(#${id}-heart)`} />
-      <circle cx="32" cy="32" r="4.5" fill={`url(#${id}-center)`} opacity="0.95" />
-
-      {/* Diagonal glassy shine overlay */}
-      <path d="M 0 0 L 64 0 L 0 64 Z" fill={`url(#${id}-glass)`} />
-    </svg>
+    <img 
+      src="/logo.png" 
+      alt="Saathi Logo"
+      style={{ 
+        width: size, 
+        height: size, 
+        filter: 'drop-shadow(0 0 25px rgba(16, 185, 129, 0.7)) drop-shadow(0 0 45px rgba(245, 158, 11, 0.5))' 
+      }} 
+      className="flex-shrink-0 animate-pulse-slow"
+    />
   );
 }
 
