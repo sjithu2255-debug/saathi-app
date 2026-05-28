@@ -8,7 +8,7 @@ import {
   MessageSquare, Send, X, AlertOctagon, Award, Download,
   Phone, ArrowRight, ArrowLeft, Fingerprint, KeyRound, ScanLine,
   Paperclip, Image as ImageIcon, Wallet, TrendingUp, IndianRupee,
-  Gift, Zap, ArrowDownToLine, ArrowUpRight, Plus, Sun, Moon
+  Gift, Zap, ArrowDownToLine, ArrowUpRight, Plus, Sun, Moon, Heart
 } from 'lucide-react';
 
 // --- BRAND ---
@@ -56,7 +56,6 @@ function SaathiLogo({ size = 32, showWordmark = false, variant = 'default' }) {
           </g>
         </defs>
         <rect width="64" height="64" rx="14" fill={`url(#${id}-grad)`} />
-        <rect x="2" y="2" width="60" height="60" rx="12" fill="none" stroke="white" strokeOpacity="0.15" strokeWidth="1" />
         
         {/* Crossed Swords in background */}
         <use href={`#${id}-sword`} x="32" y="32" transform="rotate(-40 32 32)" opacity="0.9" />
@@ -619,9 +618,74 @@ const downloadBlob = (blob, filename) => {
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 100);
 };
+// --- MISSING COMPONENTS ---
+function EarningToast({ amount, source, onDone }) {
+  useEffect(() => {
+    const t = setTimeout(onDone, 3000);
+    return () => clearTimeout(t);
+  }, [onDone]);
+  return (
+    <div className="fixed bottom-20 left-1/2 -translate-x-1/2 bg-emerald-950/90 text-emerald-400 px-4 py-2 rounded-full border border-emerald-500/30 flex items-center gap-2 shadow-lg z-50">
+      <Award size={16} className="text-emerald-500" />
+      <span className="font-bold text-sm">+{amount}</span>
+      <span className="text-xs text-emerald-500/80">for {source}</span>
+    </div>
+  );
+}
+
+function PaymentModal({ amount, description, payer, onSuccess, onCancel }) {
+  return (
+    <Modal onClose={onCancel}>
+      <ModalHeader icon={<IndianRupee size={20} />} title="Payment Required" subtitle={description} />
+      <div className="p-6 space-y-4">
+        <p className="text-sm text-slate-600">Please pay ₹{amount} to proceed with {description}. Payer: {payer}</p>
+        <div className="flex gap-3">
+          <button onClick={onCancel} className="flex-1 py-2 border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors">Cancel</button>
+          <button onClick={() => onSuccess()} className="flex-1 py-2 bg-rose-600 text-white rounded-xl shadow-md hover:bg-rose-700 transition-colors">Pay Now</button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
 
 // --- MAIN APP ---
-export default function SaathiApp() {
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null, errorInfo: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, errorInfo) {
+    this.setState({ errorInfo });
+    console.error("ErrorBoundary caught an error", error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: '20px', backgroundColor: '#f8d7da', color: '#721c24', fontFamily: 'monospace', minHeight: '100vh' }}>
+          <h1 style={{ fontSize: '24px', fontWeight: 'bold' }}>Something went wrong.</h1>
+          <p style={{ marginTop: '10px' }}>{this.state.error && this.state.error.toString()}</p>
+          <pre style={{ marginTop: '20px', whiteSpace: 'pre-wrap', fontSize: '12px' }}>
+            {this.state.errorInfo && this.state.errorInfo.componentStack}
+          </pre>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+export default function AppWrapper() {
+  return (
+    <ErrorBoundary>
+      <SaathiApp />
+    </ErrorBoundary>
+  );
+}
+
+function SaathiApp() {
   const [showSplash, setShowSplash] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authedUser, setAuthedUser] = useState(null);
@@ -6503,9 +6567,7 @@ function SplashScreen({ onDone }) {
 
       {/* Logo */}
       <div className="splash-logo relative z-10 mb-8">
-        <div className="bg-slate-900/60 backdrop-blur-md rounded-3xl p-3 shadow-2xl border border-slate-700/30 glass-glow-emerald">
-          <SplashLogoMark size={140} />
-        </div>
+        <SplashLogoMark size={140} />
       </div>
 
       {/* Name */}
@@ -6575,7 +6637,6 @@ function SplashLogoMark({ size = 140 }) {
         </g>
       </defs>
       <rect width="64" height="64" rx="14" fill={`url(#${id}-grad)`} />
-      <rect x="2" y="2" width="60" height="60" rx="12" fill="none" stroke="white" strokeOpacity="0.25" strokeWidth="1.5" />
       
       {/* Crossed Swords in background */}
       <use href={`#${id}-sword`} x="32" y="32" transform="rotate(-40 32 32)" opacity="0.9" />
@@ -6681,7 +6742,7 @@ function AuthScreen({ onSuccess }) {
   }, [phone, signupData, onSuccess]);
 
   // Brand panel (left side on desktop) — premium glassmorphic dark panel
-  const BrandPanel = () => (
+  const brandPanel = (
     <div className="hidden md:flex flex-col justify-between bg-[#0b0f19] text-white p-12 md:w-1/2 relative overflow-hidden border-r border-slate-800">
       <div className="absolute inset-0 hologram-grid pointer-events-none opacity-20"></div>
       
@@ -6690,7 +6751,7 @@ function AuthScreen({ onSuccess }) {
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
       <div className="relative z-10 flex flex-col items-start">
-        <div className="bg-slate-900/60 backdrop-blur-md rounded-2xl p-2.5 shadow-2xl border border-slate-700/30 mb-6">
+        <div className="mb-6">
           <SplashLogoMark size={96} />
         </div>
         <h1 className="text-6xl font-black tracking-tight leading-none bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-amber-300 to-emerald-400 drop-shadow-lg">Saathi</h1>
@@ -6735,7 +6796,7 @@ function AuthScreen({ onSuccess }) {
 
   return (
     <div className="min-h-screen bg-[#070913] flex flex-col md:flex-row text-slate-200">
-      <BrandPanel />
+      {brandPanel}
 
       <div className="flex-1 flex items-center justify-center p-4 md:p-8 bg-[#070913] relative overflow-hidden">
         {/* Background micro grid */}
@@ -6745,7 +6806,7 @@ function AuthScreen({ onSuccess }) {
           
           {/* Mobile logo header */}
           <div className="md:hidden mb-8 flex flex-col items-center text-center">
-            <div className="bg-slate-900 rounded-3xl p-2 shadow-2xl mb-4 border border-slate-700/30">
+            <div className="mb-4">
               <SplashLogoMark size={88} />
             </div>
             <h1 className="text-4xl font-black tracking-tight text-white bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-emerald-400">Saathi</h1>
