@@ -122,6 +122,21 @@ const TRANSLATIONS = {
     volunteerRegister: "Become a Saathi Volunteer",
     volunteerRegisterSub: "Help your community by responding to local SOS alerts, verifying service locations, and onboarding local shops.",
     registerBtn: "Register as a Volunteer",
+    postAlertTitle: "Post Hyperlocal Alert",
+    postAlertSub: "Share important updates directly with your local community",
+    alertType: "Alert Type / Category",
+    severity: "Severity",
+    postAs: "Post As",
+    title: "Title",
+    description: "Description",
+    locationDetails: "Location Details",
+    contactName: "Contact Name",
+    contactPhone: "Contact Phone",
+    notes: "Instructions / Notes (Optional)",
+    low: "Low",
+    medium: "Medium",
+    high: "High",
+    publishAlert: "Publish Hyperlocal Alert",
   },
   hi: {
     dashboard: "डैशबोर्ड",
@@ -140,6 +155,21 @@ const TRANSLATIONS = {
     volunteerRegister: "साथी स्वयंसेवक बनें",
     volunteerRegisterSub: "स्थानीय एसओएस अलर्ट का जवाब देकर, सेवा स्थानों की पुष्टि करके और स्थानीय दुकानों को जोड़कर अपने समुदाय की सहायता करें।",
     registerBtn: "स्वयंसेवक के रूप में पंजीकरण करें",
+    postAlertTitle: "हाइपरलोकल अलर्ट पोस्ट करें",
+    postAlertSub: "अपने स्थानीय समुदाय के साथ सीधे महत्वपूर्ण अपडेट साझा करें",
+    alertType: "अलर्ट प्रकार / श्रेणी",
+    severity: "तीव्रता",
+    postAs: "इस रूप में पोस्ट करें",
+    title: "शीर्षक",
+    description: "विवरण",
+    locationDetails: "स्थान विवरण",
+    contactName: "संपर्क नाम",
+    contactPhone: "संपर्क फोन",
+    notes: "निर्देश / नोट्स (वैकल्पिक)",
+    low: "निम्न",
+    medium: "मध्यम",
+    high: "उच्च",
+    publishAlert: "हाइपरलोकल अलर्ट प्रकाशित करें",
   },
   ml: {
     dashboard: "ഡാഷ്‌ബോർഡ്",
@@ -1025,13 +1055,13 @@ export default function SaathiApp() {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'home': return <HomeFeed t={t} startSOSCountdown={startSOSCountdown} isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onViewCertificate={() => setShowCertificate(true)} userRole={userRole} walletBalance={walletBalance} onOpenWallet={() => setShowWallet(true)} volunteerApplicationStatus={volunteerApplicationStatus} setVolunteerApplicationStatus={setVolunteerApplicationStatus} setVolunteerRequests={setVolunteerRequests} displayUser={displayUser} services={services} setActiveTab={setActiveTab} volunteerRequests={volunteerRequests} surveys={surveys} alerts={alerts} onOpenPostAlert={() => setShowPostAlertModal(true)} />;
+      case 'home': return <HomeFeed t={t} startSOSCountdown={startSOSCountdown} isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onViewCertificate={() => setShowCertificate(true)} userRole={userRole} walletBalance={walletBalance} onOpenWallet={() => setShowWallet(true)} volunteerApplicationStatus={volunteerApplicationStatus} setVolunteerApplicationStatus={setVolunteerApplicationStatus} setVolunteerRequests={setVolunteerRequests} displayUser={displayUser} services={services} setActiveTab={setActiveTab} volunteerRequests={volunteerRequests} surveys={surveys} alerts={alerts} onOpenPostAlert={() => setShowPostAlertModal(true)} bloodRequests={bloodRequests} />;
       case 'rescue': return <RescueModule isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onOpenChat={setActiveChatUser} userCoords={userCoords} locationStatus={locationStatus} bloodRequests={bloodRequests} setBloodRequests={setBloodRequests} userRole={userRole} addWalletTxn={addWalletTxn} creditMicro={creditMicro} showEarning={showEarning} keyFingerprint={keyFingerprint} signActionPayload={signActionPayload} />;
       case 'volunteer': return <VolunteerModule userCoords={userCoords} userRole={userRole} locationStatus={locationStatus} />;
       case 'services': return <ServicesModule userCoords={userCoords} locationStatus={locationStatus} userRole={userRole} onCommission={creditCommission} onShowEarning={showEarning} services={services} setServices={setServices} />;
       case 'survey': return <SurveyModule userRole={userRole} userCoords={userCoords} onMicroReward={creditMicro} onShowEarning={showEarning} surveys={surveys} setSurveys={setSurveys} />;
       case 'admin-approvals': return <AdminApprovalsModule volunteerRequests={volunteerRequests} setVolunteerRequests={setVolunteerRequests} services={services} setServices={setServices} surveys={surveys} setSurveys={setSurveys} userRole={userRole} setUserRole={setUserRole} setVolunteerApplicationStatus={setVolunteerApplicationStatus} displayUser={displayUser} addWalletTxn={addWalletTxn} bloodRequests={bloodRequests} setBloodRequests={setBloodRequests} creditMicro={creditMicro} showEarning={showEarning} />;
-      default: return <HomeFeed t={t} startSOSCountdown={startSOSCountdown} isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onViewCertificate={() => setShowCertificate(true)} userRole={userRole} walletBalance={walletBalance} onOpenWallet={() => setShowWallet(true)} volunteerApplicationStatus={volunteerApplicationStatus} setVolunteerApplicationStatus={setVolunteerApplicationStatus} setVolunteerRequests={setVolunteerRequests} displayUser={displayUser} services={services} setActiveTab={setActiveTab} volunteerRequests={volunteerRequests} surveys={surveys} alerts={alerts} onOpenPostAlert={() => setShowPostAlertModal(true)} />;
+      default: return <HomeFeed t={t} startSOSCountdown={startSOSCountdown} isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onViewCertificate={() => setShowCertificate(true)} userRole={userRole} walletBalance={walletBalance} onOpenWallet={() => setShowWallet(true)} volunteerApplicationStatus={volunteerApplicationStatus} setVolunteerApplicationStatus={setVolunteerApplicationStatus} setVolunteerRequests={setVolunteerRequests} displayUser={displayUser} services={services} setActiveTab={setActiveTab} volunteerRequests={volunteerRequests} surveys={surveys} alerts={alerts} onOpenPostAlert={() => setShowPostAlertModal(true)} bloodRequests={bloodRequests} />;
     }
   };
 
@@ -1147,6 +1177,66 @@ export default function SaathiApp() {
         /* Pinned badges and alerts */
         .bg-orange-950\/40, .bg-emerald-950\/40, .bg-blue-950\/40, .bg-red-950\/40 {
           border-color: rgba(249, 115, 22, 0.15) !important;
+        }
+
+        /* Premium Grey Theme for Hyperlocal Feed Cards (#0f172a) */
+        .hyperlocal-card {
+          background-color: #0f172a !important; /* Deep Slate Grey */
+          background-image: none !important;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .hyperlocal-card-blood {
+          border: 1px solid rgba(244, 63, 94, 0.4) !important; /* Soft rose border */
+          box-shadow: 0 0 15px rgba(244, 63, 94, 0.08);
+        }
+        .hyperlocal-card-blood:hover {
+          border-color: rgba(244, 63, 94, 0.9) !important; /* Glowing rose/red */
+          box-shadow: 0 0 25px rgba(244, 63, 94, 0.25);
+          transform: translateY(-2px);
+        }
+
+        .hyperlocal-card-high {
+          border: 1px solid rgba(239, 68, 68, 0.3) !important; /* Soft red border */
+          box-shadow: 0 0 15px rgba(239, 68, 68, 0.05);
+        }
+        .hyperlocal-card-high:hover {
+          border-color: rgba(239, 68, 68, 0.8) !important; /* Glowing high red */
+          box-shadow: 0 0 25px rgba(239, 68, 68, 0.2);
+          transform: translateY(-2px);
+        }
+
+        .hyperlocal-card-medium {
+          border: 1px solid rgba(249, 115, 22, 0.3) !important; /* Soft orange border */
+          box-shadow: 0 0 15px rgba(249, 115, 22, 0.05);
+        }
+        .hyperlocal-card-medium:hover {
+          border-color: rgba(249, 115, 22, 0.8) !important; /* Glowing medium orange */
+          box-shadow: 0 0 25px rgba(249, 115, 22, 0.2);
+          transform: translateY(-2px);
+        }
+
+        .hyperlocal-card-low {
+          border: 1px solid rgba(148, 163, 184, 0.2) !important; /* Soft slate/grey border */
+          box-shadow: 0 0 15px rgba(148, 163, 184, 0.02);
+        }
+        .hyperlocal-card-low:hover {
+          border-color: rgba(148, 163, 184, 0.6) !important; /* Glowing low grey */
+          box-shadow: 0 0 20px rgba(148, 163, 184, 0.15);
+          transform: translateY(-2px);
+        }
+
+        /* Premium Slate Grey Theme for Volunteer Panel (#0f172a) */
+        .volunteer-register-card {
+          background-color: #0f172a !important; /* Cohesive deep slate-grey */
+          background-image: none !important;
+          border: 1px solid rgba(16, 185, 129, 0.3) !important; /* Soft emerald/green border */
+          box-shadow: 0 0 15px rgba(16, 185, 129, 0.05);
+          transition: all 0.3s ease;
+        }
+        .volunteer-register-card:hover {
+          border-color: rgba(16, 185, 129, 0.7) !important; /* Glowing green border */
+          box-shadow: 0 0 25px rgba(16, 185, 129, 0.15);
         }
       `}</style>
       
@@ -1602,6 +1692,7 @@ export default function SaathiApp() {
             setShowPostAlertModal(false);
           }}
           onClose={() => setShowPostAlertModal(false)}
+          t={t}
         />
       )}
 
@@ -1778,7 +1869,7 @@ function LocationPickerModal({ currentLocation, onSelect, onRetryGPS, locationSt
 }
 
 // --- POST ALERT MODAL ---
-function PostAlertModal({ userRole, healthcareSubRole, currentLocation, onPost, onClose }) {
+function PostAlertModal({ userRole, healthcareSubRole, currentLocation, onPost, onClose, t }) {
   const [title, setTitle] = useState('');
   const [type, setType] = useState(userRole === 'HealthcareWorker' ? `${healthcareSubRole === 'Bloodbank' ? 'Blood Bank' : healthcareSubRole} Update` : 'General Update');
   const [description, setDescription] = useState('');
@@ -1833,14 +1924,14 @@ function PostAlertModal({ userRole, healthcareSubRole, currentLocation, onPost, 
     <Modal onClose={onClose}>
       <ModalHeader
         icon={<Activity size={22} className="text-white" />}
-        title="Post Hyperlocal Alert"
-        subtitle="Share important updates directly with your local community"
+        title={t ? t('postAlertTitle') : "Post Hyperlocal Alert"}
+        subtitle={t ? t('postAlertSub') : "Share important updates directly with your local community"}
         gradient="from-orange-500 to-emerald-600"
         onClose={onClose}
       />
       <form onSubmit={handleSubmit} className="p-5 overflow-y-auto space-y-4 text-sm text-slate-700 max-h-[75vh]">
         <div>
-          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Alert Type / Category</label>
+          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">{t ? t('alertType') : "Alert Type / Category"}</label>
           <div className="flex flex-wrap gap-2">
             {categories.map((cat) => (
               <button
@@ -1861,7 +1952,7 @@ function PostAlertModal({ userRole, healthcareSubRole, currentLocation, onPost, 
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Severity</label>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">{t ? t('severity') : "Severity"}</label>
             <div className="flex border border-slate-200 rounded-xl overflow-hidden">
               {['low', 'medium', 'high'].map(sev => (
                 <button
@@ -1874,13 +1965,13 @@ function PostAlertModal({ userRole, healthcareSubRole, currentLocation, onPost, 
                       : 'bg-white hover:bg-slate-50 text-slate-600'
                   }`}
                 >
-                  {sev}
+                  {t ? t(sev) : sev}
                 </button>
               ))}
             </div>
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Post As</label>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">{t ? t('postAs') : "Post As"}</label>
             <div className="py-2 px-3 bg-slate-50 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600">
               {userRole === 'HealthcareWorker' ? `${healthcareSubRole === 'Bloodbank' ? 'Blood Bank' : healthcareSubRole} (Healthcare)` : userRole}
             </div>
@@ -1888,7 +1979,7 @@ function PostAlertModal({ userRole, healthcareSubRole, currentLocation, onPost, 
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Title</label>
+          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">{t ? t('title') : "Title"}</label>
           <input
             type="text"
             required
@@ -1900,7 +1991,7 @@ function PostAlertModal({ userRole, healthcareSubRole, currentLocation, onPost, 
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Description</label>
+          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">{t ? t('description') : "Description"}</label>
           <textarea
             required
             placeholder="Provide detail about what is needed or what is happening..."
@@ -1912,7 +2003,7 @@ function PostAlertModal({ userRole, healthcareSubRole, currentLocation, onPost, 
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Location Details</label>
+          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">{t ? t('locationDetails') : "Location Details"}</label>
           <input
             type="text"
             required
@@ -1925,7 +2016,7 @@ function PostAlertModal({ userRole, healthcareSubRole, currentLocation, onPost, 
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Contact Name</label>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">{t ? t('contactName') : "Contact Name"}</label>
             <input
               type="text"
               required
@@ -1935,7 +2026,7 @@ function PostAlertModal({ userRole, healthcareSubRole, currentLocation, onPost, 
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Contact Phone</label>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">{t ? t('contactPhone') : "Contact Phone"}</label>
             <input
               type="text"
               required
@@ -1947,7 +2038,7 @@ function PostAlertModal({ userRole, healthcareSubRole, currentLocation, onPost, 
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Instructions / Notes (Optional)</label>
+          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">{t ? t('notes') : "Instructions / Notes (Optional)"}</label>
           <textarea
             placeholder="Add specific instructions for volunteers or community members..."
             value={notes}
@@ -1961,7 +2052,7 @@ function PostAlertModal({ userRole, healthcareSubRole, currentLocation, onPost, 
           type="submit"
           className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2.5 rounded-xl transition-all shadow-md shadow-orange-500/10 text-xs uppercase tracking-wider mt-2"
         >
-          Publish Hyperlocal Alert
+          {t ? t('publishAlert') : "Publish Hyperlocal Alert"}
         </button>
       </form>
     </Modal>
@@ -2243,10 +2334,36 @@ function HomeFeed({
   volunteerRequests,
   surveys,
   alerts,
-  onOpenPostAlert
+  onOpenPostAlert,
+  bloodRequests = []
 }) {
   const [selectedAlert, setSelectedAlert] = useState(null);
   const showWalletCard = ['Volunteer', 'NGO', 'Admin'].includes(userRole);
+
+  const combinedAlerts = useMemo(() => {
+    // Transform approved blood requests into alert-like structure for the hyperlocal feed
+    const bloodAlerts = (bloodRequests || [])
+      .filter(req => req.status === 'approved')
+      .map(req => ({
+        id: `blood-${req.id}`,
+        type: "Blood Attestation",
+        title: `VERIFIED: ${req.bloodType} Blood Required`,
+        description: `Clinical Requisition: ${req.unitsNeeded} units of ${req.bloodType} blood needed at ${req.hospital} for patient ${req.patientName}. Requested by ${req.requestorName}.`,
+        location: req.hospital,
+        contactName: req.requestorName,
+        contactPhone: req.requestorPhone,
+        notes: `Clinical Requisition verified by Saathi. Verification Document: ${req.approvalLetter}`,
+        distance: req.distance || '1.2 km',
+        time: req.date || 'Just now',
+        status: 'Active',
+        severity: 'high',
+        isBloodAttestation: true,
+        postedByRole: 'HealthcareWorker',
+        postedBySubRole: 'Bloodbank'
+      }));
+
+    return [...bloodAlerts, ...(alerts || [])];
+  }, [alerts, bloodRequests]);
 
   return (
     <div className="space-y-6">
@@ -2296,79 +2413,94 @@ function HomeFeed({
           </div>
         </div>
         <div className="space-y-4">
-          {(alerts || []).map(alert => {
+          {(combinedAlerts || []).map(alert => {
             const isHigh = alert.severity === 'high';
             const isMedium = alert.severity === 'medium';
+            const isBlood = alert.isBloodAttestation;
             return (
               <div 
                 key={alert.id} 
                 onClick={() => setSelectedAlert(alert)}
-                className={`bg-white p-5 rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden group ${
-                  isHigh 
-                    ? 'border-red-200 hover:border-red-400 bg-gradient-to-br from-white to-red-50/20 hover:shadow-md' 
-                    : isMedium 
-                      ? 'border-orange-200 hover:border-orange-400 bg-gradient-to-br from-white to-orange-50/10 hover:shadow-md' 
-                      : 'border-slate-200 hover:border-slate-400 bg-white hover:shadow-md'
+                className={`hyperlocal-card p-5 rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden group ${
+                  isBlood
+                    ? 'hyperlocal-card-blood'
+                    : isHigh 
+                      ? 'hyperlocal-card-high' 
+                      : isMedium 
+                        ? 'hyperlocal-card-medium' 
+                        : 'hyperlocal-card-low'
                 }`}
               >
                 <div className={`absolute top-0 left-0 w-1.5 h-full ${
-                  isHigh ? 'bg-red-500' : isMedium ? 'bg-orange-500' : 'bg-slate-400'
+                  isBlood ? 'bg-rose-500' : isHigh ? 'bg-red-500' : isMedium ? 'bg-orange-500' : 'bg-slate-400'
                 }`} />
 
                 <div className="flex items-start gap-4">
                   <div className={`p-3.5 rounded-xl shrink-0 relative ${
-                    isHigh 
-                      ? 'bg-red-50 text-red-600' 
-                      : isMedium 
-                        ? 'bg-orange-50 text-orange-600' 
-                        : 'bg-slate-100 text-slate-600'
+                    isBlood
+                      ? 'bg-rose-950/60 text-rose-400 border border-rose-500/20'
+                      : isHigh 
+                        ? 'bg-red-950/60 text-red-400 border border-red-500/20' 
+                        : isMedium 
+                          ? 'bg-orange-950/60 text-orange-400 border border-orange-500/20' 
+                          : 'bg-slate-800 text-slate-300 border border-slate-700'
                   }`}>
-                    <AlertTriangle size={22} className={isHigh ? 'animate-pulse' : ''} />
+                    {isBlood ? (
+                      <Heart size={22} className="text-rose-500 animate-pulse fill-rose-500" />
+                    ) : (
+                      <AlertTriangle size={22} className={isHigh ? 'animate-pulse' : ''} />
+                    )}
                     {alert.status === 'Active' && (
                       <span className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white animate-ping ${
-                        isHigh ? 'bg-red-500' : 'bg-orange-500'
+                        isBlood ? 'bg-rose-500' : isHigh ? 'bg-red-500' : 'bg-orange-500'
                       }`} />
                     )}
                   </div>
 
                   <div className="space-y-1.5 flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h4 className="font-extrabold text-slate-900 text-sm tracking-tight">
+                      <h4 className="font-extrabold text-slate-100 text-sm tracking-tight">
                         {alert.title || alert.type}
                       </h4>
                       <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                        isHigh 
-                          ? 'bg-red-100 text-red-700' 
-                          : isMedium 
-                            ? 'bg-orange-100 text-orange-700' 
-                            : 'bg-slate-100 text-slate-600'
+                        isBlood
+                          ? 'bg-rose-950/80 text-rose-300'
+                          : isHigh 
+                            ? 'bg-red-950/80 text-red-300' 
+                            : isMedium 
+                              ? 'bg-orange-950/80 text-orange-300' 
+                              : 'bg-slate-800 text-slate-300'
                       }`}>
                         {alert.type}
                       </span>
                       {alert.postedByRole && (
                         <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 ${
-                          alert.postedByRole === 'HealthcareWorker'
-                            ? alert.postedBySubRole === 'ASHA' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
-                              alert.postedBySubRole === 'Bloodbank' ? 'bg-red-50 text-red-700 border border-red-200' :
-                              alert.postedBySubRole === 'Doctor' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
-                              'bg-indigo-50 text-indigo-700 border border-indigo-200'
-                            : alert.postedByRole === 'Volunteer' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-                              'bg-purple-50 text-purple-700 border border-purple-200'
+                          alert.isBloodAttestation
+                            ? 'bg-rose-950/60 text-rose-300 border border-rose-500/30'
+                            : alert.postedByRole === 'HealthcareWorker'
+                              ? alert.postedBySubRole === 'ASHA' ? 'bg-amber-950/60 text-amber-300 border border-amber-500/30' :
+                                alert.postedBySubRole === 'Bloodbank' ? 'bg-red-950/60 text-red-300 border border-red-500/30' :
+                                alert.postedBySubRole === 'Doctor' ? 'bg-blue-950/60 text-blue-300 border border-blue-200' :
+                                'bg-indigo-950/60 text-indigo-300 border border-indigo-500/30'
+                              : alert.postedByRole === 'Volunteer' ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-500/30' :
+                                'bg-purple-950/60 text-purple-300 border border-purple-500/30'
                         }`}>
-                          <ShieldCheck size={10} />
-                          {alert.postedByRole === 'HealthcareWorker' 
-                            ? alert.postedBySubRole === 'Bloodbank' ? 'Blood Bank' : `${alert.postedBySubRole} (Health)` 
-                            : alert.postedByRole}
+                          {alert.isBloodAttestation ? <Heart size={10} className="text-rose-400 fill-rose-400" /> : <ShieldCheck size={10} />}
+                          {alert.isBloodAttestation 
+                            ? 'Verified Blood Request' 
+                            : alert.postedByRole === 'HealthcareWorker' 
+                              ? alert.postedBySubRole === 'Bloodbank' ? 'Blood Bank' : `${alert.postedBySubRole} (Health)` 
+                              : alert.postedByRole}
                         </span>
                       )}
                     </div>
 
-                    <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed max-w-xl">
+                    <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed max-w-xl">
                       {alert.description}
                     </p>
 
                     <div className="flex items-center text-[11px] text-slate-400 mt-2 gap-3">
-                      <span className="flex items-center gap-1 font-medium"><MapPin size={12} className={isHigh ? 'text-red-500' : 'text-slate-400'}/> {alert.location || 'Nearby'} ({alert.distance})</span>
+                      <span className="flex items-center gap-1 font-medium"><MapPin size={12} className={isBlood ? 'text-rose-400' : isHigh ? 'text-red-500' : 'text-slate-400'}/> {alert.location || 'Nearby'} ({alert.distance})</span>
                       <span>•</span>
                       <span className="flex items-center gap-1 font-medium"><Clock size={12}/> {alert.time}</span>
                     </div>
@@ -2376,7 +2508,7 @@ function HomeFeed({
                 </div>
 
                 <div className="flex items-center justify-end shrink-0 sm:self-center">
-                  <div className="flex items-center gap-1 text-xs font-bold text-orange-600 group-hover:translate-x-1 transition-transform duration-200">
+                  <div className="flex items-center gap-1 text-xs font-bold text-orange-500 group-hover:translate-x-1 transition-transform duration-200">
                     View & Action
                     <ChevronRight size={16} />
                   </div>
