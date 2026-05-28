@@ -22,3 +22,15 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Debug / scratch files
+scratchpad_*.cjs
+scratch_*.js
+ssr_test*.cjs
+test_*.cjs
+parse_*.cjs
+process_*.cjs
+screenshot*.png
+eslint_output.txt
+eslint_report.json
+*.md.bak
