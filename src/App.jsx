@@ -7029,17 +7029,22 @@ function AuthScreen({ onSuccess }) {
                   />
                 </div>
 
-                <div className="flex items-center gap-2 bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+                <div className="flex items-start gap-3 bg-gradient-to-r from-emerald-950/40 to-slate-900/40 p-4 rounded-xl border border-emerald-500/40 mt-4 shadow-[0_0_15px_rgba(16,185,129,0.15)] hover:border-emerald-500/60 transition-colors">
                   <input
                     type="checkbox"
                     id="registerAsVolunteer"
                     checked={signupData.registerAsVolunteer || false}
                     onChange={(e) => setSignupData(prev => ({ ...prev, registerAsVolunteer: e.target.checked }))}
-                    className="w-4 h-4 text-orange-650 border-slate-800 rounded bg-slate-950 focus:ring-orange-500 cursor-pointer"
+                    className="w-5 h-5 mt-0.5 text-emerald-500 border-emerald-700/50 rounded bg-slate-950 focus:ring-emerald-500 cursor-pointer"
                   />
-                  <label htmlFor="registerAsVolunteer" className="text-xs font-bold text-slate-300 cursor-pointer select-none">
-                    Register as a Volunteer (requires Admin approval)
-                  </label>
+                  <div>
+                    <label htmlFor="registerAsVolunteer" className="text-sm font-black text-emerald-400 cursor-pointer select-none block">
+                      Register as a Volunteer
+                    </label>
+                    <p className="text-xs text-slate-400 mt-1 cursor-pointer select-none" onClick={() => setSignupData(prev => ({ ...prev, registerAsVolunteer: !prev.registerAsVolunteer }))}>
+                      Requires Admin approval. Unlock SOS rescue and earning opportunities.
+                    </p>
+                  </div>
                 </div>
               </div>
 
