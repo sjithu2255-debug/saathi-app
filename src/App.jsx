@@ -10,6 +10,7 @@ import {
   Paperclip, Image as ImageIcon, Wallet, TrendingUp, IndianRupee,
   Gift, Zap, ArrowDownToLine, ArrowUpRight, Plus, Sun, Moon, Heart
 } from 'lucide-react';
+import logoUrl from './assets/logo.png';
 
 // --- BRAND ---
 const BRAND = {
@@ -21,7 +22,7 @@ function SaathiLogo({ size = 32, showWordmark = false, variant = 'default' }) {
   return (
     <div className="flex items-center gap-2">
       <img 
-        src="/logo.png" 
+        src={logoUrl} 
         alt="Saathi Logo"
         style={{ 
           width: size, 
@@ -6589,7 +6590,7 @@ function SplashScreen({ onDone }) {
 function SplashLogoMark({ size = 140 }) {
   return (
     <img 
-      src="/logo.png" 
+      src={logoUrl} 
       alt="Saathi Logo"
       style={{ 
         width: size, 
