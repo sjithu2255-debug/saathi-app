@@ -21,8 +21,8 @@ function SaathiLogo({ size = 32, showWordmark = false, variant = 'default' }) {
   // Stable ID per instance — avoid regenerating on every render
   const id = useMemo(() => `lg${Math.random().toString(36).slice(2, 7)}`, []);
   return (
-    <div className="flex items-center gap-2">
-      <svg width={size} height={size} viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+    <div className="flex items-center gap-2 border-none outline-none">
+      <svg width={size} height={size} viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, border: 'none', outline: 'none' }} className="border-none outline-none">
         <defs>
           <linearGradient id={`${id}-grad`} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#f97316" />
@@ -55,7 +55,7 @@ function SaathiLogo({ size = 32, showWordmark = false, variant = 'default' }) {
             <circle cx="0" cy="8.8" r="0.8" fill="#fbbf24" />
           </g>
         </defs>
-        <rect width="64" height="64" rx="14" fill={`url(#${id}-grad)`} />
+        <rect width="64" height="64" rx="14" fill={`url(#${id}-grad)`} stroke="none" strokeWidth="0" />
         
         {/* Crossed Swords in background */}
         <use href={`#${id}-sword`} x="32" y="32" transform="rotate(-40 32 32)" opacity="0.9" />
@@ -6626,7 +6626,7 @@ function SplashScreen({ onDone }) {
 function SplashLogoMark({ size = 140 }) {
   const id = useMemo(() => `splash${Math.random().toString(36).slice(2, 7)}`, []);
   return (
-    <svg width={size} height={size} viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+    <svg width={size} height={size} viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" style={{ border: 'none', outline: 'none' }} className="border-none outline-none">
       <defs>
         <linearGradient id={`${id}-grad`} x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#fbbf24" />
@@ -6663,7 +6663,7 @@ function SplashLogoMark({ size = 140 }) {
           <circle cx="0" cy="8.8" r="0.8" fill="#fbbf24" />
         </g>
       </defs>
-      <rect width="64" height="64" rx="14" fill={`url(#${id}-grad)`} />
+      <rect width="64" height="64" rx="14" fill={`url(#${id}-grad)`} stroke="none" strokeWidth="0" />
       
       {/* Crossed Swords in background */}
       <use href={`#${id}-sword`} x="32" y="32" transform="rotate(-40 32 32)" opacity="0.9" />
