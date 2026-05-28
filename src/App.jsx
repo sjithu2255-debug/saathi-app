@@ -2744,13 +2744,13 @@ function HomeFeed({
       {userRole === 'Citizen' && (
         <div className="mt-4">
           {volunteerApplicationStatus === 'idle' && (
-            <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between min-h-[180px] animate-in slide-in-from-bottom duration-300">
+            <div className="bg-emerald-950/30 border border-emerald-500/30 rounded-2xl p-6 shadow-[0_0_15px_rgba(16,185,129,0.15)] flex flex-col justify-between min-h-[180px] animate-in slide-in-from-bottom duration-300">
               <div>
-                <div className="flex items-center gap-2 mb-2 text-green-800">
+                <div className="flex items-center gap-2 mb-2 text-emerald-400">
                   <HeartHandshake size={20} />
-                  <h3 className="font-bold text-lg">{t('volunteerRegister')}</h3>
+                  <h3 className="font-black text-xl">{t('volunteerRegister')}</h3>
                 </div>
-                <p className="text-slate-600 text-xs leading-relaxed max-w-md">
+                <p className="text-emerald-500 text-sm font-medium leading-relaxed max-w-md">
                   {t('volunteerRegisterSub')}
                 </p>
               </div>
