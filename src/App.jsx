@@ -1103,7 +1103,7 @@ function SaathiApp() {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'home': return <HomeFeed t={t} startSOSCountdown={startSOSCountdown} isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onViewCertificate={() => setShowCertificate(true)} userRole={userRole} walletBalance={walletBalance} onOpenWallet={() => setShowWallet(true)} volunteerApplicationStatus={volunteerApplicationStatus} setVolunteerApplicationStatus={setVolunteerApplicationStatus} setVolunteerRequests={setVolunteerRequests} displayUser={displayUser} services={services} setActiveTab={setActiveTab} volunteerRequests={volunteerRequests} surveys={surveys} alerts={alerts} onOpenPostAlert={() => { setEditingAlert(null); setShowPostAlertModal(true); }} bloodRequests={bloodRequests} onEditAlert={(alert) => { setEditingAlert(alert); setShowPostAlertModal(true); }} onRemoveAlert={(id) => setAlerts(prev => prev.filter(a => a.id !== id))} />;
+      case 'home': return <HomeFeed t={t} isDarkMode={isDarkMode} startSOSCountdown={startSOSCountdown} isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onViewCertificate={() => setShowCertificate(true)} userRole={userRole} walletBalance={walletBalance} onOpenWallet={() => setShowWallet(true)} volunteerApplicationStatus={volunteerApplicationStatus} setVolunteerApplicationStatus={setVolunteerApplicationStatus} setVolunteerRequests={setVolunteerRequests} displayUser={displayUser} services={services} setActiveTab={setActiveTab} volunteerRequests={volunteerRequests} surveys={surveys} alerts={alerts} onOpenPostAlert={() => { setEditingAlert(null); setShowPostAlertModal(true); }} bloodRequests={bloodRequests} onEditAlert={(alert) => { setEditingAlert(alert); setShowPostAlertModal(true); }} onRemoveAlert={(id) => setAlerts(prev => prev.filter(a => a.id !== id))} />;
       case 'rescue': return <RescueModule t={t} isDarkMode={isDarkMode} isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onOpenChat={setActiveChatUser} userCoords={userCoords} locationStatus={locationStatus} bloodRequests={bloodRequests} setBloodRequests={setBloodRequests} userRole={userRole} addWalletTxn={addWalletTxn} creditMicro={creditMicro} showEarning={showEarning} keyFingerprint={keyFingerprint} signActionPayload={signActionPayload} />;
       case 'volunteer': return <VolunteerModule userCoords={userCoords} userRole={userRole} locationStatus={locationStatus} />;
       case 'services': return <ServicesModule userCoords={userCoords} locationStatus={locationStatus} userRole={userRole} onCommission={creditCommission} onShowEarning={showEarning} services={services} setServices={setServices} />;
@@ -2384,6 +2384,7 @@ function AlertDetailModal({ alert, isSOSActive, onTriggerSOS, onClose }) {
 // --- HOME ---
 function HomeFeed({
   t,
+  isDarkMode,
   startSOSCountdown,
   isSOSActive,
   setIsSOSActive,
@@ -2490,27 +2491,27 @@ function HomeFeed({
               <div
                 key={alert.id}
                 onClick={() => setSelectedAlert(alert)}
-                className={`hyperlocal-card p-5 rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden group ${isBlood
-                  ? 'hyperlocal-card-blood'
-                  : isHigh
-                    ? 'hyperlocal-card-high'
-                    : isMedium
-                      ? 'hyperlocal-card-medium'
-                      : 'hyperlocal-card-low'
-                  }`}
+                className={`p-5 rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden group ${
+                  isDarkMode
+                    ? `hyperlocal-card ${isBlood ? 'hyperlocal-card-blood' : isHigh ? 'hyperlocal-card-high' : isMedium ? 'hyperlocal-card-medium' : 'hyperlocal-card-low'}`
+                    : `${isBlood ? 'bg-rose-50 border-rose-200 hover:shadow-md' : isHigh ? 'bg-red-50 border-red-200 hover:shadow-md' : isMedium ? 'bg-orange-50 border-orange-200 hover:shadow-md' : 'bg-white border-slate-200 hover:shadow-md'}`
+                }`}
               >
                 <div className={`absolute top-0 left-0 w-1.5 h-full ${isBlood ? 'bg-rose-500' : isHigh ? 'bg-red-500' : isMedium ? 'bg-orange-500' : 'bg-slate-400'
                   }`} />
 
                 <div className="flex items-start gap-4">
-                  <div className={`p-3.5 rounded-xl shrink-0 relative ${isBlood
-                    ? 'bg-rose-950/60 text-rose-400 border border-rose-500/20'
-                    : isHigh
-                      ? 'bg-red-950/60 text-red-400 border border-red-500/20'
-                      : isMedium
-                        ? 'bg-orange-950/60 text-orange-400 border border-orange-500/20'
-                        : 'bg-slate-800 text-slate-300 border border-slate-700'
-                    }`}>
+                  <div className={`p-3.5 rounded-xl shrink-0 relative ${
+                    isDarkMode
+                      ? (isBlood ? 'bg-rose-950/60 text-rose-400 border border-rose-500/20'
+                         : isHigh ? 'bg-red-950/60 text-red-400 border border-red-500/20'
+                         : isMedium ? 'bg-orange-950/60 text-orange-400 border border-orange-500/20'
+                         : 'bg-slate-800 text-slate-300 border border-slate-700')
+                      : (isBlood ? 'bg-rose-100 text-rose-600 border border-rose-200'
+                         : isHigh ? 'bg-red-100 text-red-600 border border-red-200'
+                         : isMedium ? 'bg-orange-100 text-orange-600 border border-orange-200'
+                         : 'bg-slate-100 text-slate-600 border border-slate-200')
+                  }`}>
                     {isBlood ? (
                       <Heart size={22} className="text-rose-500 animate-pulse fill-rose-500" />
                     ) : (
@@ -2524,17 +2525,14 @@ function HomeFeed({
 
                   <div className="space-y-1.5 flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h4 className="font-extrabold text-slate-100 text-sm tracking-tight">
+                      <h4 className={`font-extrabold text-sm tracking-tight ${isDarkMode ? 'text-slate-100' : 'text-slate-900'}`}>
                         {alert.title || alert.type}
                       </h4>
-                      <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider ${isBlood
-                        ? 'bg-rose-950/80 text-rose-300'
-                        : isHigh
-                          ? 'bg-red-950/80 text-red-300'
-                          : isMedium
-                            ? 'bg-orange-950/80 text-orange-300'
-                            : 'bg-slate-800 text-slate-300'
-                        }`}>
+                      <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                        isDarkMode
+                          ? (isBlood ? 'bg-rose-950/80 text-rose-300' : isHigh ? 'bg-red-950/80 text-red-300' : isMedium ? 'bg-orange-950/80 text-orange-300' : 'bg-slate-800 text-slate-300')
+                          : (isBlood ? 'bg-rose-200 text-rose-700' : isHigh ? 'bg-red-200 text-red-700' : isMedium ? 'bg-orange-200 text-orange-700' : 'bg-slate-200 text-slate-700')
+                      }`}>
                         {alert.type}
                       </span>
                       {alert.postedByRole && (
@@ -2558,7 +2556,7 @@ function HomeFeed({
                       )}
                     </div>
 
-                    <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed max-w-xl">
+                    <p className={`text-xs line-clamp-2 leading-relaxed max-w-xl ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                       {alert.description}
                     </p>
 
