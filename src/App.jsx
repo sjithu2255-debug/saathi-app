@@ -10,6 +10,7 @@ import {
   Paperclip, Image as ImageIcon, Wallet, TrendingUp, IndianRupee,
   Gift, Zap, ArrowDownToLine, ArrowUpRight, Plus, Sun, Moon, Heart, Menu
 } from 'lucide-react';
+import html2canvas from 'html2canvas';
 import logoUrl from './assets/logo.png';
 
 // --- BRAND ---
@@ -402,6 +403,63 @@ const MOCK_ALERTS = [
     status: "Resolved",
     severity: "low"
   },
+  {
+    id: 4,
+    type: "Missing Person",
+    title: "Missing Elderly: 75yo Ramachandran",
+    description: "An elderly man suffering from mild dementia was reported missing since yesterday evening.",
+    location: "Ernakulam North Railway Station area",
+    contactName: "Karthik (Son)",
+    contactPhone: "+91 94477 22110",
+    notes: "He is wearing a white dhoti and light green shirt. Struggles to remember his address. Please contact the family immediately if spotted.",
+    distance: "5.4 km",
+    time: "14 hours ago",
+    status: "Active",
+    severity: "high"
+  },
+  {
+    id: 5,
+    type: "Natural Calamity",
+    title: "Fallen Tree Blocking Main Road",
+    description: "A huge banyan tree was uprooted during the storm, completely blocking the main thoroughfare and pulling down power lines.",
+    location: "MG Road, near City Library",
+    contactName: "City Corporation Disaster Management",
+    contactPhone: "1077",
+    notes: "Live wires are on the ground. Maintain a strict 50m distance. Fire & Rescue teams are on the way. Expected clearance time: 4 hours.",
+    distance: "0.8 km",
+    time: "30 mins ago",
+    status: "Active",
+    severity: "high"
+  },
+  {
+    id: 6,
+    type: "Medical Emergency",
+    title: "Urgent O-ve Blood Required",
+    description: "Critical blood requirement for a road accident victim in the ICU.",
+    location: "Medical Trust Hospital, Ernakulam",
+    contactName: "Blood Bank Helpdesk",
+    contactPhone: "+91 484 235 5999",
+    notes: "Patient is in critical condition. O-ve is a rare group. Any eligible donor within 10km is requested to proceed to the hospital immediately.",
+    distance: "8.2 km",
+    time: "15 mins ago",
+    status: "Active",
+    severity: "high",
+    isBloodAttestation: true
+  },
+  {
+    id: 7,
+    type: "Animal Rescue",
+    title: "Injured Stray Dog (Hit and Run)",
+    description: "A stray dog was severely injured in a hit-and-run incident and needs immediate medical transport to a vet.",
+    location: "Kaloor Stadium Link Road",
+    contactName: "Sneha (Local Resident)",
+    contactPhone: "+91 98955 66778",
+    notes: "Dog is conscious but unable to move its hind legs. I am waiting near the animal. Need a volunteer with a vehicle willing to transport to the SPCA clinic.",
+    distance: "3.1 km",
+    time: "45 mins ago",
+    status: "Active",
+    severity: "medium"
+  }
 ];
 
 const MOCK_VOLUNTEER = [
@@ -2637,70 +2695,116 @@ function WalletModal({ balance, transactions, onPayout, onClose }) {
 }
 
 function AlertDetailModal({ alert, isSOSActive, onTriggerSOS, onClose }) {
+  const [hasPledged, setHasPledged] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
+  const modalRef = useRef(null);
+
   if (!alert) return null;
 
   const handleCall = () => {
     window.open("tel:112", "_self");
   };
 
+  const handlePledge = () => {
+    setHasPledged(true);
+  };
+
+  const handleShareAsImage = async () => {
+    if (!modalRef.current) return;
+    setIsSharing(true);
+    try {
+      setTimeout(async () => {
+        const canvas = await html2canvas(modalRef.current, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+        const image = canvas.toDataURL("image/png");
+        const link = document.createElement('a');
+        link.href = image;
+        link.download = `Saathi_Verified_Alert_${alert.id}.png`;
+        link.click();
+        setIsSharing(false);
+      }, 100);
+    } catch (err) {
+      console.error("Failed to share image", err);
+      setIsSharing(false);
+    }
+  };
+
   return (
     <Modal onClose={onClose} maxWidth="max-w-md">
-      <ModalHeader
-        icon={<AlertOctagon size={22} className="animate-pulse text-white" />}
-        title={alert.title || alert.type}
-        subtitle={`Severity: ${alert.severity.toUpperCase()} • ${alert.time}`}
-        gradient={alert.severity === 'high' ? 'from-red-600 to-rose-700' : 'from-orange-500 to-amber-600'}
-        onClose={onClose}
-      />
-      <div className="p-5 overflow-y-auto space-y-4 text-sm text-slate-700">
-        <div className="flex gap-2">
-          <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider ${alert.severity === 'high' ? 'bg-red-100 text-red-700' :
-            alert.severity === 'medium' ? 'bg-orange-100 text-orange-700' :
-              'bg-slate-100 text-slate-700'
-            }`}>
-            {alert.severity} Severity
-          </span>
-          <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider ${alert.status === 'Active' ? 'bg-emerald-100 text-emerald-700 animate-pulse' : 'bg-slate-100 text-slate-700'
-            }`}>
-            {alert.status}
-          </span>
-        </div>
+      <div ref={modalRef} className="bg-white pb-2 relative rounded-2xl overflow-hidden">
+        <ModalHeader
+          icon={<AlertOctagon size={22} className="animate-pulse text-white" />}
+          title={alert.title || alert.type}
+          subtitle={`Severity: ${alert.severity.toUpperCase()} • ${alert.time}`}
+          gradient={alert.severity === 'high' ? 'from-red-600 to-rose-700' : 'from-orange-500 to-amber-600'}
+          onClose={!isSharing ? onClose : undefined}
+        />
+        <div className="p-5 overflow-y-auto space-y-4 text-sm text-slate-700">
+          <div className="flex gap-2">
+            <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider ${alert.severity === 'high' ? 'bg-red-100 text-red-700' :
+              alert.severity === 'medium' ? 'bg-orange-100 text-orange-700' :
+                'bg-slate-100 text-slate-700'
+              }`}>
+              {alert.severity} Severity
+            </span>
+            <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider ${alert.status === 'Active' ? 'bg-emerald-100 text-emerald-700 animate-pulse' : 'bg-slate-100 text-slate-700'
+              }`}>
+              {alert.status}
+            </span>
+          </div>
 
-        <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
-          <p className="font-semibold text-slate-900 mb-1">Alert Details</p>
-          <p className="text-xs leading-relaxed text-slate-600">{alert.description}</p>
-        </div>
+          <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+            <p className="font-semibold text-slate-900 mb-1">Alert Details</p>
+            <p className="text-xs leading-relaxed text-slate-600">{alert.description}</p>
+          </div>
 
-        <div className="space-y-2.5">
-          <div className="flex items-start gap-2.5">
-            <MapPin size={16} className="text-slate-400 mt-0.5 shrink-0" />
-            <div>
-              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Location / Venue</p>
-              <p className="text-xs text-slate-800 font-medium">{alert.location || 'Nearby'} ({alert.distance})</p>
+          <div className="space-y-2.5">
+            <div className="flex items-start gap-2.5">
+              <MapPin size={16} className="text-slate-400 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Location / Venue</p>
+                <p className="text-xs text-slate-800 font-medium">{alert.location || 'Nearby'} ({alert.distance})</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-2.5">
+              <Users size={16} className="text-slate-400 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Key Contact</p>
+                <p className="text-xs text-slate-800 font-medium">{alert.contactName || 'Saathi Control Room'}</p>
+                <p className="text-xs text-slate-500 font-mono mt-0.5">{alert.contactPhone || '112'}</p>
+              </div>
             </div>
           </div>
 
-          <div className="flex items-start gap-2.5">
-            <Users size={16} className="text-slate-400 mt-0.5 shrink-0" />
-            <div>
-              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Key Contact</p>
-              <p className="text-xs text-slate-800 font-medium">{alert.contactName || 'Saathi Control Room'}</p>
-              <p className="text-xs text-slate-500 font-mono mt-0.5">{alert.contactPhone || '112'}</p>
+          {alert.notes && (
+            <div className="bg-amber-50/50 border border-amber-100 rounded-xl p-3.5 text-xs text-amber-900">
+              <div className="flex items-center gap-1.5 font-bold mb-1">
+                <AlertTriangle size={14} className="text-amber-600" />
+                Volunteer Instructions
+              </div>
+              <p className="text-amber-800 leading-relaxed">{alert.notes}</p>
             </div>
+          )}
+
+          {/* Verification Watermark */}
+          <div className="mt-2 pt-3 border-t border-slate-100 flex items-center justify-center gap-1.5 text-slate-400">
+            <ShieldCheck size={14} className="text-emerald-500" />
+            <span className="text-[10px] font-bold tracking-widest uppercase text-slate-500">Verified via Saathi Shield</span>
           </div>
         </div>
+      </div>
+      
+      {!isSharing && (
+        <div className="p-4 bg-white border-t border-slate-100 rounded-b-2xl flex flex-col gap-2">
+          <button
+            onClick={handlePledge}
+            disabled={hasPledged}
+            className={`w-full font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wider shadow-sm ${hasPledged ? 'bg-emerald-100 text-emerald-700 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20'}`}
+          >
+            <HeartHandshake size={16} />
+            {hasPledged ? 'You Pledged to Help' : 'Pledge to Help'}
+          </button>
 
-        {alert.notes && (
-          <div className="bg-amber-50/50 border border-amber-100 rounded-xl p-3.5 text-xs text-amber-900">
-            <div className="flex items-center gap-1.5 font-bold mb-1">
-              <AlertTriangle size={14} className="text-amber-600" />
-              Volunteer Instructions
-            </div>
-            <p className="text-amber-800 leading-relaxed">{alert.notes}</p>
-          </div>
-        )}
-
-        <div className="flex flex-col gap-2 pt-3 border-t border-slate-100">
           <div className="flex gap-2">
             <button
               type="button"
@@ -2716,7 +2820,7 @@ function AlertDetailModal({ alert, isSOSActive, onTriggerSOS, onClose }) {
               onClick={onTriggerSOS}
               disabled={isSOSActive}
               className={`flex-1 font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 group text-xs uppercase tracking-wider ${isSOSActive
-                ? 'bg-emerald-50 text-emerald-700 cursor-not-allowed border border-emerald-200'
+                ? 'bg-rose-50 text-rose-700 cursor-not-allowed border border-rose-200'
                 : 'bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white shadow-md shadow-orange-500/10'
                 }`}
             >
@@ -2724,15 +2828,25 @@ function AlertDetailModal({ alert, isSOSActive, onTriggerSOS, onClose }) {
               {isSOSActive ? "Broadcast Active" : "Trigger SOS"}
             </button>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl transition-colors text-xs uppercase tracking-wider"
-          >
-            Close Details
-          </button>
+          
+          <div className="flex gap-2 mt-1">
+            <button
+              type="button"
+              onClick={handleShareAsImage}
+              className="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold py-2.5 rounded-xl transition-colors text-xs uppercase tracking-wider flex items-center justify-center gap-2"
+            >
+              <Download size={14} /> Share as Image
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl transition-colors text-xs uppercase tracking-wider"
+            >
+              Close
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </Modal>
   );
 }
@@ -2764,6 +2878,7 @@ function HomeFeed({
   onRemoveAlert
 }) {
   const [selectedAlert, setSelectedAlert] = useState(null);
+  const [activeFilter, setActiveFilter] = useState('All');
   const showWalletCard = ['Volunteer'].includes(userRole);
 
   const combinedAlerts = useMemo(() => {
@@ -2790,6 +2905,16 @@ function HomeFeed({
 
     return [...bloodAlerts, ...(alerts || [])];
   }, [alerts, bloodRequests]);
+
+  const filterOptions = ['All', 'Medical', 'Missing', 'Calamity', 'Other'];
+
+  const filteredAlerts = useMemo(() => {
+    if (activeFilter === 'All') return combinedAlerts;
+    if (activeFilter === 'Medical') return combinedAlerts.filter(a => a.type === 'Medical Emergency' || a.isBloodAttestation);
+    if (activeFilter === 'Missing') return combinedAlerts.filter(a => a.type === 'Missing Person');
+    if (activeFilter === 'Calamity') return combinedAlerts.filter(a => a.type === 'Water Logging' || a.type === 'Natural Calamity');
+    return combinedAlerts.filter(a => !['Medical Emergency', 'Missing Person', 'Water Logging', 'Natural Calamity'].includes(a.type) && !a.isBloodAttestation);
+  }, [combinedAlerts, activeFilter]);
 
   return (
     <div className="space-y-6">
@@ -2937,7 +3062,7 @@ function HomeFeed({
             {/* The 3 split tiles */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Blood Requirement */}
-              <div className="bg-gradient-to-br from-rose-500 to-red-600 rounded-2xl p-5 text-white shadow-xl flex flex-col justify-between min-h-[140px] relative overflow-hidden group cursor-pointer" onClick={() => {}}>
+              <div className="bg-gradient-to-br from-rose-500 to-red-600 rounded-2xl p-5 text-white shadow-xl flex flex-col justify-between min-h-[140px] relative overflow-hidden group cursor-pointer" onClick={() => setActiveFilter('Medical')}>
                 <div className="absolute right-0 top-0 opacity-10 transform translate-x-2 -translate-y-2 group-hover:scale-110 transition-transform">
                   <Heart size={100} />
                 </div>
@@ -2952,7 +3077,7 @@ function HomeFeed({
               </div>
 
               {/* Missing Person */}
-              <div className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl p-5 text-white shadow-xl flex flex-col justify-between min-h-[140px] relative overflow-hidden group cursor-pointer" onClick={() => {}}>
+              <div className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl p-5 text-white shadow-xl flex flex-col justify-between min-h-[140px] relative overflow-hidden group cursor-pointer" onClick={() => setActiveFilter('Missing')}>
                 <div className="absolute right-0 top-0 opacity-10 transform translate-x-2 -translate-y-2 group-hover:scale-110 transition-transform">
                   <User size={100} />
                 </div>
@@ -2967,7 +3092,7 @@ function HomeFeed({
               </div>
 
               {/* Natural Calamity */}
-              <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-5 text-white shadow-xl flex flex-col justify-between min-h-[140px] relative overflow-hidden group cursor-pointer" onClick={() => {}}>
+              <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-5 text-white shadow-xl flex flex-col justify-between min-h-[140px] relative overflow-hidden group cursor-pointer" onClick={() => setActiveFilter('Calamity')}>
                 <div className="absolute right-0 top-0 opacity-10 transform translate-x-2 -translate-y-2 group-hover:scale-110 transition-transform">
                   <AlertTriangle size={100} />
                 </div>
@@ -3026,25 +3151,46 @@ function HomeFeed({
 
       {/* HYPERLOCAL FEED (Small Boxes) */}
       <div>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
+          <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2 shrink-0">
             <Activity size={18} className="text-orange-600" /> {t('hyperlocalFeed')}
           </h3>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {filterOptions.map(option => (
+              <button
+                key={option}
+                onClick={() => setActiveFilter(option)}
+                className={`px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold transition-all ${
+                  activeFilter === option 
+                    ? 'bg-slate-800 text-white shadow-md' 
+                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                {option}
+              </button>
+            ))}
             {(userRole === 'Volunteer' || userRole === 'HealthcareWorker' || userRole === 'Admin') && (
               <button
                 type="button"
                 onClick={onOpenPostAlert}
-                className="bg-orange-600 hover:bg-orange-700 text-white font-bold py-1.5 px-3 rounded-xl text-xs flex items-center gap-1 transition-all shadow-sm active:scale-95 cursor-pointer"
+                className="bg-orange-600 hover:bg-orange-700 text-white font-bold py-1 px-3 rounded-full text-[10px] sm:text-xs flex items-center gap-1 transition-all shadow-sm active:scale-95 cursor-pointer ml-1"
               >
                 <Plus size={12} /> Post Alert
               </button>
             )}
-            <button className="text-sm text-orange-600 font-medium hover:underline">{t('viewMap')}</button>
+            <button 
+              onClick={() => {
+                const mapEl = document.getElementById('hyperlocal-map');
+                if (mapEl) mapEl.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="text-sm text-orange-600 font-medium hover:underline ml-2"
+            >
+              {t('viewMap')}
+            </button>
           </div>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-          {(combinedAlerts || []).map(alert => {
+          {(filteredAlerts || []).map(alert => {
             const isHigh = alert.severity === 'high';
             const isMedium = alert.severity === 'medium';
             const isBlood = alert.isBloodAttestation;
@@ -3335,7 +3481,7 @@ function RescueModule({
             )}
           </div>
 
-          <div className={`w-full h-72 rounded-2xl relative overflow-hidden border transition-colors duration-300 ${isSOSActive ? 'border-red-500/40' : 'border-slate-800'} shadow-xl bg-slate-950`}>
+          <div id="hyperlocal-map" className={`w-full h-72 rounded-2xl relative overflow-hidden border transition-colors duration-300 ${isSOSActive ? 'border-red-500/40' : 'border-slate-800'} shadow-xl bg-slate-950`}>
             <iframe
               title="Map"
               width="100%"
