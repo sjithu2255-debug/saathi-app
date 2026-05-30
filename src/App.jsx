@@ -1161,6 +1161,14 @@ function SaathiApp() {
             color: #1e293b !important;
           }
 
+          /* Decrease transparency for dropdown menus for better readability */
+          div[data-dropdown] .absolute,
+          .absolute.z-50 {
+            background-color: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(24px) !important;
+            -webkit-backdrop-filter: blur(24px) !important;
+          }
+
           .bg-slate-900,
           div[class*="bg-slate-900"],
           aside[class*="bg-slate-900"],
@@ -1272,6 +1280,14 @@ function SaathiApp() {
         .bg-slate-950, div[class*="bg-slate-950"] { background-color: rgba(2, 6, 23, 0.4) !important; backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important; }
         .bg-slate-900, div[class*="bg-slate-900"] { background-color: rgba(15, 23, 42, 0.4) !important; backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important; }
         .bg-slate-800, div[class*="bg-slate-800"] { background-color: rgba(30, 41, 59, 0.5) !important; backdrop-filter: blur(12px) !important; -webkit-backdrop-filter: blur(12px) !important; }
+
+        /* Decrease transparency for dropdown menus for better readability */
+        div[data-dropdown] .absolute,
+        .absolute.z-50 {
+          background-color: rgba(15, 23, 42, 0.95) !important;
+          backdrop-filter: blur(24px) !important;
+          -webkit-backdrop-filter: blur(24px) !important;
+        }
 
         .glass-panel {
           background-color: rgba(15, 23, 42, 0.3) !important;
@@ -1415,7 +1431,7 @@ function SaathiApp() {
       )}
 
       <header className={`backdrop-blur-md shadow-2xl border-b sticky top-0 z-50 ${isDarkMode ? 'bg-[#0b0f19]/80 border-slate-800/80' : 'bg-white/90 border-slate-200'}`}>
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between relative">
           <div className="flex items-center gap-1 sm:gap-3">
             {isAuthenticated && (
               <button
@@ -1503,7 +1519,7 @@ function SaathiApp() {
               <button
                 type="button"
                 onClick={() => setIsSOSActive(false)}
-                className="flex items-center gap-1.5 bg-white text-red-600 border border-red-500 hover:bg-red-50 font-bold px-2 sm:px-3 py-1.5 rounded-full shadow-sm transition-all animate-pulse text-[10px] sm:text-xs uppercase tracking-wider whitespace-nowrap shrink-0"
+                className="flex items-center gap-1.5 bg-white text-red-600 border border-red-500 hover:bg-red-50 font-bold px-2 sm:px-3 py-1.5 rounded-full shadow-sm transition-all animate-pulse text-[10px] sm:text-xs uppercase tracking-wider whitespace-nowrap shrink-0 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 sm:static sm:transform-none z-50"
               >
                 <span className="w-2 h-2 bg-red-600 rounded-full animate-ping"></span>
                 <span>{t('stopBroadcast')}</span>
@@ -1513,7 +1529,7 @@ function SaathiApp() {
                 type="button"
                 onClick={startSOSCountdown}
                 disabled={sosCountdown !== null}
-                className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 bg-red-600 hover:bg-red-700 active:scale-95 text-white rounded-full shadow-sm transition-all relative group cursor-pointer whitespace-nowrap shrink-0"
+                className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 bg-red-600 hover:bg-red-700 active:scale-95 text-white rounded-full shadow-sm transition-all relative group cursor-pointer whitespace-nowrap shrink-0 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 sm:static sm:transform-none z-50"
                 title={t('triggerSOS')}
               >
                 <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-25 group-hover:opacity-40"></div>
