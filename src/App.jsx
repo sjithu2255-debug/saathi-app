@@ -1671,18 +1671,13 @@ function SaathiApp() {
 
             {/* Location Badge */}
             <div
-              className={`flex items-center justify-center w-9 h-9 rounded-full transition-colors duration-200 border cursor-default select-none pointer-events-none ${locationStatus === 'granted' ? 'bg-emerald-950/40 text-emerald-400 border-emerald-500/20' :
+              className={`relative group flex items-center justify-center w-9 h-9 rounded-full transition-colors duration-200 border cursor-help select-none ${
+                locationStatus === 'granted' ? 'bg-emerald-950/40 text-emerald-400 border-emerald-500/20' :
                 locationStatus === 'manual' ? 'bg-blue-950/40 text-blue-400 border-blue-500/20' :
-                  locationStatus === 'requesting' ? 'bg-blue-950/40 text-blue-400 border-blue-500/20' :
-                    locationStatus === 'denied' || locationStatus === 'unavailable' ? 'bg-orange-950/40 text-orange-400 border-orange-500/20' :
-                      'bg-slate-900 text-slate-400 border-slate-800'
-                }`}
-              title={
-                locationStatus === 'granted' && userCoords ? `Location: ${resolvedLocation} | GPS: ${userCoords.lat.toFixed(5)}, ${userCoords.lng.toFixed(5)} (±${Math.round(userCoords.accuracy)}m)` :
-                  locationStatus === 'manual' ? `Location: ${resolvedLocation} (Manually set)` :
-                    locationStatus === 'denied' ? 'Location access blocked' :
-                      locationStatus === 'requesting' ? 'Fetching location...' : resolvedLocation
-              }
+                locationStatus === 'requesting' ? 'bg-blue-950/40 text-blue-400 border-blue-500/20' :
+                locationStatus === 'denied' || locationStatus === 'unavailable' ? 'bg-orange-950/40 text-orange-400 border-orange-500/20' :
+                'bg-slate-900 text-slate-400 border-slate-800'
+              }`}
             >
               {locationStatus === 'requesting' ? (
                 <Loader2 size={16} className="text-blue-400 animate-spin" />
@@ -1698,6 +1693,23 @@ function SaathiApp() {
               ) : (
                 <MapPin size={16} className="text-slate-400" />
               )}
+              
+              {/* Custom Tooltip */}
+              <div className="absolute top-full right-0 mt-2 w-max max-w-xs p-3 bg-slate-900 text-slate-200 text-xs rounded-xl shadow-xl shadow-black/50 border border-slate-800 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 flex flex-col gap-1">
+                <span className="font-bold text-white block pb-1 border-b border-slate-700/50">Current Location</span>
+                <span>{resolvedLocation}</span>
+                {userCoords && locationStatus === 'granted' && (
+                  <span className="text-[10px] text-slate-400 font-mono mt-1">
+                    {userCoords.lat.toFixed(5)}, {userCoords.lng.toFixed(5)} (±{Math.round(userCoords.accuracy)}m)
+                  </span>
+                )}
+                {locationStatus === 'manual' && (
+                  <span className="text-[10px] text-blue-400 font-bold mt-1">Manually Set</span>
+                )}
+                {locationStatus === 'denied' && (
+                  <span className="text-[10px] text-orange-400 font-bold mt-1">Location access blocked</span>
+                )}
+              </div>
             </div>
           </div>
 
@@ -1761,8 +1773,8 @@ function SaathiApp() {
               <span className="hidden sm:inline sm:ml-1.5 uppercase tracking-wide">SOS</span>
             </button>
 
-            {/* Wallet — visible to Volunteer/NGO/Admin/Government/CivilDefence */}
-            {['Volunteer', 'NGO', 'Government', 'CivilDefence', 'Admin'].includes(userRole) && (
+            {/* Wallet — visible to Volunteer only */}
+            {userRole === 'Volunteer' && (
               <button
                 onClick={() => setShowWallet(true)}
                 title={`Wallet: ${formatINR(walletBalance)}`}
