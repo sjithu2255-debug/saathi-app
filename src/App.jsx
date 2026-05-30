@@ -1519,7 +1519,7 @@ function SaathiApp() {
               <button
                 type="button"
                 onClick={() => setIsSOSActive(false)}
-                className="flex items-center gap-1.5 bg-white text-red-600 border border-red-500 hover:bg-red-50 font-bold px-2 sm:px-3 py-1.5 rounded-full shadow-sm transition-all animate-pulse text-[10px] sm:text-xs uppercase tracking-wider whitespace-nowrap shrink-0 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 sm:static sm:transform-none z-50"
+                className="flex items-center gap-1.5 bg-white text-red-600 border border-red-500 hover:bg-red-50 font-bold px-2 sm:px-3 py-1.5 rounded-full shadow-sm transition-all animate-pulse text-[10px] sm:text-xs uppercase tracking-wider whitespace-nowrap shrink-0 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50"
               >
                 <span className="w-2 h-2 bg-red-600 rounded-full animate-ping"></span>
                 <span>{t('stopBroadcast')}</span>
@@ -1529,7 +1529,7 @@ function SaathiApp() {
                 type="button"
                 onClick={startSOSCountdown}
                 disabled={sosCountdown !== null}
-                className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 bg-red-600 hover:bg-red-700 active:scale-95 text-white rounded-full shadow-sm transition-all relative group cursor-pointer whitespace-nowrap shrink-0 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 sm:static sm:transform-none z-50"
+                className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 bg-red-600 hover:bg-red-700 active:scale-95 text-white rounded-full shadow-sm transition-all group cursor-pointer whitespace-nowrap shrink-0 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50"
                 title={t('triggerSOS')}
               >
                 <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-25 group-hover:opacity-40"></div>
