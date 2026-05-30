@@ -1503,6 +1503,32 @@ function SaathiApp() {
           </div>
 
           <div className="flex items-center space-x-2">
+            {/* SOS button in header */}
+            {isSOSActive ? (
+              <button
+                type="button"
+                onClick={() => setIsSOSActive(false)}
+                className="flex items-center gap-1.5 bg-white text-red-600 border border-red-500 hover:bg-red-50 font-bold px-3 py-1.5 rounded-full shadow-sm transition-all animate-pulse text-[10px] sm:text-xs uppercase tracking-wider"
+              >
+                <span className="w-2 h-2 bg-red-600 rounded-full animate-ping"></span>
+                <span className="hidden sm:inline">{t('stopBroadcast')}</span>
+                <span className="sm:hidden">STOP</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={startSOSCountdown}
+                disabled={sosCountdown !== null}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 active:scale-95 text-white rounded-full shadow-sm transition-all relative group cursor-pointer"
+                title={t('triggerSOS')}
+              >
+                <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-25 group-hover:opacity-40"></div>
+                <ShieldAlert size={14} className="relative z-10" />
+                <span className="text-[10px] sm:text-xs font-black tracking-wider relative z-10 uppercase hidden sm:inline">SOS HELP</span>
+                <span className="text-[10px] sm:text-xs font-black tracking-wider relative z-10 uppercase sm:hidden">SOS</span>
+              </button>
+            )}
+
             {/* Real-time System Integrity Badge */}
             <div className="relative group cursor-default" data-dropdown>
               <div
@@ -1891,34 +1917,6 @@ function SaathiApp() {
           source={earningToast.source}
           onDone={() => setEarningToast(null)}
         />
-      )}
-
-      {/* Floating SOS button */}
-      {isAuthenticated && (
-        <div className="fixed bottom-24 right-6 md:bottom-8 md:right-8 z-[150] flex flex-col items-end gap-2">
-          {isSOSActive ? (
-            <button
-              type="button"
-              onClick={() => setIsSOSActive(false)}
-              className="flex items-center gap-2 bg-white text-red-600 border-2 border-red-500 hover:bg-red-50 font-bold px-4 py-3 rounded-full shadow-2xl transition-all animate-bounce text-xs uppercase tracking-wider"
-            >
-              <span className="w-3 h-3 bg-red-600 rounded-full animate-ping"></span>
-              {t('stopBroadcast')}
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={startSOSCountdown}
-              disabled={sosCountdown !== null}
-              className="flex items-center gap-2.5 px-4 py-3 md:px-5 md:py-3.5 bg-red-600 hover:bg-red-700 hover:scale-105 active:scale-95 text-white rounded-full shadow-2xl transition-all relative group cursor-pointer"
-              title={t('triggerSOS')}
-            >
-              <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-25 group-hover:opacity-40"></div>
-              <ShieldAlert size={18} className="relative z-10 animate-pulse" />
-              <span className="text-xs md:text-sm font-black tracking-wider relative z-10 uppercase">SOS HELP</span>
-            </button>
-          )}
-        </div>
       )}
 
       {/* Full-screen countdown overlay */}
