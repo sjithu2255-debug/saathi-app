@@ -2506,13 +2506,10 @@ function WalletModal({ balance, transactions, onPayout, onClose }) {
             <div className="flex items-baseline gap-0.5 mt-1 text-black">
               <span className="text-xl font-bold">₹</span>
               <span className="text-3xl font-black relative z-10">{balance}</span>
-              {/* Cash Animations */}
-              <div className="absolute -top-4 -right-6 text-emerald-500 animate-bounce delay-100 opacity-60 pointer-events-none text-xl">💸</div>
-              <div className="absolute -bottom-2 -right-2 text-emerald-500 animate-pulse delay-300 opacity-40 pointer-events-none text-xl">💰</div>
             </div>
           </div>
           <div className="w-10 h-10 bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-600 relative z-10">
-            <Wallet size={20} className="animate-pulse" />
+            <Wallet size={20} />
           </div>
         </div>
 
