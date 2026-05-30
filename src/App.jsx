@@ -7179,6 +7179,7 @@ const DEFAULT_OTP = '000000';
 
 function AuthScreen({ onSuccess, isDarkMode, currentLanguage, setCurrentLanguage, t }) {
   const isAdminRoute = window.location.pathname === '/admin';
+  const [isLoginMode, setIsLoginMode] = useState(true);
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('pass@1234');
   const [selectedRole, setSelectedRole] = useState(isAdminRoute ? 'Admin' : 'Citizen');
@@ -7196,20 +7197,37 @@ function AuthScreen({ onSuccess, isDarkMode, currentLanguage, setCurrentLanguage
         const usersDB = JSON.parse(localStorage.getItem('saathi_users') || '{}');
         const formattedPhone = phone.replace(/\D/g, '').slice(0, 10);
         
-        if (!usersDB[formattedPhone]) {
-          // Register
-          usersDB[formattedPhone] = {
-            password,
-            role: selectedRole,
-            name: `User ${formattedPhone.slice(-4)}`
-          };
-          localStorage.setItem('saathi_users', JSON.stringify(usersDB));
-        } else {
-          // Login
-          if (usersDB[formattedPhone].password !== password) {
-            setError('Incorrect password');
+        if (isAdminRoute) {
+          // Admin Route: Auto-register if not exists for demo purposes
+          if (!usersDB[formattedPhone]) {
+            usersDB[formattedPhone] = { password, role: 'Admin', name: `Admin ${formattedPhone.slice(-4)}` };
+            localStorage.setItem('saathi_users', JSON.stringify(usersDB));
+          } else if (usersDB[formattedPhone].password !== password || usersDB[formattedPhone].role !== 'Admin') {
+            setError('Incorrect admin credentials');
             setIsProcessing(false);
             return;
+          }
+        } else {
+          // Regular Route
+          if (isLoginMode) {
+            if (!usersDB[formattedPhone]) {
+              setError('Account not found. Please create an account.');
+              setIsProcessing(false);
+              return;
+            }
+            if (usersDB[formattedPhone].password !== password) {
+              setError('Incorrect password');
+              setIsProcessing(false);
+              return;
+            }
+          } else {
+            if (usersDB[formattedPhone]) {
+              setError('Account already exists. Please sign in.');
+              setIsProcessing(false);
+              return;
+            }
+            usersDB[formattedPhone] = { password, role: selectedRole, name: `User ${formattedPhone.slice(-4)}` };
+            localStorage.setItem('saathi_users', JSON.stringify(usersDB));
           }
         }
 
@@ -7221,7 +7239,7 @@ function AuthScreen({ onSuccess, isDarkMode, currentLanguage, setCurrentLanguage
           role: loggedInUser.role 
         });
       } catch (e) {
-        setError('Login failed. Please try again.');
+        setError('Authentication failed. Please try again.');
         setIsProcessing(false);
       }
     }, 800);
@@ -7334,10 +7352,10 @@ function AuthScreen({ onSuccess, isDarkMode, currentLanguage, setCurrentLanguage
           <div className="space-y-5 animate-in fade-in">
             <div>
               <h2 className="text-2xl font-bold text-white">
-                {isAdminRoute ? 'Admin Portal' : (t ? t('welcomeTitle') : 'Welcome')}
+                {isAdminRoute ? 'Admin Portal' : (isLoginMode ? 'Welcome Back' : 'Create Account')}
               </h2>
               <p className="text-xs text-slate-400 mt-1">
-                {isAdminRoute ? 'Sign in to the administrative dashboard securely.' : 'Sign in or register your account securely.'}
+                {isAdminRoute ? 'Sign in to the administrative dashboard securely.' : (isLoginMode ? 'Sign in to your account securely.' : 'Register a new account securely.')}
               </p>
             </div>
 
@@ -7374,9 +7392,9 @@ function AuthScreen({ onSuccess, isDarkMode, currentLanguage, setCurrentLanguage
                 />
               </div>
               
-              {!isAdminRoute ? (
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Role (for new users)</label>
+              {!isAdminRoute && !isLoginMode && (
+                <div className="space-y-1.5 animate-in fade-in slide-in-from-top-2">
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Account Type / Role</label>
                   <select
                     value={selectedRole}
                     onChange={(e) => setSelectedRole(e.target.value)}
@@ -7392,7 +7410,9 @@ function AuthScreen({ onSuccess, isDarkMode, currentLanguage, setCurrentLanguage
                     <option value="ControlRoom">Control Room</option>
                   </select>
                 </div>
-              ) : (
+              )}
+              
+              {isAdminRoute && (
                 <div className="bg-red-950/20 border border-red-500/20 rounded-xl p-3 text-xs text-red-400 flex items-center justify-center font-bold">
                   Admin Access Required
                 </div>
@@ -7407,8 +7427,19 @@ function AuthScreen({ onSuccess, isDarkMode, currentLanguage, setCurrentLanguage
               className="w-full bg-gradient-to-r from-orange-600 to-emerald-600 hover:from-orange-700 hover:to-emerald-700 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer text-sm mt-4"
             >
               {isProcessing ? <Loader2 size={16} className="animate-spin" /> : <ArrowRight size={16} />}
-              {isProcessing ? 'Verifying...' : 'Sign In / Register'}
+              {isProcessing ? 'Verifying...' : (isAdminRoute ? 'Sign In' : (isLoginMode ? 'Sign In' : 'Create Account'))}
             </button>
+            
+            {!isAdminRoute && (
+              <div className="text-center mt-4">
+                <button 
+                  onClick={() => { setIsLoginMode(!isLoginMode); setError(''); }}
+                  className="text-xs font-bold text-slate-400 hover:text-white transition-colors"
+                >
+                  {isLoginMode ? "Don't have an account? Create one" : "Already have an account? Sign in"}
+                </button>
+              </div>
+            )}
             
             <p className="text-[10px] text-slate-500 text-center leading-relaxed mt-4">
               By continuing, you agree to Saathi's Terms and Privacy Policy. All connection channels are cryptographically signed to block intercepts.
