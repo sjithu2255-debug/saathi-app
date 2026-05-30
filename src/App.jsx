@@ -2016,6 +2016,17 @@ function SaathiApp() {
                     <button
                       onClick={() => {
                         setVolunteerApplicationStatus('pending');
+                        try {
+                          const usersDB = JSON.parse(localStorage.getItem('saathi_users') || '{}');
+                          if (displayUser && displayUser.phone && usersDB[displayUser.phone]) {
+                            usersDB[displayUser.phone].requestedRole = 'Volunteer';
+                            usersDB[displayUser.phone].approvalStatus = 'pending';
+                            usersDB[displayUser.phone].verificationDocument = 'Requested from Dashboard';
+                            localStorage.setItem('saathi_users', JSON.stringify(usersDB));
+                          }
+                        } catch (e) {
+                          console.error("Failed to update user role request", e);
+                        }
                         setVolunteerRequests(prev => [
                           {
                             id: Date.now(),
