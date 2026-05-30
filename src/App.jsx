@@ -1468,38 +1468,33 @@ function SaathiApp() {
           </div>
 
           <div
-            className={`flex items-center space-x-2 px-3 py-1.5 rounded-full text-xs font-bold transition-colors duration-200 border cursor-default select-none pointer-events-none ${locationStatus === 'granted' ? 'bg-emerald-950/40 text-emerald-400 border-emerald-500/20' :
+            className={`flex items-center justify-center w-9 h-9 rounded-full transition-colors duration-200 border cursor-default select-none pointer-events-none ${locationStatus === 'granted' ? 'bg-emerald-950/40 text-emerald-400 border-emerald-500/20' :
               locationStatus === 'manual' ? 'bg-blue-950/40 text-blue-400 border-blue-500/20' :
                 locationStatus === 'requesting' ? 'bg-blue-950/40 text-blue-400 border-blue-500/20' :
                   locationStatus === 'denied' || locationStatus === 'unavailable' ? 'bg-orange-950/40 text-orange-400 border-orange-500/20' :
                     'bg-slate-900 text-slate-400 border-slate-800'
               }`}
             title={
-              locationStatus === 'granted' && userCoords ? `GPS: ${userCoords.lat.toFixed(5)}, ${userCoords.lng.toFixed(5)} (±${Math.round(userCoords.accuracy)}m)` :
-                locationStatus === 'manual' ? 'Manually set' :
+              locationStatus === 'granted' && userCoords ? `Location: ${resolvedLocation} | GPS: ${userCoords.lat.toFixed(5)}, ${userCoords.lng.toFixed(5)} (±${Math.round(userCoords.accuracy)}m)` :
+                locationStatus === 'manual' ? `Location: ${resolvedLocation} (Manually set)` :
                   locationStatus === 'denied' ? 'Location access blocked' :
-                    locationStatus === 'requesting' ? 'Fetching location...' : ''
+                    locationStatus === 'requesting' ? 'Fetching location...' : resolvedLocation
             }
           >
             {locationStatus === 'requesting' ? (
-              <Loader2 size={14} className="text-blue-400 animate-spin" />
+              <Loader2 size={16} className="text-blue-400 animate-spin" />
             ) : locationStatus === 'granted' ? (
               <div className="relative">
-                <MapPin size={14} className="text-emerald-400" />
-                <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-emerald-500 rounded-full border border-slate-900 animate-pulse"></span>
+                <MapPin size={16} className="text-emerald-400" />
+                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-500 rounded-full border border-slate-900 animate-pulse"></span>
               </div>
             ) : locationStatus === 'manual' ? (
-              <MapPin size={14} className="text-blue-400" />
+              <MapPin size={16} className="text-blue-400" />
             ) : locationStatus === 'denied' || locationStatus === 'unavailable' ? (
-              <AlertTriangle size={14} className="text-orange-400 animate-pulse" />
+              <AlertTriangle size={16} className="text-orange-400 animate-pulse" />
             ) : (
-              <MapPin size={14} className="text-slate-400" />
+              <MapPin size={16} className="text-slate-400" />
             )}
-            <span className="truncate max-w-[70px] sm:max-w-xs">
-              {locationStatus === 'requesting' ? 'Locating...' :
-                locationStatus === 'denied' || locationStatus === 'unavailable' ? 'Location Disabled' :
-                  resolvedLocation}
-            </span>
           </div>
 
           <div className="flex items-center space-x-2">
@@ -1511,8 +1506,7 @@ function SaathiApp() {
                 className="flex items-center gap-1.5 bg-white text-red-600 border border-red-500 hover:bg-red-50 font-bold px-3 py-1.5 rounded-full shadow-sm transition-all animate-pulse text-[10px] sm:text-xs uppercase tracking-wider"
               >
                 <span className="w-2 h-2 bg-red-600 rounded-full animate-ping"></span>
-                <span className="hidden sm:inline">{t('stopBroadcast')}</span>
-                <span className="sm:hidden">STOP</span>
+                <span>{t('stopBroadcast')}</span>
               </button>
             ) : (
               <button
@@ -1524,21 +1518,20 @@ function SaathiApp() {
               >
                 <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-25 group-hover:opacity-40"></div>
                 <ShieldAlert size={14} className="relative z-10" />
-                <span className="text-[10px] sm:text-xs font-black tracking-wider relative z-10 uppercase hidden sm:inline">SOS HELP</span>
-                <span className="text-[10px] sm:text-xs font-black tracking-wider relative z-10 uppercase sm:hidden">SOS</span>
+                <span className="text-[10px] sm:text-xs font-black tracking-wider relative z-10 uppercase">SOS HELP</span>
               </button>
             )}
 
             {/* Real-time System Integrity Badge */}
             <div className="relative group cursor-default" data-dropdown>
               <div
-                className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-black transition-all border ${securityScore >= 90
+                className={`flex items-center justify-center w-9 h-9 rounded-full transition-all border ${securityScore >= 90
                   ? 'bg-emerald-950/40 text-emerald-400 border-emerald-500/20 pulse-glow-success'
                   : 'bg-red-950/40 text-red-400 border-red-500/20 animate-pulse'
                   }`}
+                title={`System Integrity: ${securityScore}%`}
               >
-                <Fingerprint size={13} className="animate-pulse" />
-                <span className="hidden sm:inline">SECURE: {securityScore}%</span>
+                <Fingerprint size={16} className="animate-pulse" />
               </div>
 
               <div className="absolute right-0 mt-2 w-80 bg-slate-950/95 backdrop-blur-md rounded-2xl p-4 shadow-2xl border border-slate-800/80 z-[300] hidden group-hover:block transition-all">
@@ -1580,10 +1573,9 @@ function SaathiApp() {
               <button
                 onClick={() => setShowWallet(true)}
                 title={`Wallet: ${formatINR(walletBalance)}`}
-                className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-950 border border-amber-500/20 hover:border-amber-400 transition-colors cursor-pointer"
+                className="relative flex items-center justify-center w-9 h-9 rounded-full bg-slate-950 border border-amber-500/20 hover:border-amber-400 transition-colors cursor-pointer"
               >
-                <Wallet size={14} className="text-amber-400" />
-                <span className="text-xs font-bold text-amber-500 hidden sm:inline">{formatINR(walletBalance)}</span>
+                <Wallet size={16} className="text-amber-400" />
               </button>
             )}
             <div className="relative" data-dropdown>
