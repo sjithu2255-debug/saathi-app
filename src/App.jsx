@@ -2142,48 +2142,13 @@ function SaathiApp() {
       {/* Full-screen countdown overlay */}
       {/* SOS Stop Face Verify Modal */}
       {showSOSStopModal && (
-        <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md">
-          <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl w-full max-w-sm text-center shadow-2xl relative overflow-hidden">
-            <h3 className="text-xl font-black text-white mb-2 uppercase">Stop SOS Broadcast</h3>
-            <p className="text-xs text-slate-400 mb-6">Please look at the camera to verify your identity to stop the SOS.</p>
-            
-            <div className="relative bg-slate-950 rounded-xl overflow-hidden aspect-[4/3] mb-6 flex items-center justify-center border-2 border-slate-800 group">
-              <ScanLine size={48} className="text-slate-500 animate-pulse group-hover:text-red-500 transition-colors" />
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-40 h-52 border-4 border-white/20 rounded-full"></div>
-              </div>
-              <p className="absolute bottom-3 left-1/2 -translate-x-1/2 text-white text-[10px] bg-black/50 px-2 py-1 rounded">
-                Center your face
-              </p>
-            </div>
-            
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => setShowSOSStopModal(false)}
-                className="flex-1 px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl transition-colors text-sm"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  // Simulate 1.5s verify
-                  const btn = document.getElementById('verify-btn');
-                  if (btn) btn.innerHTML = '<span class="animate-spin inline-block mr-2">⟳</span>Verifying...';
-                  setTimeout(() => {
-                    setIsSOSActive(false);
-                    setShowSOSStopModal(false);
-                  }, 1500);
-                }}
-                id="verify-btn"
-                className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors shadow-lg shadow-red-900/50 text-sm flex items-center justify-center"
-              >
-                <ScanLine size={16} className="mr-1" /> Face Verify
-              </button>
-            </div>
-          </div>
-        </div>
+        <FaceVerifyStopSOSModal 
+          onVerify={() => {
+            setIsSOSActive(false);
+            setShowSOSStopModal(false);
+          }}
+          onCancel={() => setShowSOSStopModal(false)}
+        />
       )}
 
       {sosCountdown !== null && (
@@ -2811,6 +2776,111 @@ function AlertDetailModal({ alert, isSOSActive, onTriggerSOS, onClose }) {
         </div>
       )}
     </Modal>
+  );
+}
+
+// --- FACE VERIFY SOS MODAL ---
+function FaceVerifyStopSOSModal({ onVerify, onCancel }) {
+  const videoRef = useRef(null);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [photoData, setPhotoData] = useState(null);
+
+  useEffect(() => {
+    let stream = null;
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
+      .then(s => {
+        stream = s;
+        if (videoRef.current) {
+          videoRef.current.srcObject = s;
+        }
+      })
+      .catch(err => console.error("Camera error:", err));
+
+    return () => {
+      if (stream) stream.getTracks().forEach(t => t.stop());
+    };
+  }, []);
+
+  const handleVerify = () => {
+    setIsVerifying(true);
+    // Take picture in 2 seconds
+    setTimeout(() => {
+      if (videoRef.current) {
+        const canvas = document.createElement('canvas');
+        canvas.width = videoRef.current.videoWidth || 480;
+        canvas.height = videoRef.current.videoHeight || 640;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+        setPhotoData(canvas.toDataURL('image/jpeg'));
+      }
+      
+      // Simulate verification process after capturing picture
+      setTimeout(() => {
+        onVerify();
+      }, 1000);
+    }, 2000);
+  };
+
+  return (
+    <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md">
+      <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl w-full max-w-sm text-center shadow-2xl relative overflow-hidden">
+        <h3 className="text-xl font-black text-white mb-2 uppercase">Stop SOS Broadcast</h3>
+        <p className="text-xs text-slate-400 mb-6">Please look at the camera to verify your identity to stop the SOS.</p>
+        
+        <div className="relative bg-slate-950 rounded-xl overflow-hidden aspect-[4/3] mb-6 flex items-center justify-center border-2 border-slate-800 group">
+          {photoData ? (
+            <img src={photoData} alt="Captured face" className="w-full h-full object-cover" style={{ transform: 'scaleX(-1)' }} />
+          ) : (
+            <>
+              <video 
+                ref={videoRef} 
+                autoPlay 
+                playsInline 
+                muted 
+                className="w-full h-full object-cover" 
+                style={{ transform: 'scaleX(-1)' }} 
+              />
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-40 h-52 border-4 border-white/20 rounded-full"></div>
+              </div>
+              <p className="absolute bottom-3 left-1/2 -translate-x-1/2 text-white text-[10px] bg-black/50 px-2 py-1 rounded">
+                Center your face
+              </p>
+            </>
+          )}
+          {isVerifying && !photoData && (
+            <div className="absolute inset-0 bg-slate-900/50 flex flex-col items-center justify-center backdrop-blur-sm">
+              <span className="text-white text-3xl font-black animate-pulse">2s</span>
+              <span className="text-xs text-slate-300 mt-2">Capturing...</span>
+            </div>
+          )}
+          {isVerifying && photoData && (
+            <div className="absolute inset-0 bg-emerald-900/50 flex flex-col items-center justify-center backdrop-blur-sm">
+              <span className="text-white text-lg font-bold animate-pulse">Verified</span>
+            </div>
+          )}
+        </div>
+        
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={isVerifying}
+            className="flex-1 px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl transition-colors text-sm disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleVerify}
+            disabled={isVerifying}
+            className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors shadow-lg shadow-red-900/50 text-sm flex items-center justify-center disabled:opacity-50"
+          >
+            {isVerifying ? <><span className="animate-spin inline-block mr-2">⟳</span>Verifying...</> : <><ScanLine size={16} className="mr-1" /> Face Verify</>}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
