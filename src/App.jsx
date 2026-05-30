@@ -743,6 +743,27 @@ function SaathiApp() {
   const countdownTimerRef = useRef(null);
   const displayUser = authedUser || MOCK_USER;
 
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setDeferredPrompt(null);
+      }
+    }
+  };
+
   // Active DevTools open detection logic
   useEffect(() => {
     const checkDevTools = () => {
@@ -1530,6 +1551,16 @@ function SaathiApp() {
                 </div>
               )}
             </div>
+
+            {deferredPrompt && (
+              <button
+                onClick={handleInstallClick}
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-full text-xs font-extrabold shadow-md shadow-emerald-500/20 transition-all border border-emerald-400/30 ml-1"
+              >
+                <Download size={12} />
+                <span>Install App</span>
+              </button>
+            )}
 
             {/* Location Badge */}
             <div
