@@ -650,6 +650,7 @@ export default function AppWrapper() {
 }
 
 function SaathiApp() {
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showSplash, setShowSplash] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -1129,7 +1130,8 @@ function SaathiApp() {
   }
 
   return (
-    <div className="flex flex-col h-screen font-sans overflow-hidden bg-[#070913] text-slate-200 relative">
+    <div className={`flex flex-col h-screen font-sans overflow-hidden relative transition-colors ${isDarkMode ? 'bg-[#070913] text-slate-200' : 'bg-slate-50 text-slate-800'}`}>
+      {isDarkMode && (
       <style>{`
         /* Premium, cohesive dark theme overrides globally */
         body, html {
@@ -1269,6 +1271,7 @@ function SaathiApp() {
           box-shadow: 0 0 25px rgba(16, 185, 129, 0.15);
         }
       `}</style>
+      )}
 
       {/* Background Holographic Grid */}
       <div className="absolute inset-0 hologram-grid opacity-10 pointer-events-none"></div>
@@ -1281,18 +1284,24 @@ function SaathiApp() {
         </div>
       )}
 
-      <header className="bg-[#0b0f19]/80 backdrop-blur-md shadow-2xl border-b border-slate-800/80 sticky top-0 z-50">
+      <header className={`backdrop-blur-md shadow-2xl border-b sticky top-0 z-50 ${isDarkMode ? 'bg-[#0b0f19]/80 border-slate-800/80' : 'bg-white/90 border-slate-200'}`}>
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             {isAuthenticated && (
               <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="hidden md:flex p-2 -ml-2 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+                className={`hidden md:flex p-2 -ml-2 rounded-xl transition-colors ${isDarkMode ? 'text-slate-400 hover:bg-slate-800 hover:text-white' : 'text-slate-600 hover:bg-slate-200 hover:text-slate-900'}`}
               >
                 <Menu size={24} />
               </button>
             )}
             <SaathiLogo size={36} showWordmark={false} />
+            <button
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className={`p-2 rounded-xl transition-colors ${isDarkMode ? 'text-slate-400 hover:bg-slate-800 hover:text-white' : 'text-slate-600 hover:bg-slate-200 hover:text-slate-900'}`}
+            >
+              {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
 
             <div className="relative" data-dropdown>
               <button
@@ -1657,7 +1666,7 @@ function SaathiApp() {
         </div>
       </main>
 
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#0b0f19]/95 backdrop-blur-md border-t border-slate-800 z-[150] pb-safe">
+      <nav className={`md:hidden fixed bottom-0 left-0 right-0 backdrop-blur-md border-t z-[150] pb-safe ${isDarkMode ? 'bg-[#0b0f19]/95 border-slate-800' : 'bg-white/95 border-slate-200'}`}>
         <div className="flex justify-around items-center h-16 pb-1">
           <MobileNavButton active={activeTab === 'home'} onClick={() => setActiveTab('home')} icon={<Activity size={22} />} label={t('dashboard')} />
           <MobileNavButton active={activeTab === 'rescue'} onClick={() => setActiveTab('rescue')} icon={<ShieldAlert size={22} />} label={t('rescue')} color="text-red-500" />
@@ -6500,7 +6509,7 @@ function SplashScreen({ onDone }) {
 
   return (
     <div
-      className={`fixed inset-0 z-[1000] flex flex-col items-center justify-center bg-[#070913] transition-opacity duration-500 ${phase === 'exit' ? 'opacity-0' : 'opacity-100'
+      className={`fixed inset-0 z-[1000] flex flex-col items-center justify-center transition-all duration-500 ${isDarkMode ? 'bg-[#070913] text-slate-200' : 'bg-slate-50 text-slate-800'} ${phase === 'exit' ? 'opacity-0' : 'opacity-100'
         }`}
     >
       <style>{`
@@ -6722,14 +6731,48 @@ function AuthScreen({ onSuccess }) {
   );
 
   return (
-    <div className="min-h-screen bg-[#070913] flex flex-col md:flex-row text-slate-200">
+    <div className={`min-h-screen flex flex-col md:flex-row transition-colors ${isDarkMode ? 'bg-[#070913] text-slate-200' : 'bg-slate-50 text-slate-800'}`}>
       {brandPanel}
 
-      <div className="flex-1 flex items-center justify-center p-4 md:p-8 bg-[#070913] relative overflow-hidden">
+      <div className={`flex-1 flex items-center justify-center p-4 md:p-8 relative overflow-hidden transition-colors ${isDarkMode ? 'bg-[#070913]' : 'bg-slate-50'}`}>
+        
+        <div className="absolute top-6 right-6 z-50" data-dropdown>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowLanguageMenu(!showLanguageMenu);
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-extrabold bg-orange-950/40 hover:bg-orange-900/60 text-orange-400 transition-all border border-orange-500/20 cursor-pointer shadow-lg backdrop-blur"
+          >
+            <span className="hidden sm:inline">{LANGUAGES[currentLanguage]?.nativeName || 'English'}</span>
+            <span className="sm:hidden">{LANGUAGES[currentLanguage]?.nativeName.slice(0, 2).toUpperCase() || 'EN'}</span>
+            <ChevronRight size={12} className={`transform transition-transform ${showLanguageMenu ? 'rotate-90' : ''}`} />
+          </button>
+          {showLanguageMenu && (
+            <div className={`absolute right-0 mt-2 w-36 border rounded-xl shadow-2xl z-50 overflow-hidden ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
+              <div className="p-1">
+                {Object.keys(LANGUAGES).map(langCode => (
+                  <button
+                    key={langCode}
+                    onClick={() => {
+                      setCurrentLanguage(langCode);
+                      setShowLanguageMenu(false);
+                    }}
+                    className={`w-full text-left px-3 py-2 text-xs rounded-lg transition-colors flex items-center justify-between ${currentLanguage === langCode ? 'bg-orange-950/50 text-orange-400 font-bold border border-orange-500/10' : isDarkMode ? 'hover:bg-slate-800 text-slate-300' : 'hover:bg-slate-100 text-slate-700'}`}
+                  >
+                    <span>{LANGUAGES[langCode].nativeName}</span>
+                    {currentLanguage === langCode && <CheckCircle size={10} className="text-orange-500" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Background micro grid */}
         <div className="absolute inset-0 hologram-grid opacity-10 pointer-events-none"></div>
 
-        <div className="w-full max-w-md bg-slate-900/30 border border-slate-800/80 backdrop-blur-md rounded-2xl p-6 sm:p-8 relative z-10 shadow-2xl">
+        <div className={`w-full max-w-md backdrop-blur-md rounded-2xl p-6 sm:p-8 relative z-10 shadow-2xl border ${isDarkMode ? 'bg-slate-900/30 border-slate-800/80' : 'bg-white/80 border-slate-200/80'}`}>
 
           {/* Mobile logo header */}
           <div className="md:hidden mb-8 flex flex-col items-center text-center">
