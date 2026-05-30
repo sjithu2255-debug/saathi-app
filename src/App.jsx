@@ -1699,7 +1699,7 @@ function SaathiApp() {
                 <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl z-50 overflow-hidden">
                   <div className="flex items-center justify-between p-3 border-b border-slate-800 bg-slate-950">
                     <div>
-                      <h4 className="font-bold text-xs text-white">Notifications</h4>
+                      <h4 className={`font-bold text-xs ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>Notifications</h4>
                       <p className="text-[10px] text-slate-500">{unreadCount} unread</p>
                     </div>
                     {unreadCount > 0 && (
@@ -1735,7 +1735,7 @@ function SaathiApp() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-2">
-                              <h5 className={`text-xs ${notif.unread ? 'font-bold text-white' : 'font-medium text-slate-300'}`}>{notif.title}</h5>
+                              <h5 className={`text-xs ${notif.unread ? `font-bold ${isDarkMode ? 'text-white' : 'text-slate-900'}` : 'font-medium text-slate-300'}`}>{notif.title}</h5>
                               {notif.unread && <span className="w-2 h-2 bg-orange-500 rounded-full mt-1.5 shrink-0 animate-pulse"></span>}
                             </div>
                             <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-2">{notif.body}</p>
