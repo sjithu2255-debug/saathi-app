@@ -468,6 +468,17 @@ const ROLE_COLORS = {
   Admin: 'bg-indigo-600'
 };
 
+const ROLE_HEX = {
+  Citizen: '#2563eb',
+  Volunteer: '#059669',
+  NGO: '#d77946ff',
+  Government: '#9333ea',
+  CivilDefence: '#640303ff',
+  ServiceProvider: '#0891b2',
+  HealthcareWorker: '#fb063bff',
+  Admin: '#4f46e5'
+};
+
 const can = {
   postOpportunity: (role) => ['NGO', 'Admin', 'Government', 'CivilDefence'].includes(role),
   onboardService: (role) => ['Volunteer', 'NGO', 'Admin', 'Government', 'CivilDefence'].includes(role),
@@ -1231,6 +1242,20 @@ function SaathiApp() {
 
   return (
     <div className={`flex flex-col h-screen font-sans overflow-hidden relative transition-colors ${isDarkMode ? 'bg-[#070913] text-slate-200' : 'bg-slate-50 text-slate-800'}`}>
+      <style>{`
+        :root {
+          --theme-primary: ${ROLE_HEX[userRole] || '#ea580c'};
+          --theme-primary-hover: color-mix(in srgb, var(--theme-primary) 85%, black);
+        }
+        .bg-orange-600 { background-color: var(--theme-primary) !important; }
+        .hover\\:bg-orange-700:hover { background-color: var(--theme-primary-hover) !important; }
+        .text-orange-600 { color: var(--theme-primary) !important; }
+        .text-orange-500 { color: var(--theme-primary) !important; }
+        .border-orange-500 { border-color: var(--theme-primary) !important; }
+        .border-orange-600 { border-color: var(--theme-primary) !important; }
+        .bg-gradient-to-r.from-orange-600 { --tw-gradient-from: var(--theme-primary) !important; }
+        .bg-gradient-to-br.from-orange-500 { --tw-gradient-from: var(--theme-primary) !important; }
+      `}</style>
       {!isDarkMode && (
         <style>{`
           /* Convert hardcoded dark backgrounds to light with high transparency */
