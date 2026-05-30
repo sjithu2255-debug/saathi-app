@@ -1466,37 +1466,38 @@ function SaathiApp() {
             </div>
           </div>
 
-          <div
-            className={`flex items-center justify-center w-9 h-9 rounded-full transition-colors duration-200 border cursor-default select-none pointer-events-none ${locationStatus === 'granted' ? 'bg-emerald-950/40 text-emerald-400 border-emerald-500/20' :
-              locationStatus === 'manual' ? 'bg-blue-950/40 text-blue-400 border-blue-500/20' :
-                locationStatus === 'requesting' ? 'bg-blue-950/40 text-blue-400 border-blue-500/20' :
-                  locationStatus === 'denied' || locationStatus === 'unavailable' ? 'bg-orange-950/40 text-orange-400 border-orange-500/20' :
-                    'bg-slate-900 text-slate-400 border-slate-800'
-              }`}
-            title={
-              locationStatus === 'granted' && userCoords ? `Location: ${resolvedLocation} | GPS: ${userCoords.lat.toFixed(5)}, ${userCoords.lng.toFixed(5)} (±${Math.round(userCoords.accuracy)}m)` :
-                locationStatus === 'manual' ? `Location: ${resolvedLocation} (Manually set)` :
-                  locationStatus === 'denied' ? 'Location access blocked' :
-                    locationStatus === 'requesting' ? 'Fetching location...' : resolvedLocation
-            }
-          >
-            {locationStatus === 'requesting' ? (
-              <Loader2 size={16} className="text-blue-400 animate-spin" />
-            ) : locationStatus === 'granted' ? (
-              <div className="relative">
-                <MapPin size={16} className="text-emerald-400" />
-                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-500 rounded-full border border-slate-900 animate-pulse"></span>
-              </div>
-            ) : locationStatus === 'manual' ? (
-              <MapPin size={16} className="text-blue-400" />
-            ) : locationStatus === 'denied' || locationStatus === 'unavailable' ? (
-              <AlertTriangle size={16} className="text-orange-400 animate-pulse" />
-            ) : (
-              <MapPin size={16} className="text-slate-400" />
-            )}
-          </div>
+
 
           <div className="flex items-center gap-1 sm:gap-2">
+            <div
+              className={`flex items-center justify-center w-9 h-9 rounded-full transition-colors duration-200 border cursor-default select-none pointer-events-none ${locationStatus === 'granted' ? 'bg-emerald-950/40 text-emerald-400 border-emerald-500/20' :
+                locationStatus === 'manual' ? 'bg-blue-950/40 text-blue-400 border-blue-500/20' :
+                  locationStatus === 'requesting' ? 'bg-blue-950/40 text-blue-400 border-blue-500/20' :
+                    locationStatus === 'denied' || locationStatus === 'unavailable' ? 'bg-orange-950/40 text-orange-400 border-orange-500/20' :
+                      'bg-slate-900 text-slate-400 border-slate-800'
+                }`}
+              title={
+                locationStatus === 'granted' && userCoords ? `Location: ${resolvedLocation} | GPS: ${userCoords.lat.toFixed(5)}, ${userCoords.lng.toFixed(5)} (±${Math.round(userCoords.accuracy)}m)` :
+                  locationStatus === 'manual' ? `Location: ${resolvedLocation} (Manually set)` :
+                    locationStatus === 'denied' ? 'Location access blocked' :
+                      locationStatus === 'requesting' ? 'Fetching location...' : resolvedLocation
+              }
+            >
+              {locationStatus === 'requesting' ? (
+                <Loader2 size={16} className="text-blue-400 animate-spin" />
+              ) : locationStatus === 'granted' ? (
+                <div className="relative">
+                  <MapPin size={16} className="text-emerald-400" />
+                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-500 rounded-full border border-slate-900 animate-pulse"></span>
+                </div>
+              ) : locationStatus === 'manual' ? (
+                <MapPin size={16} className="text-blue-400" />
+              ) : locationStatus === 'denied' || locationStatus === 'unavailable' ? (
+                <AlertTriangle size={16} className="text-orange-400 animate-pulse" />
+              ) : (
+                <MapPin size={16} className="text-slate-400" />
+              )}
+            </div>
             {/* SOS button in header */}
             {isSOSActive ? (
               <button
