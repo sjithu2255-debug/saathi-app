@@ -1669,6 +1669,16 @@ function SaathiApp() {
               </div>
             </div>
 
+            {/* Header SOS Button */}
+            <button
+              onClick={() => setIsSOSActive(!isSOSActive)}
+              className={`flex items-center justify-center w-9 h-9 sm:w-auto sm:px-3 sm:py-1.5 rounded-full text-xs font-bold transition-all shadow-md cursor-pointer border ${isSOSActive ? 'bg-red-600 text-white border-red-500 animate-pulse shadow-red-500/50' : 'bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20'}`}
+              title="Trigger Emergency SOS"
+            >
+              <ShieldAlert size={16} className={isSOSActive ? 'animate-bounce' : ''} />
+              <span className="hidden sm:inline sm:ml-1.5 uppercase tracking-wide">SOS</span>
+            </button>
+
             {/* Wallet — visible to Volunteer/NGO/Admin/Government/CivilDefence */}
             {['Volunteer', 'NGO', 'Government', 'CivilDefence', 'Admin'].includes(userRole) && (
               <button
@@ -2809,8 +2819,9 @@ function HomeFeed({
         </button>
       )}
 
-      {/* ROLE-BASED DASHBOARD (Moved to Top) */}
-      <div className="mb-6">
+      {/* ROLE-BASED DASHBOARD & SOS TRIGGER */}
+      <div className="mb-6 grid grid-cols-1 lg:grid-cols-4 gap-4">
+        <div className="lg:col-span-3">
         {userRole === 'Admin' ? (
           <div className="bg-gradient-to-br from-purple-600 to-indigo-700 rounded-2xl p-6 text-white shadow-xl flex flex-col justify-between min-h-[180px]">
             <div>
@@ -2884,63 +2895,132 @@ function HomeFeed({
             </button>
           </div>
         ) : (
-          <div className="bg-gradient-to-br from-orange-500 via-orange-600 to-emerald-600 rounded-2xl p-6 text-white shadow-xl flex flex-col justify-between min-h-[180px]">
-            <div>
-              <h2 className="text-xl font-bold mb-1">Your Civic Impact</h2>
-              <div className="flex items-center gap-4 mt-3">
-                <div className="text-center">
-                  <div className="text-3xl font-black">{MOCK_USER.volunteerHours}</div>
-                  <div className="text-xs text-white/80 uppercase tracking-wider font-semibold">Hours</div>
+          <div className="flex flex-col gap-4">
+            {/* Civic Impact */}
+            <div className="bg-gradient-to-br from-orange-500 via-orange-600 to-emerald-600 rounded-2xl p-6 text-white shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center min-h-[140px] relative overflow-hidden group">
+              <div className="absolute right-0 top-0 opacity-10 transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform">
+                <Award size={150} />
+              </div>
+              <div className="relative z-10">
+                <h2 className="text-xl font-bold mb-3">Your Civic Impact</h2>
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <div className="text-3xl font-black">{MOCK_USER.volunteerHours}</div>
+                    <div className="text-xs text-white/80 uppercase tracking-wider font-semibold">Hours</div>
+                  </div>
+                  <div className="w-px h-10 bg-white/30"></div>
+                  <div className="text-center">
+                    <div className="text-3xl font-black">3</div>
+                    <div className="text-xs text-white/80 uppercase tracking-wider font-semibold">Missions</div>
+                  </div>
+                  <div className="w-px h-10 bg-white/30 hidden sm:block"></div>
+                  <div className="hidden sm:block text-left">
+                    <div className="text-sm font-semibold text-white/80">Last Blood Donation</div>
+                    <div className="text-lg font-bold flex items-center gap-2">
+                      <Heart size={16} className="text-rose-300" /> 12 Oct 2025
+                    </div>
+                  </div>
                 </div>
-                <div className="w-px h-10 bg-white/30"></div>
-                <div className="text-center">
-                  <div className="text-3xl font-black">3</div>
-                  <div className="text-xs text-white/80 uppercase tracking-wider font-semibold">Missions</div>
+                <div className="sm:hidden mt-4 bg-white/20 px-3 py-1.5 rounded-lg inline-flex items-center gap-2 backdrop-blur-sm">
+                  <Heart size={12} className="text-rose-300" />
+                  <span className="text-xs font-medium">Last Donation: <strong className="text-white">12 Oct 2025</strong></span>
+                </div>
+              </div>
+              <button
+                onClick={onViewCertificate}
+                className="mt-4 sm:mt-0 text-xs font-semibold bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg backdrop-blur-sm transition-colors flex items-center gap-1.5 relative z-10 shrink-0"
+              >
+                <Award size={14} /> View Certificate
+              </button>
+            </div>
+
+            {/* The 3 split tiles */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Blood Requirement */}
+              <div className="bg-gradient-to-br from-rose-500 to-red-600 rounded-2xl p-5 text-white shadow-xl flex flex-col justify-between min-h-[140px] relative overflow-hidden group cursor-pointer" onClick={() => {}}>
+                <div className="absolute right-0 top-0 opacity-10 transform translate-x-2 -translate-y-2 group-hover:scale-110 transition-transform">
+                  <Heart size={100} />
+                </div>
+                <div className="relative z-10">
+                  <h2 className="text-lg font-bold mb-1">Blood Requirement</h2>
+                  <p className="text-rose-100 text-xs mb-3">Urgent requests nearby</p>
+                  <div className="flex items-end gap-2">
+                    <span className="text-4xl font-black">{alerts.filter(a => a.type === 'Medical Emergency' || a.isBloodAttestation).length || 1}</span>
+                    <span className="text-sm font-semibold mb-1 text-rose-200">Active</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Missing Person */}
+              <div className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl p-5 text-white shadow-xl flex flex-col justify-between min-h-[140px] relative overflow-hidden group cursor-pointer" onClick={() => {}}>
+                <div className="absolute right-0 top-0 opacity-10 transform translate-x-2 -translate-y-2 group-hover:scale-110 transition-transform">
+                  <User size={100} />
+                </div>
+                <div className="relative z-10">
+                  <h2 className="text-lg font-bold mb-1">Person Missing</h2>
+                  <p className="text-amber-100 text-xs mb-3">Search operations</p>
+                  <div className="flex items-end gap-2">
+                    <span className="text-4xl font-black">{alerts.filter(a => a.type === 'Missing Person').length || 1}</span>
+                    <span className="text-sm font-semibold mb-1 text-amber-200">Active</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Natural Calamity */}
+              <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-5 text-white shadow-xl flex flex-col justify-between min-h-[140px] relative overflow-hidden group cursor-pointer" onClick={() => {}}>
+                <div className="absolute right-0 top-0 opacity-10 transform translate-x-2 -translate-y-2 group-hover:scale-110 transition-transform">
+                  <AlertTriangle size={100} />
+                </div>
+                <div className="relative z-10">
+                  <h2 className="text-lg font-bold mb-1">Natural Calamity</h2>
+                  <p className="text-blue-100 text-xs mb-3">Disaster alerts</p>
+                  <div className="flex items-end gap-2">
+                    <span className="text-4xl font-black">{alerts.filter(a => a.type === 'Water Logging' || a.type === 'Natural Calamity').length || 1}</span>
+                    <span className="text-sm font-semibold mb-1 text-blue-200">Active</span>
+                  </div>
                 </div>
               </div>
             </div>
-            <button
-              onClick={onViewCertificate}
-              className="mt-4 text-xs font-semibold bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg self-start backdrop-blur-sm transition-colors flex items-center gap-1.5"
-            >
-              <Award size={14} /> View Certificate
-            </button>
           </div>
         )}
-      </div>
+        </div>
 
-      {/* TRIGGER SOS RED BOX */}
-      <div className="mb-6">
-        <div className={`relative overflow-hidden rounded-2xl p-6 flex flex-col justify-between items-start transition-all duration-300 bg-red-600 shadow-red-500/40 text-white shadow-xl min-h-[180px]`}>
-          <div className="absolute -right-10 -top-10 opacity-10">
-            <ShieldAlert size={150} />
-          </div>
-          <div className="w-full relative z-10">
-            <h2 className="text-2xl font-bold mb-1">{isSOSActive ? t('activeSOS') : t('emergencyAssist')}</h2>
-            {isSOSActive ? (
-              <div className="space-y-2 mt-2">
-                <div className="flex items-center gap-2 text-red-100 bg-red-700/50 p-2 rounded-lg backdrop-blur-sm">
-                  <Radio size={16} className="animate-pulse text-white" />
-                  <div className="text-xs font-mono font-medium">
-                    Lat: {liveLocation?.lat} | Lng: {liveLocation?.lng}
-                  </div>
-                </div>
-                <p className="text-xs text-red-50 flex items-center gap-1.5">
-                  <Users size={14} /> Notifying {MOCK_CONTACTS.length} contacts & nearby volunteers...
-                </p>
+        {/* TRIGGER SOS RED TILE (Small Tile on the Right) */}
+        <div className="lg:col-span-1 h-full">
+          <div className={`h-full relative overflow-hidden rounded-2xl p-5 flex flex-col items-center justify-center text-center transition-all duration-300 bg-red-600 shadow-red-500/40 text-white shadow-xl group`}>
+            <div className="absolute right-0 top-0 opacity-10 transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform">
+              <ShieldAlert size={150} />
+            </div>
+            <div className="relative z-10 w-full flex flex-col items-center gap-3">
+              <div className="bg-red-500/30 p-3 rounded-full">
+                <AlertTriangle size={32} className={isSOSActive ? 'animate-bounce' : ''} />
               </div>
-            ) : (
-              <p className="text-white/90 text-sm max-w-xs font-medium">
-                Trigger a hyperlocal alert to nearby volunteers and share your live location instantly.
-              </p>
-            )}
+              <h2 className="text-xl font-bold">{isSOSActive ? t('activeSOS') : t('emergencyAssist')}</h2>
+              
+              {isSOSActive ? (
+                <div className="w-full space-y-2 mt-1">
+                  <div className="text-[10px] font-mono bg-red-700/50 px-2 py-1.5 rounded flex items-center justify-center gap-1.5 backdrop-blur-sm">
+                    <Radio size={12} className="animate-pulse" />
+                    {liveLocation?.lat ? liveLocation.lat.toFixed(4) : '...'}, {liveLocation?.lng ? liveLocation.lng.toFixed(4) : '...'}
+                  </div>
+                  <p className="text-[10px] text-red-50 flex items-center justify-center gap-1.5">
+                    <Users size={12} /> {MOCK_CONTACTS.length} notified
+                  </p>
+                </div>
+              ) : (
+                <p className="text-red-100 text-[11px] font-medium leading-snug px-2">
+                  Alert nearby volunteers and share location instantly.
+                </p>
+              )}
+
+              <button
+                onClick={isSOSActive ? () => setIsSOSActive(false) : startSOSCountdown}
+                className={`mt-3 w-full py-2.5 rounded-xl font-bold text-xs tracking-wide transition-all z-10 ${isSOSActive ? 'bg-white text-red-600 hover:bg-red-50 shadow-md' : 'bg-white text-red-600 hover:bg-red-50 shadow-md flex items-center justify-center gap-1.5'}`}
+              >
+                {isSOSActive ? t('stopBroadcast') : <>{t('triggerSOS')}</>}
+              </button>
+            </div>
           </div>
-          <button
-            onClick={isSOSActive ? () => setIsSOSActive(false) : startSOSCountdown}
-            className={`mt-4 px-6 py-2.5 rounded-full font-bold text-sm tracking-wide transition-all z-10 w-full sm:w-auto ${isSOSActive ? 'bg-white text-red-600 hover:bg-red-50 shadow-lg' : 'bg-white text-red-600 hover:bg-red-50 shadow-lg flex items-center justify-center gap-2'}`}
-          >
-            {isSOSActive ? t('stopBroadcast') : <><AlertTriangle size={18} /> {t('triggerSOS')}</>}
-          </button>
         </div>
       </div>
 
