@@ -1613,12 +1613,12 @@ function SaathiApp() {
                 type="button"
                 onClick={startSOSCountdown}
                 disabled={sosCountdown !== null}
-                className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 bg-red-600 hover:bg-red-700 active:scale-95 text-white rounded-full shadow-sm transition-all group cursor-pointer whitespace-nowrap shrink-0 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50"
+                className={`flex items-center gap-1.5 px-2 sm:px-3 py-1.5 bg-red-600 hover:bg-red-700 active:scale-95 rounded-full shadow-sm transition-all group cursor-pointer whitespace-nowrap shrink-0 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 ${!isDarkMode ? 'text-black' : 'text-white'}`}
                 title={t('triggerSOS')}
               >
                 <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-25 group-hover:opacity-40"></div>
                 <ShieldAlert size={14} className="relative z-10 shrink-0" />
-                <span className="text-[10px] sm:text-xs font-black tracking-wider relative z-10 uppercase">SOS HELP</span>
+                <span className={`text-[10px] sm:text-xs font-black tracking-wider relative z-10 uppercase ${!isDarkMode ? 'text-black' : 'text-white'}`}>SOS HELP</span>
               </button>
             )}
 
@@ -1689,7 +1689,7 @@ function SaathiApp() {
               >
                 <Bell size={18} />
                 {unreadCount > 0 && (
-                  <span className="absolute top-0.5 right-0.5 min-w-[16px] h-[16px] px-1 bg-red-500 text-white text-[9px] font-bold rounded-full border border-slate-900 flex items-center justify-center">
+                  <span className={`absolute top-0.5 right-0.5 min-w-[16px] h-[16px] px-1 bg-red-500 text-[9px] font-bold rounded-full border border-slate-900 flex items-center justify-center ${!isDarkMode ? 'text-black' : 'text-white'}`} style={{ color: !isDarkMode ? '#000000' : '#ffffff' }}>
                     {unreadCount}
                   </span>
                 )}
