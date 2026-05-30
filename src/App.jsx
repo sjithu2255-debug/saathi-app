@@ -1102,7 +1102,7 @@ function SaathiApp() {
   }
 
   if (!isAuthenticated) {
-    return <AuthScreen onSuccess={(user) => {
+    return <AuthScreen isDarkMode={isDarkMode} currentLanguage={currentLanguage} setCurrentLanguage={setCurrentLanguage} onSuccess={(user) => {
       setAuthedUser(user);
       setIsAuthenticated(true);
 
@@ -6598,8 +6598,9 @@ const DEMO_USER_PROFILE = {
 };
 const DEFAULT_OTP = '000000';
 
-function AuthScreen({ onSuccess }) {
+function AuthScreen({ onSuccess, isDarkMode, currentLanguage, setCurrentLanguage }) {
   const [screen, setScreen] = useState('landing');
+  const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [otpError, setOtpError] = useState('');
