@@ -7438,7 +7438,7 @@ function AuthScreen({ onSuccess, isDarkMode, currentLanguage, setCurrentLanguage
   const isAdminRoute = window.location.pathname === '/admin';
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [phone, setPhone] = useState('');
-  const [password, setPassword] = useState('pass@1234');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [selectedRole, setSelectedRole] = useState(isAdminRoute ? 'Admin' : 'Citizen');
   const [isProcessing, setIsProcessing] = useState(false);
