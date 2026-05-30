@@ -2725,7 +2725,10 @@ function AlertDetailModal({ alert, isSOSActive, autoShare, onTriggerSOS, onClose
   useEffect(() => {
     if (autoShare && !isSharing) {
       setTimeout(() => {
-        handleShareAsImage();
+        handleShareAsImage().catch(err => {
+          console.error("AutoShare error:", err);
+          alert("Auto-download was blocked by your browser. Please click the 'Share as Image' button below.");
+        });
       }, 300);
     }
   }, [autoShare]);
@@ -2917,7 +2920,14 @@ function FaceVerifyStopSOSModal({ onVerify, onCancel }) {
       
       // Simulate verification process after capturing picture
       setTimeout(() => {
-        onVerify(capturedImage);
+        try {
+          onVerify(capturedImage);
+        } catch (err) {
+          console.error("Verification failed:", err);
+          alert("Verification error: " + err.message);
+          setIsVerifying(false);
+          setPhotoData(null);
+        }
       }, 1000);
     }, 2000);
   };
