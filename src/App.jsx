@@ -2638,6 +2638,8 @@ function WalletModal({ balance, transactions, onPayout, onClose }) {
 
 function AlertDetailModal({ alert, isSOSActive, autoShare, onTriggerSOS, onClose }) {
   const [hasPledged, setHasPledged] = useState(false);
+  const [isCancelingPledge, setIsCancelingPledge] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
   const [isSharing, setIsSharing] = useState(false);
   const modalRef = useRef(null);
 
@@ -2654,18 +2656,20 @@ function AlertDetailModal({ alert, isSOSActive, autoShare, onTriggerSOS, onClose
   const handleShareAsImage = async () => {
     if (!modalRef.current) return;
     setIsSharing(true);
+    
+    // Give React a tick to hide the bottom buttons before capturing
+    await new Promise(resolve => setTimeout(resolve, 150));
+    
     try {
-      setTimeout(async () => {
-        const canvas = await html2canvas(modalRef.current, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
-        const image = canvas.toDataURL("image/png");
-        const link = document.createElement('a');
-        link.href = image;
-        link.download = `Saathi_Verified_Alert_${alert.id}.png`;
-        link.click();
-        setIsSharing(false);
-      }, 100);
+      const canvas = await html2canvas(modalRef.current, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+      const image = canvas.toDataURL("image/png");
+      const link = document.createElement('a');
+      link.href = image;
+      link.download = `Saathi_Verified_Alert_${alert.id}.png`;
+      link.click();
     } catch (err) {
       console.error("Failed to share image", err);
+    } finally {
       setIsSharing(false);
     }
   };
@@ -2746,16 +2750,65 @@ function AlertDetailModal({ alert, isSOSActive, autoShare, onTriggerSOS, onClose
       
       {!isSharing && (
         <div className="p-4 bg-white border-t border-slate-100 rounded-b-2xl flex flex-col gap-2">
-          <button
-            onClick={handlePledge}
-            disabled={hasPledged}
-            className={`w-full font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wider shadow-sm ${hasPledged ? 'bg-emerald-100 text-emerald-700 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20'}`}
-          >
-            <HeartHandshake size={16} />
-            {hasPledged ? 'You Pledged to Help' : 'Pledge to Help'}
-          </button>
+          {!hasPledged ? (
+            <button
+              onClick={handlePledge}
+              className="w-full font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wider shadow-sm bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20"
+            >
+              <HeartHandshake size={16} />
+              Pledge to Help
+            </button>
+          ) : isCancelingPledge ? (
+            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+              <p className="text-xs font-bold text-slate-700 mb-2 uppercase tracking-wider flex items-center gap-1.5">
+                <AlertTriangle size={14} className="text-red-500" /> Cancel Pledge
+              </p>
+              <textarea
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                placeholder="Reason for cancellation (mandatory)..."
+                className="w-full p-2.5 border border-slate-300 rounded-lg text-xs mb-2.5 focus:outline-none focus:ring-2 focus:ring-red-500/50 bg-white"
+                rows="2"
+              />
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsCancelingPledge(false);
+                    setCancelReason("");
+                  }}
+                  className="flex-1 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded-lg transition-colors uppercase tracking-wider"
+                >
+                  Back
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setHasPledged(false);
+                    setIsCancelingPledge(false);
+                    setCancelReason("");
+                    // In a real app, send cancelReason to backend here
+                  }}
+                  disabled={!cancelReason.trim()}
+                  className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white text-xs font-bold rounded-lg transition-colors uppercase tracking-wider"
+                >
+                  Confirm
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => setIsCancelingPledge(true)}
+              className="w-full font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wider shadow-sm bg-emerald-100 text-emerald-700 hover:bg-red-100 hover:text-red-700 group"
+            >
+              <HeartHandshake size={16} className="group-hover:hidden" />
+              <X size={16} className="hidden group-hover:block" />
+              <span className="group-hover:hidden">You Pledged to Help</span>
+              <span className="hidden group-hover:block">Cancel Pledge</span>
+            </button>
+          )}
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 mt-1">
             <button
               type="button"
               onClick={handleCall}
