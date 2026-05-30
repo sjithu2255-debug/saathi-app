@@ -13,12 +13,14 @@ Error generating stack: `+e.message+`
 3. Apply direct pressure to any bleeding wounds with a clean cloth.`:`1. Stay calm and ensure you are in a safe location.
 2. Call emergency services immediately.
 3. Do not intervene unless you are trained in first aid.`:`No response generated.`},at=async e=>{if(navigator.clipboard?.writeText)try{return await navigator.clipboard.writeText(e),!0}catch{}let t=document.createElement(`textarea`);t.value=e,t.style.position=`fixed`,t.style.opacity=`0`,document.body.appendChild(t),t.select();try{return document.execCommand(`copy`),!0}catch{return!1}finally{document.body.removeChild(t)}},ot=async(e,t=1e3,n=700,r=2)=>{let i=new XMLSerializer().serializeToString(e),a=new Blob([i],{type:`image/svg+xml;charset=utf-8`}),o=URL.createObjectURL(a);try{let e=new Image;await new Promise((t,n)=>{e.onload=t,e.onerror=n,e.src=o});let i=document.createElement(`canvas`);i.width=t*r,i.height=n*r;let a=i.getContext(`2d`);return a.scale(r,r),a.fillStyle=`#ffffff`,a.fillRect(0,0,t,n),a.drawImage(e,0,0,t,n),i}finally{URL.revokeObjectURL(o)}},st=(e,t)=>{let n=URL.createObjectURL(e),r=document.createElement(`a`);r.href=n,r.download=t,r.click(),setTimeout(()=>URL.revokeObjectURL(n),100)};function ct({amount:e,source:t,onDone:n}){return(0,_.useEffect)(()=>{let e=setTimeout(n,3e3);return()=>clearTimeout(e)},[n]),(0,R.jsxs)(`div`,{className:`fixed bottom-20 left-1/2 -translate-x-1/2 bg-emerald-950/90 text-emerald-400 px-4 py-2 rounded-full border border-emerald-500/30 flex items-center gap-2 shadow-lg z-50`,children:[(0,R.jsx)(ae,{size:16,className:`text-emerald-500`}),(0,R.jsxs)(`span`,{className:`font-bold text-sm`,children:[`+`,e]}),(0,R.jsxs)(`span`,{className:`text-xs text-emerald-500/80`,children:[`for `,t]})]})}function lt({amount:e,description:t,payer:n,onSuccess:r,onCancel:i}){return(0,R.jsxs)(ze,{onClose:i,children:[(0,R.jsx)(Be,{icon:(0,R.jsx)(N,{size:20}),title:`Payment Required`,subtitle:t}),(0,R.jsxs)(`div`,{className:`p-6 space-y-4`,children:[(0,R.jsxs)(`p`,{className:`text-sm text-slate-600`,children:[`Please pay ₹`,e,` to proceed with `,t,`. Payer: `,n]}),(0,R.jsxs)(`div`,{className:`flex gap-3`,children:[(0,R.jsx)(`button`,{onClick:i,className:`flex-1 py-2 border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors`,children:`Cancel`}),(0,R.jsx)(`button`,{onClick:()=>r(),className:`flex-1 py-2 bg-rose-600 text-white rounded-xl shadow-md hover:bg-rose-700 transition-colors`,children:`Pay Now`})]})]})]})}var ut=class extends _.Component{constructor(e){super(e),this.state={hasError:!1,error:null,errorInfo:null}}static getDerivedStateFromError(e){return{hasError:!0,error:e}}componentDidCatch(e,t){this.setState({errorInfo:t}),console.error(`ErrorBoundary caught an error`,e,t)}render(){return this.state.hasError?(0,R.jsxs)(`div`,{style:{padding:`20px`,backgroundColor:`#f8d7da`,color:`#721c24`,fontFamily:`monospace`,minHeight:`100vh`},children:[(0,R.jsx)(`h1`,{style:{fontSize:`24px`,fontWeight:`bold`},children:`Something went wrong.`}),(0,R.jsx)(`p`,{style:{marginTop:`10px`},children:this.state.error&&this.state.error.toString()}),(0,R.jsx)(`pre`,{style:{marginTop:`20px`,whiteSpace:`pre-wrap`,fontSize:`12px`},children:this.state.errorInfo&&this.state.errorInfo.componentStack})]}):this.props.children}};function dt(){return(0,R.jsx)(ut,{children:(0,R.jsx)(ft,{})})}function ft(){let[e,t]=(0,_.useState)(!0),[n,r]=(0,_.useState)(!0),[i,a]=(0,_.useState)(!0),[o,s]=(0,_.useState)(!1),[c,l]=(0,_.useState)(null),[u,d]=(0,_.useState)(`home`),[f,p]=(0,_.useState)(!1),[m,h]=(0,_.useState)(null),[g,v]=(0,_.useState)(!1),[y,b]=(0,_.useState)(Ve.role),[x,S]=(0,_.useState)(`idle`),[C,w]=(0,_.useState)([{id:1,name:`Amit Sharma`,phone:`+91 98765 43220`,email:`amit.sharma@example.com`,status:`pending`,date:`1 day ago`,idType:`Aadhaar Card`,idNumber:`XXXX XXXX 8892`},{id:2,name:`Priya Patel`,phone:`+91 98765 43221`,email:`priya.patel@example.com`,status:`pending`,date:`2 hours ago`,idType:`PAN Card`,idNumber:`ABCDE5678G`}]),[T,ee]=(0,_.useState)([{id:1,patientName:`K. R. Vijayan`,bloodType:`O+`,unitsNeeded:3,hospital:`Alappuzha General Hospital (Ward 5)`,doctorContact:`+91 94472 12345`,approvalLetter:`req_cert_vijayan.pdf`,requestorName:`Jithu Sreekumar`,requestorPhone:`+91 98765 43210`,status:`approved`,responses:[{name:`Rahul S.`,phone:`+91 94460 54321`,status:`pledged`}],date:`1 day ago`,distance:`1.2 km`},{id:2,patientName:`Amina Beevi`,bloodType:`B-`,unitsNeeded:2,hospital:`Medical College Hospital, Alappuzha (ICU Wing)`,doctorContact:`+91 98450 98765`,approvalLetter:`doc_cert_amina.png`,requestorName:`Salim Khan`,requestorPhone:`+91 98765 88888`,status:`pending`,responses:[],date:`Just now`,distance:`3.4 km`}]),[te,E]=(0,_.useState)(null),[ie,ae]=(0,_.useState)(!1),[k,le]=(0,_.useState)(!1),[M,N]=(0,_.useState)(Je),[ue,me]=(0,_.useState)(!1),[P,_e]=(0,_.useState)(null),[F,I]=(0,_.useState)(`idle`),[ve,be]=(0,_.useState)(Ve.location),[xe,Ce]=(0,_.useState)(``),[De,Oe]=(0,_.useState)(!1),[Me,Ne]=(0,_.useState)(`en`),[Pe,Ie]=(0,_.useState)(!1),[ze,Be]=(0,_.useState)(null),[He,We]=(0,_.useState)(100),[qe,Xe]=(0,_.useState)(!1),[Ze,Qe]=(0,_.useState)(null),[$e,rt]=(0,_.useState)(``),[it,at]=(0,_.useState)(``),[ot,st]=(0,_.useState)(!1),[lt,ut]=(0,_.useState)(100),[dt,ft]=(0,_.useState)([]),gt=(0,_.useRef)(null),bt=c||Ve;(0,_.useEffect)(()=>{let e=()=>{let e=window.outerWidth-window.innerWidth>160,t=window.outerHeight-window.innerHeight>160;e||t?(Xe(!0),We(e=>Math.max(60,e-10))):Xe(!1)};window.addEventListener(`resize`,e);let t=setInterval(e,2e3);return e(),()=>{window.removeEventListener(`resize`,e),clearInterval(t)}},[]);let St=async()=>{try{let e=await window.crypto.subtle.generateKey({name:`ECDSA`,namedCurve:`P-256`},!0,[`sign`,`verify`]),t=await window.crypto.subtle.exportKey(`spki`,e.publicKey),n=await window.crypto.subtle.digest(`SHA-256`,t),r=Array.from(new Uint8Array(n)).map(e=>e.toString(16).padStart(2,`0`)).join(``).slice(0,8).toUpperCase();return Qe(e),rt(r),{keys:e,fingerprint:r}}catch(e){console.error(`Cryptographic keypair generation failed:`,e)}};(0,_.useEffect)(()=>{o&&!Ze&&St()},[o]);let Ct=(0,_.useCallback)(async(e,t)=>{if(!Ze)return``;try{let n=new TextEncoder().encode(JSON.stringify({action:e,payload:t,timestamp:Date.now()})),r=await window.crypto.subtle.sign({name:`ECDSA`,hash:{name:`SHA-256`}},Ze.privateKey,n),i=Array.from(new Uint8Array(r)).map(e=>e.toString(16).padStart(2,`0`)).join(``);return at(i.slice(0,16).toUpperCase()),i}catch(e){return console.error(`Payload signature failure:`,e),``}},[Ze]),Tt=(0,_.useRef)(null);(0,_.useEffect)(()=>{Tt.current=P},[P]);let Et=(0,_.useCallback)(e=>{if(!e)return;let t=e.accuracy===0,n=!1,r=Tt.current;r&&nt(r.lat,r.lng,e.lat,e.lng)>150&&(n=!0),t||n?(st(!0),ut(50),We(e=>Math.max(50,e-25))):(st(!1),ut(100),We(100))},[]),[Dt,Nt]=(0,_.useState)(245),[Ft,It]=(0,_.useState)([{id:1,type:`credit`,source:`commission`,amount:10,description:`Onboarded Mullakkal Stores`,date:`2 days ago`,sig:`SIG_A392F8_E52B`},{id:2,type:`credit`,source:`micro`,amount:5,description:`Completed Govt Health Survey`,date:`3 days ago`,sig:`SIG_A392F8_F012`},{id:3,type:`credit`,source:`micro`,amount:50,description:`SOS Response - Medical Emergency`,date:`5 days ago`,sig:`SIG_A392F8_A889`},{id:4,type:`credit`,source:`commission`,amount:10,description:`Onboarded QuickFix Plumbing`,date:`1 week ago`,sig:`SIG_A392F8_C445`},{id:5,type:`debit`,source:`payout`,amount:100,description:`UPI Payout to *****1234`,date:`2 weeks ago`,sig:`SIG_A392F8_D708`},{id:6,type:`credit`,source:`micro`,amount:10,description:`Verified service location`,date:`3 weeks ago`,sig:`SIG_A392F8_B112`}]),[Lt,zt]=(0,_.useState)(!1),[Bt,Vt]=(0,_.useState)(Ge),[Ht,Ut]=(0,_.useState)(Ke),[Wt,Gt]=(0,_.useState)(Ue),[Kt,qt]=(0,_.useState)(!1),[Jt,Yt]=(0,_.useState)(null),[Xt,Zt]=(0,_.useState)(`ASHA`),Qt=(0,_.useCallback)(e=>{Ct(e.type===`credit`?`REWARDS_CREDIT`:`REWARDS_DEBIT`,e),It(t=>[{...e,id:Date.now(),date:`just now`,sig:`SIG_${$e||`SYS`}_${Math.random().toString(36).substring(3,7).toUpperCase()}`},...t]),Nt(t=>e.type===`credit`?t+e.amount:t-e.amount)},[$e,Ct]),$t=(0,_.useCallback)((e,t)=>{let n=et(e);return Qt({type:`credit`,source:`commission`,amount:n,description:t}),n},[Qt]),en=(0,_.useCallback)((e,t)=>(Qt({type:`credit`,source:`micro`,amount:e,description:t}),e),[Qt]),[tn,nn]=(0,_.useState)(null),rn=(0,_.useCallback)((e,t=`commission`)=>{nn({amount:e,source:t})},[]);(0,_.useEffect)(()=>{let e=window.self!==window.top;if(e){I(`manual`),Ce(``);return}if(!navigator.geolocation){I(`unavailable`),Ce(`Geolocation is not supported in this browser.`);return}I(`requesting`),navigator.geolocation.getCurrentPosition(async e=>{let t={lat:e.coords.latitude,lng:e.coords.longitude,accuracy:e.coords.accuracy};_e(t),Et(t),I(`granted`),Ce(``);try{let e=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${t.lat}&lon=${t.lng}&zoom=10`,{headers:{"Accept-Language":`en`}});if(e.ok){let t=(await e.json()).address||{};be([t.city||t.town||t.village||t.suburb||t.county||``,t.state||t.region||``].filter(Boolean).join(`, `)||`Unknown location`)}}catch{be(`${t.lat.toFixed(3)}, ${t.lng.toFixed(3)}`)}},t=>{let n=`Could not fetch your location.`;t.code===t.PERMISSION_DENIED?(n=e?`Location blocked: this preview runs in a sandboxed iframe where geolocation is disabled. Open the app in a new tab, or set your location manually below.`:`Permission denied. Allow location access in your browser settings, or set it manually.`,I(`denied`)):t.code===t.POSITION_UNAVAILABLE?(n=`Your device could not determine your position. Try again or set manually.`,I(`unavailable`)):(t.code===t.TIMEOUT&&(n=`Location request timed out. Try again or set manually.`),I(`unavailable`)),Ce(n)},{enableHighAccuracy:!0,timeout:1e4,maximumAge:6e4})},[Et]);let an=(0,_.useCallback)(()=>{I(`requesting`),Ce(``),navigator.geolocation.getCurrentPosition(e=>{let t={lat:e.coords.latitude,lng:e.coords.longitude,accuracy:e.coords.accuracy};_e(t),Et(t),I(`granted`)},()=>{I(`denied`),Oe(!0)},{enableHighAccuracy:!0,timeout:1e4})},[Et]),on=(0,_.useCallback)((e,t,n)=>{let r={lat:t,lng:n,accuracy:0};_e(r),Et(r),be(e),I(`manual`),Ce(``),Oe(!1)},[Et]);(0,_.useEffect)(()=>{let e;if(f){let t=P?.lat??11.0168,n=P?.lng??76.9558;h({lat:t.toFixed(5),lng:n.toFixed(5)}),e=setInterval(()=>{t+=(Math.random()-.5)*1e-4,n+=(Math.random()-.5)*1e-4,h({lat:t.toFixed(5),lng:n.toFixed(5)})},2e3)}else h(null);return()=>clearInterval(e)},[f,P]),(0,_.useEffect)(()=>{let e=setTimeout(()=>v(!0),15e3),t=setTimeout(()=>v(!1),23e3);return()=>{clearTimeout(e),clearTimeout(t)}},[]);let sn=(0,_.useMemo)(()=>M.filter(e=>e.unread).length,[M]),cn=(0,_.useCallback)(()=>N(e=>e.map(e=>({...e,unread:!1}))),[]),ln=(0,_.useCallback)(e=>N(t=>t.map(t=>t.id===e?{...t,unread:!1}:t)),[]);(0,_.useEffect)(()=>{let e=e=>{e.target.closest(`[data-dropdown]`)||(ae(!1),le(!1))};return document.addEventListener(`mousedown`,e),()=>document.removeEventListener(`mousedown`,e)},[]);let un=(0,_.useCallback)(()=>{s(!1),l(null),le(!1)},[]),dn=(0,_.useCallback)(()=>{d(`rescue`),p(e=>e||!0),v(!1),setTimeout(()=>{document.querySelector(`main`)?.scrollTo({top:0,behavior:`smooth`})},100)},[]),fn=(0,_.useCallback)(()=>{if(f){p(!1);return}if(ze!==null)return;Be(5);let e=setInterval(()=>{Be(t=>t<=1?(clearInterval(e),p(!0),d(`rescue`),Ct(`SOS_ACTIVATE`,{timestamp:Date.now()}),null):t-1)},1e3);gt.current=e},[f,ze,Ct]),pn=(0,_.useCallback)(()=>{gt.current&&=(clearInterval(gt.current),null),Be(null)},[]);(0,_.useEffect)(()=>()=>{gt.current&&clearInterval(gt.current)},[]);let mn=(0,_.useCallback)(e=>Re[Me]?.[e]||Re.en[e],[Me]),hn=(0,_.useMemo)(()=>C.filter(e=>e.status===`pending`).length+Bt.filter(e=>e.status===`pending`).length+Ht.filter(e=>e.status===`pending`).length+(T||[]).filter(e=>e.status===`pending`).length,[C,Bt,Ht,T]);return i?(0,R.jsx)(Pt,{isDarkMode:e,onDone:()=>a(!1)}):o?(0,R.jsxs)(`div`,{className:`flex flex-col h-screen font-sans overflow-hidden relative transition-colors ${e?`bg-[#070913] text-slate-200`:`bg-slate-50 text-slate-800`}`,children:[!e&&(0,R.jsx)(`style`,{children:`
-          /* Convert hardcoded dark backgrounds to light */
+          /* Convert hardcoded dark backgrounds to light with high transparency */
           .bg-slate-950,
           div[class*="bg-slate-950"],
           section[class*="bg-slate-950"],
           span[class*="bg-slate-950"] {
-            background-color: #ffffff !important;
+            background-color: rgba(255, 255, 255, 0.4) !important;
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
             color: #1e293b !important;
           }
 
@@ -26,7 +28,9 @@ Error generating stack: `+e.message+`
           div[class*="bg-slate-900"],
           aside[class*="bg-slate-900"],
           span[class*="bg-slate-900"] {
-            background-color: #f8fafc !important;
+            background-color: rgba(248, 250, 252, 0.4) !important;
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
             color: #1e293b !important;
           }
 
@@ -34,7 +38,9 @@ Error generating stack: `+e.message+`
           div[class*="bg-slate-800"],
           button[class*="bg-slate-800"],
           span[class*="bg-slate-800"] {
-            background-color: #f1f5f9 !important;
+            background-color: rgba(241, 245, 249, 0.5) !important;
+            backdrop-filter: blur(12px) !important;
+            -webkit-backdrop-filter: blur(12px) !important;
             color: #0f172a !important;
           }
 
@@ -96,9 +102,11 @@ Error generating stack: `+e.message+`
           }
           
           .glass-panel {
-            background-color: rgba(255, 255, 255, 0.9) !important;
-            border-color: #e2e8f0 !important;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+            background-color: rgba(255, 255, 255, 0.4) !important;
+            backdrop-filter: blur(20px) !important;
+            -webkit-backdrop-filter: blur(20px) !important;
+            border-color: rgba(226, 232, 240, 0.6) !important;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05) !important;
           }
         `}),e&&(0,R.jsx)(`style`,{children:`
         /* Premium, cohesive dark theme overrides globally */
@@ -107,15 +115,29 @@ Error generating stack: `+e.message+`
           color: #f1f5f9 !important;
         }
 
-        /* Force dark theme for all white background elements */
+        /* Force dark theme for all white background elements with high transparency */
         .bg-white,
         .bg-slate-50,
         .modal-content,
         div[class*="bg-white"],
         nav[class*="bg-white"],
         header[class*="bg-white"] {
-          background-color: #0b0f19 !important;
+          background-color: rgba(11, 15, 25, 0.4) !important;
+          backdrop-filter: blur(16px) !important;
+          -webkit-backdrop-filter: blur(16px) !important;
           color: #e2e8f0 !important;
+        }
+
+        /* Increase transparency for dark slate backgrounds */
+        .bg-slate-950, div[class*="bg-slate-950"] { background-color: rgba(2, 6, 23, 0.4) !important; backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important; }
+        .bg-slate-900, div[class*="bg-slate-900"] { background-color: rgba(15, 23, 42, 0.4) !important; backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important; }
+        .bg-slate-800, div[class*="bg-slate-800"] { background-color: rgba(30, 41, 59, 0.5) !important; backdrop-filter: blur(12px) !important; -webkit-backdrop-filter: blur(12px) !important; }
+
+        .glass-panel {
+          background-color: rgba(15, 23, 42, 0.3) !important;
+          backdrop-filter: blur(20px) !important;
+          -webkit-backdrop-filter: blur(20px) !important;
+          border-color: rgba(255, 255, 255, 0.1) !important;
         }
 
         /* Make card and element borders dark and clean */
