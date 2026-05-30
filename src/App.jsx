@@ -1710,9 +1710,9 @@ function SaathiApp() {
               <button
                 onClick={() => setShowWallet(true)}
                 title={`Wallet: ${formatINR(walletBalance)}`}
-                className="relative flex items-center justify-center w-9 h-9 rounded-full bg-slate-950 border border-amber-500/20 hover:border-amber-400 transition-colors cursor-pointer"
+                className="relative flex items-center justify-center w-9 h-9 rounded-full bg-slate-950 border border-emerald-500/20 hover:border-emerald-400 transition-colors cursor-pointer"
               >
-                <Wallet size={16} className="text-amber-400" />
+                <Wallet size={16} className="text-emerald-400" />
               </button>
             )}
             <div className="relative" data-dropdown>
@@ -2495,19 +2495,19 @@ function WalletModal({ balance, transactions, onPayout, onClose }) {
         icon={<Wallet size={20} />}
         title="Redeem Rewards"
         subtitle="Withdraw your earnings instantly via UPI"
-        gradient="from-amber-500 to-orange-600"
+        gradient="from-emerald-500 to-teal-600"
         onClose={onClose}
       />
       <div className="p-5 overflow-y-auto space-y-5">
-        <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-4 flex items-center justify-between">
+        <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl p-4 flex items-center justify-between">
           <div>
-            <p className="text-[10px] uppercase font-bold text-amber-800 tracking-wider">Available Balance</p>
+            <p className="text-[10px] uppercase font-bold text-emerald-800 tracking-wider">Available Balance</p>
             <div className="flex items-baseline gap-0.5 mt-1 text-slate-900">
               <span className="text-xl font-bold">₹</span>
               <span className="text-3xl font-black">{balance}</span>
             </div>
           </div>
-          <div className="w-10 h-10 bg-amber-500/10 rounded-full flex items-center justify-center text-amber-600">
+          <div className="w-10 h-10 bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-600">
             <Wallet size={20} />
           </div>
         </div>
@@ -2538,7 +2538,7 @@ function WalletModal({ balance, transactions, onPayout, onClose }) {
                 value={upiId}
                 disabled={status === 'loading'}
                 onChange={(e) => setUpiId(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent disabled:bg-slate-50 disabled:text-slate-400"
+                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent disabled:bg-slate-50 disabled:text-slate-400"
               />
             </div>
             <div className="space-y-1">
@@ -2549,7 +2549,7 @@ function WalletModal({ balance, transactions, onPayout, onClose }) {
                 value={amount}
                 disabled={status === 'loading'}
                 onChange={(e) => setAmount(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent disabled:bg-slate-50 disabled:text-slate-400"
+                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent disabled:bg-slate-50 disabled:text-slate-400"
               />
             </div>
             {errorMessage && (
@@ -2558,7 +2558,7 @@ function WalletModal({ balance, transactions, onPayout, onClose }) {
             <button
               type="submit"
               disabled={status === 'loading'}
-              className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-orange-400 text-white font-bold py-2.5 rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-md shadow-orange-500/10"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-bold py-2.5 rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-md shadow-emerald-500/10"
             >
               {status === 'loading' ? (
                 <>
