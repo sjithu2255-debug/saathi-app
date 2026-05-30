@@ -7446,6 +7446,11 @@ function AuthScreen({ onSuccess, isDarkMode, currentLanguage, setCurrentLanguage
               setIsProcessing(false);
               return;
             }
+            if (usersDB[formattedPhone].approvalStatus === 'pending') {
+              setError('Your account is still pending Admin approval.');
+              setIsProcessing(false);
+              return;
+            }
           } else {
             if (usersDB[formattedPhone]) {
               setError('Account already exists. Please sign in.');
@@ -7466,6 +7471,13 @@ function AuthScreen({ onSuccess, isDarkMode, currentLanguage, setCurrentLanguage
               name: `User ${formattedPhone.slice(-4)}` 
             };
             localStorage.setItem('saathi_users', JSON.stringify(usersDB));
+            
+            if (selectedRole !== 'Citizen') {
+              setError(`Account created! Your request for ${selectedRole} is pending Admin approval.`);
+              setIsLoginMode(true);
+              setIsProcessing(false);
+              return;
+            }
           }
         }
 
