@@ -772,6 +772,24 @@ function SaathiApp() {
   const [liveLocation, setLiveLocation] = useState(null);
   const [showNotification, setShowNotification] = useState(false);
   const [userRole, setUserRole] = useState(MOCK_USER.role);
+  const [pledgedAlerts, setPledgedAlerts] = useState(() => {
+    try {
+      const stored = localStorage.getItem('saathi_pledges');
+      return stored ? JSON.parse(stored) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+
+  const togglePledge = useCallback((alertId, isPledging, reason = "") => {
+    setPledgedAlerts(prev => {
+      const next = isPledging 
+        ? [...new Set([...prev, alertId])] 
+        : prev.filter(id => id !== alertId);
+      localStorage.setItem('saathi_pledges', JSON.stringify(next));
+      return next;
+    });
+  }, []);
   const [volunteerApplicationStatus, setVolunteerApplicationStatus] = useState('idle'); // idle | pending | approved | rejected
   const [volunteerRequests, setVolunteerRequests] = useState([
     { id: 1, name: "Amit Sharma", phone: "+91 98765 43220", email: "amit.sharma@example.com", status: "pending", date: "1 day ago", idType: "Aadhaar Card", idNumber: "XXXX XXXX 8892" },
@@ -908,6 +926,30 @@ function SaathiApp() {
     if (isAuthenticated && !keyPair) {
       generateUserKeys();
     }
+  }, [isAuthenticated, keyPair]);
+
+  // Session Inactivity Timeout (3 minutes)
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    let timeoutId;
+    const resetTimer = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        setIsAuthenticated(false);
+        setAuthedUser(null);
+        setActiveTab('home');
+      }, 3 * 60 * 1000); // 3 minutes
+    };
+
+    const activityEvents = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
+    activityEvents.forEach(evt => window.addEventListener(evt, resetTimer));
+    resetTimer(); // Initialize timer
+
+    return () => {
+      clearTimeout(timeoutId);
+      activityEvents.forEach(evt => window.removeEventListener(evt, resetTimer));
+    };
   }, [isAuthenticated]);
 
   const signActionPayload = useCallback(async (actionType, payloadData) => {
@@ -1244,13 +1286,13 @@ function SaathiApp() {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'home': return <HomeFeed t={t} isDarkMode={isDarkMode} startSOSCountdown={startSOSCountdown} isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onViewCertificate={() => setShowCertificate(true)} userRole={userRole} walletBalance={walletBalance} onOpenWallet={() => setShowWallet(true)} volunteerApplicationStatus={volunteerApplicationStatus} setVolunteerApplicationStatus={setVolunteerApplicationStatus} setVolunteerRequests={setVolunteerRequests} displayUser={displayUser} services={services} setActiveTab={setActiveTab} volunteerRequests={volunteerRequests} surveys={surveys} alerts={alerts} onOpenPostAlert={() => { setEditingAlert(null); setShowPostAlertModal(true); }} bloodRequests={bloodRequests} onEditAlert={(alert) => { setEditingAlert(alert); setShowPostAlertModal(true); }} onRemoveAlert={(id) => setAlerts(prev => prev.filter(a => a.id !== id))} />;
+      case 'home': return <HomeFeed t={t} isDarkMode={isDarkMode} startSOSCountdown={startSOSCountdown} isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onViewCertificate={() => setShowCertificate(true)} userRole={userRole} walletBalance={walletBalance} onOpenWallet={() => setShowWallet(true)} volunteerApplicationStatus={volunteerApplicationStatus} setVolunteerApplicationStatus={setVolunteerApplicationStatus} setVolunteerRequests={setVolunteerRequests} displayUser={displayUser} services={services} setActiveTab={setActiveTab} volunteerRequests={volunteerRequests} surveys={surveys} alerts={alerts} onOpenPostAlert={() => { setEditingAlert(null); setShowPostAlertModal(true); }} bloodRequests={bloodRequests} onEditAlert={(alert) => { setEditingAlert(alert); setShowPostAlertModal(true); }} onRemoveAlert={(id) => setAlerts(prev => prev.filter(a => a.id !== id))} pledgedAlerts={pledgedAlerts} togglePledge={togglePledge} />;
       case 'rescue': return <RescueModule t={t} isDarkMode={isDarkMode} isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onOpenChat={setActiveChatUser} userCoords={userCoords} locationStatus={locationStatus} bloodRequests={bloodRequests} setBloodRequests={setBloodRequests} userRole={userRole} addWalletTxn={addWalletTxn} creditMicro={creditMicro} showEarning={showEarning} keyFingerprint={keyFingerprint} signActionPayload={signActionPayload} />;
       case 'volunteer': return <VolunteerModule userCoords={userCoords} userRole={userRole} locationStatus={locationStatus} />;
       case 'services': return <ServicesModule userCoords={userCoords} locationStatus={locationStatus} userRole={userRole} onCommission={creditCommission} onShowEarning={showEarning} services={services} setServices={setServices} />;
       case 'survey': return <SurveyModule userRole={userRole} userCoords={userCoords} onMicroReward={creditMicro} onShowEarning={showEarning} surveys={surveys} setSurveys={setSurveys} />;
       case 'admin-approvals': return <AdminApprovalsModule volunteerRequests={volunteerRequests} setVolunteerRequests={setVolunteerRequests} services={services} setServices={setServices} surveys={surveys} setSurveys={setSurveys} userRole={userRole} setUserRole={setUserRole} setVolunteerApplicationStatus={setVolunteerApplicationStatus} displayUser={displayUser} addWalletTxn={addWalletTxn} bloodRequests={bloodRequests} setBloodRequests={setBloodRequests} creditMicro={creditMicro} showEarning={showEarning} />;
-      default: return <HomeFeed t={t} startSOSCountdown={startSOSCountdown} isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onViewCertificate={() => setShowCertificate(true)} userRole={userRole} walletBalance={walletBalance} onOpenWallet={() => setShowWallet(true)} volunteerApplicationStatus={volunteerApplicationStatus} setVolunteerApplicationStatus={setVolunteerApplicationStatus} setVolunteerRequests={setVolunteerRequests} displayUser={displayUser} services={services} setActiveTab={setActiveTab} volunteerRequests={volunteerRequests} surveys={surveys} alerts={alerts} onOpenPostAlert={() => { setEditingAlert(null); setShowPostAlertModal(true); }} bloodRequests={bloodRequests} onEditAlert={(alert) => { setEditingAlert(alert); setShowPostAlertModal(true); }} onRemoveAlert={(id) => setAlerts(prev => prev.filter(a => a.id !== id))} />;
+      default: return <HomeFeed t={t} startSOSCountdown={startSOSCountdown} isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onViewCertificate={() => setShowCertificate(true)} userRole={userRole} walletBalance={walletBalance} onOpenWallet={() => setShowWallet(true)} volunteerApplicationStatus={volunteerApplicationStatus} setVolunteerApplicationStatus={setVolunteerApplicationStatus} setVolunteerRequests={setVolunteerRequests} displayUser={displayUser} services={services} setActiveTab={setActiveTab} volunteerRequests={volunteerRequests} surveys={surveys} alerts={alerts} onOpenPostAlert={() => { setEditingAlert(null); setShowPostAlertModal(true); }} bloodRequests={bloodRequests} onEditAlert={(alert) => { setEditingAlert(alert); setShowPostAlertModal(true); }} onRemoveAlert={(id) => setAlerts(prev => prev.filter(a => a.id !== id))} pledgedAlerts={pledgedAlerts} togglePledge={togglePledge} />;
     }
   };
 
@@ -1858,27 +1900,7 @@ function SaathiApp() {
                       </div>
                     </div>
 
-                    <div className="text-[9px] font-black text-slate-500 mb-1.5 px-2 uppercase tracking-widest">Switch Profile Role</div>
-                    <div className="space-y-1">
-                      {['Citizen', 'Volunteer', 'NGO', 'Government', 'CivilDefence', 'ServiceProvider', 'HealthcareWorker', 'Admin'].map(role => (
-                        <button
-                          key={role}
-                          onClick={() => {
-                            setUserRole(role);
-                            setShowProfileMenu(false);
-                          }}
-                          className={`w-full text-left px-3 py-2 text-xs rounded-lg transition-colors flex items-start justify-between gap-2 cursor-pointer ${userRole === role ? 'bg-slate-800 text-white' : 'hover:bg-slate-800 text-slate-400'}`}
-                        >
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1.5">
-                              <span className="font-bold">{role === 'HealthcareWorker' ? 'Healthcare Worker' : role === 'CivilDefence' ? 'Civil Defence' : role}</span>
-                              {userRole === role && <CheckCircle size={10} className={`${ROLE_COLORS[role].replace('bg-', 'text-')} shrink-0`} />}
-                            </div>
-                            <p className="text-[9px] text-slate-500 mt-0.5 leading-tight">{ROLE_DESCRIPTIONS[role]}</p>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
+
 
                     {userRole === 'HealthcareWorker' && (
                       <div className="mt-2.5 p-2 bg-slate-950 rounded-xl border border-slate-850">
@@ -2636,8 +2658,8 @@ function WalletModal({ balance, transactions, onPayout, onClose }) {
   );
 }
 
-function AlertDetailModal({ alert, isSOSActive, autoShare, onTriggerSOS, onClose }) {
-  const [hasPledged, setHasPledged] = useState(false);
+function AlertDetailModal({ alert, isSOSActive, autoShare, onTriggerSOS, onClose, pledgedAlerts = [], togglePledge = () => {} }) {
+  const hasPledged = pledgedAlerts.includes(alert?.id);
   const [isCancelingPledge, setIsCancelingPledge] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [isSharing, setIsSharing] = useState(false);
@@ -2650,7 +2672,7 @@ function AlertDetailModal({ alert, isSOSActive, autoShare, onTriggerSOS, onClose
   };
 
   const handlePledge = () => {
-    setHasPledged(true);
+    togglePledge(alert.id, true);
   };
 
   const handleShareAsImage = async () => {
@@ -2784,7 +2806,7 @@ function AlertDetailModal({ alert, isSOSActive, autoShare, onTriggerSOS, onClose
                 <button
                   type="button"
                   onClick={() => {
-                    setHasPledged(false);
+                    togglePledge(alert.id, false, cancelReason);
                     setIsCancelingPledge(false);
                     setCancelReason("");
                     // In a real app, send cancelReason to backend here
@@ -2808,30 +2830,6 @@ function AlertDetailModal({ alert, isSOSActive, autoShare, onTriggerSOS, onClose
             </button>
           )}
 
-          <div className="flex gap-2 mt-1">
-            <button
-              type="button"
-              onClick={handleCall}
-              className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-all shadow-md shadow-red-600/10 flex items-center justify-center gap-2 group text-xs uppercase tracking-wider"
-            >
-              <PhoneCall size={16} className="group-hover:scale-110 transition-transform" />
-              Call 112
-            </button>
-
-            <button
-              type="button"
-              onClick={onTriggerSOS}
-              disabled={isSOSActive}
-              className={`flex-1 font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 group text-xs uppercase tracking-wider ${isSOSActive
-                ? 'bg-rose-50 text-rose-700 cursor-not-allowed border border-rose-200'
-                : 'bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white shadow-md shadow-orange-500/10'
-                }`}
-            >
-              <Radio size={16} className={`${isSOSActive ? '' : 'animate-pulse group-hover:scale-110'} transition-transform`} />
-              {isSOSActive ? "Broadcast Active" : "Trigger SOS"}
-            </button>
-          </div>
-          
           <div className="flex gap-2 mt-1">
             <button
               type="button"
@@ -2983,7 +2981,9 @@ function HomeFeed({
   onOpenPostAlert,
   bloodRequests = [],
   onEditAlert,
-  onRemoveAlert
+  onRemoveAlert,
+  pledgedAlerts,
+  togglePledge
 }) {
   const [selectedAlert, setSelectedAlert] = useState(null);
   const [autoShare, setAutoShare] = useState(false);
@@ -3372,6 +3372,8 @@ function HomeFeed({
             setSelectedAlert(null);
             setAutoShare(false);
           }}
+          pledgedAlerts={pledgedAlerts}
+          togglePledge={togglePledge}
         />
       )}
     </div>
@@ -7176,91 +7178,58 @@ const DEMO_USER_PROFILE = {
 const DEFAULT_OTP = '000000';
 
 function AuthScreen({ onSuccess, isDarkMode, currentLanguage, setCurrentLanguage, t }) {
-  const [screen, setScreen] = useState('landing');
-  const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [phone, setPhone] = useState('');
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
-  const [otpError, setOtpError] = useState('');
+  const [password, setPassword] = useState('pass@1234');
+  const [selectedRole, setSelectedRole] = useState('Citizen');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [signupData, setSignupData] = useState({
-    name: '', bloodGroup: '', email: '', idVerified: false, idType: null, idNumber: null, idDocument: null
-  });
-  const otpRefs = useRef([]);
+  const [error, setError] = useState('');
+  const [showLanguageMenu, setShowLanguageMenu] = useState(false);
 
   const isValidPhone = useCallback((p) => REGEX.indianMobile.test(p.replace(/\D/g, '')), []);
 
-  const handleOtpChange = useCallback((idx, val) => {
-    if (val.length > 1) {
-      const digits = val.replace(/\D/g, '').slice(0, 6).split('');
-      const newOtp = ['', '', '', '', '', ''];
-      digits.forEach((d, i) => { newOtp[i] = d; });
-      setOtp(newOtp);
-      otpRefs.current[Math.min(digits.length, 5)]?.focus();
-      return;
-    }
-    if (!/^\d?$/.test(val)) return;
-    setOtp(prev => {
-      const next = [...prev];
-      next[idx] = val;
-      return next;
-    });
-    setOtpError('');
-    if (val && idx < 5) otpRefs.current[idx + 1]?.focus();
-  }, []);
-
-  const handleOtpKeyDown = useCallback((idx, e) => {
-    if (e.key === 'Backspace' && !otp[idx] && idx > 0) {
-      otpRefs.current[idx - 1]?.focus();
-    }
-  }, [otp]);
-
-  const verifyOtp = useCallback((afterScreen) => {
+  const handleLogin = () => {
     setIsProcessing(true);
+    setError('');
     setTimeout(() => {
-      if (otp.join('') === DEFAULT_OTP) {
-        setOtpError('');
-        if (afterScreen === 'signin') {
-          onSuccess({ ...DEMO_USER_PROFILE, phone: '+91 ' + phone });
+      try {
+        const usersDB = JSON.parse(localStorage.getItem('saathi_users') || '{}');
+        const formattedPhone = phone.replace(/\D/g, '').slice(0, 10);
+        
+        if (!usersDB[formattedPhone]) {
+          // Register
+          usersDB[formattedPhone] = {
+            password,
+            role: selectedRole,
+            name: `User ${formattedPhone.slice(-4)}`
+          };
+          localStorage.setItem('saathi_users', JSON.stringify(usersDB));
         } else {
-          setScreen('signup-details');
+          // Login
+          if (usersDB[formattedPhone].password !== password) {
+            setError('Incorrect password');
+            setIsProcessing(false);
+            return;
+          }
         }
-      } else {
-        setOtpError('Invalid OTP. Hint: try 000000 for demo.');
+
+        const loggedInUser = usersDB[formattedPhone];
+        onSuccess({ 
+          ...DEMO_USER_PROFILE, 
+          phone: '+91 ' + formattedPhone,
+          name: loggedInUser.name,
+          role: loggedInUser.role 
+        });
+      } catch (e) {
+        setError('Login failed. Please try again.');
+        setIsProcessing(false);
       }
-      setIsProcessing(false);
     }, 800);
-  }, [otp, phone, onSuccess]);
+  };
 
-  const handleGoogleSignIn = useCallback(() => {
-    setIsProcessing(true);
-    setTimeout(() => {
-      onSuccess({ ...DEMO_USER_PROFILE, email: 'jithu.sreekumar@gmail.com' });
-    }, 1200);
-  }, [onSuccess]);
-
-  const completeSignup = useCallback(() => {
-    setIsProcessing(true);
-    setTimeout(() => {
-      onSuccess({
-        ...DEMO_USER_PROFILE,
-        name: signupData.name || DEMO_USER_PROFILE.name,
-        phone: '+91 ' + phone,
-        email: signupData.email,
-        bloodGroup: signupData.bloodGroup || 'A+',
-        volunteerHours: 0,
-        idType: signupData.idType,
-        idNumber: signupData.idNumber,
-        registerAsVolunteer: signupData.registerAsVolunteer || false,
-      });
-    }, 1000);
-  }, [phone, signupData, onSuccess]);
-
-  // Brand panel (left side on desktop) — premium glassmorphic dark panel
   const brandPanel = (
     <div className="hidden md:flex flex-col justify-between bg-[#0b0f19] text-white p-12 md:w-1/2 relative overflow-hidden border-r border-slate-800">
       <div className="absolute inset-0 hologram-grid pointer-events-none opacity-20"></div>
 
-      {/* Radial soft glow */}
       <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
@@ -7347,12 +7316,10 @@ function AuthScreen({ onSuccess, isDarkMode, currentLanguage, setCurrentLanguage
           )}
         </div>
 
-        {/* Background micro grid */}
         <div className="absolute inset-0 hologram-grid opacity-10 pointer-events-none"></div>
 
         <div className={`w-full max-w-md backdrop-blur-md rounded-2xl p-6 sm:p-8 relative z-10 shadow-2xl border ${isDarkMode ? 'bg-slate-900/30 border-slate-800/80' : 'bg-white/80 border-slate-200/80'}`}>
 
-          {/* Mobile logo header */}
           <div className="md:hidden mb-8 flex flex-col items-center text-center">
             <div className="mb-4">
               <SplashLogoMark size={88} />
@@ -7363,70 +7330,15 @@ function AuthScreen({ onSuccess, isDarkMode, currentLanguage, setCurrentLanguage
             </p>
           </div>
 
-          {screen === 'landing' && (
-            <div className="space-y-6 animate-in fade-in">
-              <div>
-                <h2 className="text-2xl font-black text-white">{t ? t('welcomeTitle') : 'Welcome'}</h2>
-                <p className="text-xs text-slate-400 mt-1">{t ? t('welcomeSub') : 'Sign in or create your Saathi account securely.'}</p>
-              </div>
-
-              <button
-                onClick={handleGoogleSignIn}
-                disabled={isProcessing}
-                className="w-full bg-slate-950 border border-slate-800 hover:bg-slate-900 text-slate-200 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-3 transition-colors disabled:opacity-50 btn-premium-interactive cursor-pointer text-sm"
-              >
-                {isProcessing ? (
-                  <Loader2 size={18} className="animate-spin text-emerald-400" />
-                ) : (
-                  <svg width="20" height="20" viewBox="0 0 24 24">
-                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
-                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-                  </svg>
-                )}
-                Continue with Google
-              </button>
-
-              <div className="flex items-center gap-3">
-                <div className="flex-1 h-px bg-slate-800"></div>
-                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">or</span>
-                <div className="flex-1 h-px bg-slate-800"></div>
-              </div>
-
-              <button
-                onClick={() => setScreen('signin-phone')}
-                className="w-full bg-gradient-to-r from-orange-600 to-emerald-600 hover:from-orange-700 hover:to-emerald-700 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-orange-500/10 btn-premium-interactive cursor-pointer text-sm"
-              >
-                <Phone size={18} /> Sign in with Phone
-              </button>
-
-              <button
-                onClick={() => setScreen('signup-phone')}
-                className="w-full bg-slate-900 border border-slate-800 hover:bg-slate-850 hover:border-orange-500/40 text-orange-400 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer text-sm"
-              >
-                Create New Account <ArrowRight size={16} />
-              </button>
-
-              <p className="text-[10px] text-slate-500 text-center leading-relaxed mt-4">
-                By continuing, you agree to Saathi's Terms and Privacy Policy. All connection channels are cryptographically signed to block intercepts.
-              </p>
+          <div className="space-y-5 animate-in fade-in">
+            <div>
+              <h2 className="text-2xl font-bold text-white">
+                {t ? t('welcomeTitle') : 'Welcome'}
+              </h2>
+              <p className="text-xs text-slate-400 mt-1">Sign in or register your account securely.</p>
             </div>
-          )}
 
-          {(screen === 'signin-phone' || screen === 'signup-phone') && (
-            <div className="space-y-5 animate-in fade-in">
-              <button onClick={() => setScreen('landing')} className="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1">
-                <ArrowLeft size={14} /> Back to landing
-              </button>
-
-              <div>
-                <h2 className="text-xl font-bold text-white">
-                  {screen === 'signin-phone' ? 'Sign In' : 'Create Account'}
-                </h2>
-                <p className="text-xs text-slate-400 mt-1">Enter your phone number to receive an OTP.</p>
-              </div>
-
+            <div className="space-y-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Phone Number</label>
                 <div className="flex gap-2">
@@ -7448,174 +7360,48 @@ function AuthScreen({ onSuccess, isDarkMode, currentLanguage, setCurrentLanguage
                 )}
               </div>
 
-              <button
-                onClick={() => {
-                  setOtp(['', '', '', '', '', '']);
-                  setOtpError('');
-                  setScreen(screen === 'signin-phone' ? 'signin-otp' : 'signup-otp');
-                  setTimeout(() => otpRefs.current[0]?.focus(), 100);
-                }}
-                disabled={!isValidPhone(phone)}
-                className="w-full bg-gradient-to-r from-orange-600 to-emerald-600 hover:from-orange-700 hover:to-emerald-700 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer text-sm"
-              >
-                Send Secure OTP <ArrowRight size={16} />
-              </button>
-
-              <div className="bg-emerald-950/20 border border-emerald-500/20 rounded-xl p-3.5 text-xs text-emerald-400 flex items-start gap-2">
-                <KeyRound size={14} className="text-emerald-500 shrink-0 mt-0.5" />
-                <div>
-                  <strong>Demo Mode:</strong> Use OTP <code className="bg-emerald-950 px-1.5 py-0.5 rounded border border-emerald-500/20 font-mono text-white">000000</code> to verify.
-                </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Password</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  className="w-full p-3 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:border-orange-500/70 focus:outline-none"
+                />
               </div>
+              
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Role (for new users)</label>
+                <select
+                  value={selectedRole}
+                  onChange={(e) => setSelectedRole(e.target.value)}
+                  className="w-full p-3 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:border-orange-500/70 focus:outline-none"
+                >
+                  <option value="Citizen">Citizen</option>
+                  <option value="Volunteer">Volunteer</option>
+                  <option value="HealthcareWorker">Healthcare Worker</option>
+                  <option value="Admin">Admin</option>
+                  <option value="ControlRoom">Control Room</option>
+                </select>
+              </div>
+
+              {error && <p className="text-xs text-red-400 font-bold">{error}</p>}
             </div>
-          )}
 
-          {(screen === 'signin-otp' || screen === 'signup-otp') && (
-            <div className="space-y-5 animate-in fade-in">
-              <button
-                onClick={() => setScreen(screen === 'signin-otp' ? 'signin-phone' : 'signup-phone')}
-                className="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1"
-              >
-                <ArrowLeft size={14} /> Change number
-              </button>
-
-              <div>
-                <h2 className="text-xl font-black text-white">Verify Security Token</h2>
-                <p className="text-xs text-slate-400 mt-1">
-                  Sent via encrypted channel to <span className="font-bold text-slate-200">+91 {phone}</span>
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">6-Digit Verification Token</label>
-                <div className="flex gap-2 justify-between">
-                  {otp.map((digit, idx) => (
-                    <input
-                      key={idx}
-                      ref={el => otpRefs.current[idx] = el}
-                      type="text"
-                      inputMode="numeric"
-                      maxLength="6"
-                      value={digit}
-                      onChange={(e) => handleOtpChange(idx, e.target.value)}
-                      onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                      className="w-10 h-12 sm:w-12 sm:h-12 text-center bg-slate-950 border border-slate-800 rounded-xl text-lg font-black text-white focus:border-orange-500 focus:outline-none transition-colors"
-                    />
-                  ))}
-                </div>
-                {otpError && <p className="text-xs text-red-400 font-bold mt-1 text-center">{otpError}</p>}
-              </div>
-
-              <button
-                onClick={() => verifyOtp(screen === 'signin-otp' ? 'signin' : 'signup')}
-                disabled={otp.some(d => !d) || isProcessing}
-                className="w-full bg-gradient-to-r from-orange-600 to-emerald-600 hover:from-orange-700 hover:to-emerald-700 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md disabled:opacity-50 cursor-pointer text-sm"
-              >
-                {isProcessing ? <Loader2 size={16} className="animate-spin" /> : <Fingerprint size={16} />}
-                {isProcessing ? 'Verifying...' : 'Submit Verification Token'}
-              </button>
-            </div>
-          )}
-
-          {screen === 'signup-details' && (
-            <div className="space-y-5 animate-in fade-in">
-              <div>
-                <h2 className="text-xl font-black text-white">Complete Profile</h2>
-                <p className="text-xs text-slate-400 mt-1">Setup your high-trust citizen profile.</p>
-              </div>
-
-              <div className="space-y-3">
-                <div>
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Full Name (As on ID)</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Jithu Sreekumar"
-                    value={signupData.name}
-                    onChange={(e) => setSignupData(prev => ({ ...prev, name: e.target.value }))}
-                    className="w-full p-3 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:border-orange-500/70 focus:outline-none"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Blood Group</label>
-                    <select
-                      value={signupData.bloodGroup}
-                      onChange={(e) => setSignupData(prev => ({ ...prev, bloodGroup: e.target.value }))}
-                      className="w-full p-3 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:border-orange-500/70 focus:outline-none"
-                    >
-                      <option value="">Select Group</option>
-                      {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(bg => (
-                        <option key={bg} value={bg}>{bg}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Special Role</label>
-                    <select
-                      value={signupData.role || 'Citizen'}
-                      onChange={(e) => setSignupData(prev => ({ ...prev, role: e.target.value }))}
-                      className="w-full p-3 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:border-orange-500/70 focus:outline-none"
-                    >
-                      <option value="Citizen">Citizen</option>
-                      <option value="ServiceProvider">Service Provider</option>
-                      <option value="NGO">NGO Partner</option>
-                      <option value="HealthcareWorker">Healthcare Worker</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Email Address</label>
-                  <input
-                    type="email"
-                    placeholder="jithu@example.com"
-                    value={signupData.email}
-                    onChange={(e) => setSignupData(prev => ({ ...prev, email: e.target.value }))}
-                    className="w-full p-3 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:border-orange-500/70 focus:outline-none"
-                  />
-                </div>
-
-                <div className="flex items-start gap-3 bg-gradient-to-r from-emerald-950/40 to-slate-900/40 p-4 rounded-xl border border-emerald-500/40 mt-4 shadow-[0_0_15px_rgba(16,185,129,0.15)] hover:border-emerald-500/60 transition-colors">
-                  <input
-                    type="checkbox"
-                    id="registerAsVolunteer"
-                    checked={signupData.registerAsVolunteer || false}
-                    onChange={(e) => setSignupData(prev => ({ ...prev, registerAsVolunteer: e.target.checked }))}
-                    className="w-5 h-5 mt-0.5 text-emerald-500 border-emerald-700/50 rounded bg-slate-950 focus:ring-emerald-500 cursor-pointer"
-                  />
-                  <div>
-                    <label htmlFor="registerAsVolunteer" className="text-sm font-black text-emerald-400 cursor-pointer select-none block">
-                      Register as a Volunteer
-                    </label>
-                    <p className="text-xs text-slate-400 mt-1 cursor-pointer select-none" onClick={() => setSignupData(prev => ({ ...prev, registerAsVolunteer: !prev.registerAsVolunteer }))}>
-                      Requires Admin approval. Unlock SOS rescue and earning opportunities.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <button
-                onClick={() => setScreen('signup-digilocker')}
-                disabled={!signupData.name || !signupData.bloodGroup}
-                className="w-full bg-gradient-to-r from-orange-600 to-emerald-600 hover:from-orange-700 hover:to-emerald-700 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md disabled:opacity-50 cursor-pointer text-sm"
-              >
-                Continue to ID Verification <ArrowRight size={16} />
-              </button>
-            </div>
-          )}
-
-          {screen === 'signup-digilocker' && (
-            <DigiLockerStep
-              onComplete={(idData) => {
-                setSignupData(prev => ({ ...prev, ...idData, idVerified: true }));
-                completeSignup();
-              }}
-              onBack={() => setScreen('signup-details')}
-              isCompleting={isProcessing}
-            />
-          )}
+            <button
+              onClick={handleLogin}
+              disabled={!isValidPhone(phone) || !password || isProcessing}
+              className="w-full bg-gradient-to-r from-orange-600 to-emerald-600 hover:from-orange-700 hover:to-emerald-700 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer text-sm mt-4"
+            >
+              {isProcessing ? <Loader2 size={16} className="animate-spin" /> : <ArrowRight size={16} />}
+              {isProcessing ? 'Verifying...' : 'Sign In / Register'}
+            </button>
+            
+            <p className="text-[10px] text-slate-500 text-center leading-relaxed mt-4">
+              By continuing, you agree to Saathi's Terms and Privacy Policy. All connection channels are cryptographically signed to block intercepts.
+            </p>
+          </div>
         </div>
       </div>
     </div>
