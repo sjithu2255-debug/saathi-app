@@ -5711,13 +5711,54 @@ function AdminApprovalsModule({
   creditMicro,
   showEarning
 }) {
-  const [subTab, setSubTab] = useState('volunteers');
+  const [subTab, setSubTab] = useState('roleRequests');
   const [selectedDocPreview, setSelectedDocPreview] = useState(null); // for inspecting requisition slips
+  const [roleRequests, setRoleRequests] = useState([]);
+
+  useEffect(() => {
+    try {
+      const usersDB = JSON.parse(localStorage.getItem('saathi_users') || '{}');
+      const pending = Object.entries(usersDB)
+        .filter(([_, user]) => user.approvalStatus === 'pending')
+        .map(([phone, user]) => ({ phone, ...user }));
+      setRoleRequests(pending);
+    } catch (e) {
+      console.error('Error parsing saathi_users', e);
+    }
+  }, []);
 
   const pendingVolunteers = volunteerRequests.filter(r => r.status === 'pending');
   const pendingServices = services.filter(s => s.status === 'pending');
   const pendingSurveys = surveys.filter(s => s.status === 'pending');
   const pendingBlood = (bloodRequests || []).filter(r => r.status === 'pending');
+
+  const handleApproveRoleRequest = (phone, requestedRole) => {
+    try {
+      const usersDB = JSON.parse(localStorage.getItem('saathi_users') || '{}');
+      if (usersDB[phone]) {
+        usersDB[phone].role = requestedRole;
+        usersDB[phone].approvalStatus = 'approved';
+        localStorage.setItem('saathi_users', JSON.stringify(usersDB));
+      }
+      setRoleRequests(prev => prev.filter(r => r.phone !== phone));
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleRejectRoleRequest = (phone) => {
+    try {
+      const usersDB = JSON.parse(localStorage.getItem('saathi_users') || '{}');
+      if (usersDB[phone]) {
+        usersDB[phone].requestedRole = null;
+        usersDB[phone].approvalStatus = 'rejected';
+        localStorage.setItem('saathi_users', JSON.stringify(usersDB));
+      }
+      setRoleRequests(prev => prev.filter(r => r.phone !== phone));
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const handleApproveVolunteer = (id, name) => {
     setVolunteerRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'approved' } : r));
@@ -5789,6 +5830,21 @@ function AdminApprovalsModule({
       {/* Tabs */}
       <div className="flex border-b border-slate-800 overflow-x-auto">
         <button
+          onClick={() => setSubTab('roleRequests')}
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-black uppercase tracking-wider whitespace-nowrap border-b-2 transition-all ${subTab === 'roleRequests'
+            ? 'border-purple-500 text-purple-400 font-bold'
+            : 'border-transparent text-slate-500 hover:text-slate-300'
+            }`}
+        >
+          <User size={14} />
+          Role Approvals
+          {roleRequests.length > 0 && (
+            <span className="bg-purple-950 text-purple-400 border border-purple-500/20 text-[10px] font-bold px-2 py-0.5 rounded-full">
+              {roleRequests.length}
+            </span>
+          )}
+        </button>
+        <button
           onClick={() => setSubTab('volunteers')}
           className={`flex items-center gap-2 px-4 py-2.5 text-xs font-black uppercase tracking-wider whitespace-nowrap border-b-2 transition-all ${subTab === 'volunteers'
             ? 'border-purple-500 text-purple-400 font-bold'
@@ -5796,7 +5852,7 @@ function AdminApprovalsModule({
             }`}
         >
           <HeartHandshake size={14} />
-          Volunteer Requests
+          Volunteer Ops
           {pendingVolunteers.length > 0 && (
             <span className="bg-purple-950 text-purple-400 border border-purple-500/20 text-[10px] font-bold px-2 py-0.5 rounded-full">
               {pendingVolunteers.length}
@@ -5852,12 +5908,67 @@ function AdminApprovalsModule({
 
       {/* Tab Panels */}
       <div className="space-y-4">
+        {subTab === 'roleRequests' && (
+          <div className="space-y-3">
+            {roleRequests.length === 0 ? (
+              <div className="bg-white border border-dashed border-slate-200 rounded-2xl p-8 text-center text-slate-500">
+                <CheckCircle size={36} className="mx-auto text-green-500 mb-2" />
+                <p className="text-sm font-medium">No pending role assignments.</p>
+              </div>
+            ) : (
+              roleRequests.map(req => (
+                <div key={req.phone} className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm transition-all hover:border-purple-200">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex gap-3">
+                      <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 shrink-0">
+                        <User size={20} />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-slate-900">{req.name}</h4>
+                        <p className="text-xs text-slate-500 mt-0.5">{req.phone}</p>
+                        <div className="mt-3 bg-slate-50 border border-slate-100 rounded-lg p-2.5 space-y-1">
+                          <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Requested Role</p>
+                          <p className="text-sm font-black text-slate-800">{req.requestedRole}</p>
+                          <div className="mt-2 pt-2 border-t border-slate-200">
+                            <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Attached Document</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <FileText size={14} className="text-slate-400" />
+                              <span className="text-xs text-slate-700 font-mono">{req.verificationDocument || "No document attached"}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">
+                      Pending
+                    </span>
+                  </div>
+                  <div className="flex gap-3 mt-4 border-t border-slate-100 pt-4">
+                    <button
+                      onClick={() => handleRejectRoleRequest(req.phone)}
+                      className="flex-1 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold py-2 rounded-xl transition-all"
+                    >
+                      Reject
+                    </button>
+                    <button
+                      onClick={() => handleApproveRoleRequest(req.phone, req.requestedRole)}
+                      className="flex-1 bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-2 rounded-xl transition-all shadow-sm"
+                    >
+                      Approve & Grant Role
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+        
         {subTab === 'volunteers' && (
           <div className="space-y-3">
             {pendingVolunteers.length === 0 ? (
               <div className="bg-white border border-dashed border-slate-200 rounded-2xl p-8 text-center text-slate-500">
                 <CheckCircle size={36} className="mx-auto text-green-500 mb-2" />
-                <p className="text-sm font-medium">No pending volunteer registrations.</p>
+                <p className="text-sm font-medium">No pending volunteer operations.</p>
               </div>
             ) : (
               pendingVolunteers.map(req => (
@@ -7186,8 +7297,22 @@ function AuthScreen({ onSuccess, isDarkMode, currentLanguage, setCurrentLanguage
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
+  const [documentName, setDocumentName] = useState('');
 
   const isValidPhone = useCallback((p) => REGEX.indianMobile.test(p.replace(/\D/g, '')), []);
+
+  const getDocumentLabel = () => {
+    switch (selectedRole) {
+      case 'Volunteer': return 'Upload College ID Card or Volunteer ID';
+      case 'NGO': return 'Upload NGO ID Card or Registration';
+      case 'ServiceProvider': return 'Upload Service Provider License';
+      case 'Government':
+      case 'HealthcareWorker':
+      case 'CivilDefence':
+      case 'ControlRoom': return 'Upload Office ID Card';
+      default: return 'Upload Verification Document';
+    }
+  };
 
   const handleLogin = () => {
     setIsProcessing(true);
@@ -7226,7 +7351,19 @@ function AuthScreen({ onSuccess, isDarkMode, currentLanguage, setCurrentLanguage
               setIsProcessing(false);
               return;
             }
-            usersDB[formattedPhone] = { password, role: selectedRole, name: `User ${formattedPhone.slice(-4)}` };
+            if (selectedRole !== 'Citizen' && !documentName) {
+              setError('Please attach the required verification document for this role.');
+              setIsProcessing(false);
+              return;
+            }
+            usersDB[formattedPhone] = { 
+              password, 
+              role: 'Citizen', 
+              requestedRole: selectedRole,
+              approvalStatus: selectedRole === 'Citizen' ? 'approved' : 'pending',
+              verificationDocument: documentName,
+              name: `User ${formattedPhone.slice(-4)}` 
+            };
             localStorage.setItem('saathi_users', JSON.stringify(usersDB));
           }
         }
@@ -7393,22 +7530,43 @@ function AuthScreen({ onSuccess, isDarkMode, currentLanguage, setCurrentLanguage
               </div>
               
               {!isAdminRoute && !isLoginMode && (
-                <div className="space-y-1.5 animate-in fade-in slide-in-from-top-2">
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Account Type / Role</label>
-                  <select
-                    value={selectedRole}
-                    onChange={(e) => setSelectedRole(e.target.value)}
-                    className="w-full p-3 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:border-orange-500/70 focus:outline-none"
-                  >
-                    <option value="Citizen">Citizen</option>
-                    <option value="Volunteer">Volunteer</option>
-                    <option value="NGO">NGO</option>
-                    <option value="Government">Government</option>
-                    <option value="CivilDefence">Civil Defence</option>
-                    <option value="ServiceProvider">Service Provider</option>
-                    <option value="HealthcareWorker">Healthcare Worker</option>
-                    <option value="ControlRoom">Control Room</option>
-                  </select>
+                <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Account Type / Role</label>
+                    <select
+                      value={selectedRole}
+                      onChange={(e) => setSelectedRole(e.target.value)}
+                      className="w-full p-3 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:border-orange-500/70 focus:outline-none"
+                    >
+                      <option value="Citizen">Citizen</option>
+                      <option value="Volunteer">Volunteer</option>
+                      <option value="NGO">NGO</option>
+                      <option value="Government">Government</option>
+                      <option value="CivilDefence">Civil Defence</option>
+                      <option value="ServiceProvider">Service Provider</option>
+                      <option value="HealthcareWorker">Healthcare Worker</option>
+                      <option value="ControlRoom">Control Room</option>
+                    </select>
+                    {selectedRole !== 'Citizen' && (
+                      <p className="text-[10px] text-orange-400 mt-1 font-bold">
+                        Note: You will be registered as a Citizen until an Admin approves your requested role.
+                      </p>
+                    )}
+                  </div>
+                  
+                  {selectedRole !== 'Citizen' && (
+                    <div className="space-y-1.5 animate-in fade-in">
+                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">{getDocumentLabel()}</label>
+                      <div className="relative">
+                        <input
+                          type="file"
+                          onChange={(e) => setDocumentName(e.target.files[0]?.name || '')}
+                          className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-slate-400 file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-orange-500/10 file:text-orange-400 hover:file:bg-orange-500/20"
+                          accept="image/*,.pdf"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
               
