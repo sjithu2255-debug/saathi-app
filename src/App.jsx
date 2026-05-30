@@ -2006,6 +2006,52 @@ function SaathiApp() {
       )}
 
       {/* Full-screen countdown overlay */}
+      {/* SOS Stop Passcode Modal */}
+      {showSOSStopModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl w-full max-w-sm text-center shadow-2xl relative overflow-hidden">
+            <div className="absolute inset-0 bg-red-500/10 animate-pulse pointer-events-none"></div>
+            <ShieldAlert size={48} className="text-red-500 mx-auto mb-4 animate-bounce" />
+            <h3 className="text-xl font-black text-white mb-2 uppercase">Stop Emergency Broadcast</h3>
+            <p className="text-xs text-slate-400 mb-6">Enter your 6-digit security PIN to cancel the SOS alert and deactivate the siren.</p>
+            
+            <input
+              type="password"
+              maxLength={6}
+              value={sosPasscode}
+              onChange={(e) => setSosPasscode(e.target.value)}
+              placeholder="••••••"
+              className="w-full bg-slate-950 border border-slate-800 text-center text-3xl font-mono text-white rounded-xl py-4 mb-4 tracking-[0.5em] focus:border-red-500 focus:outline-none transition-colors"
+              autoFocus
+            />
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowSOSStopModal(false)}
+                className="flex-1 px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (sosPasscode === '123456') {
+                    setIsSOSActive(false);
+                    stopSiren();
+                    setShowSOSStopModal(false);
+                    setSosPasscode('');
+                  } else {
+                    alert('Invalid PIN!');
+                  }
+                }}
+                className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors shadow-lg shadow-red-900/50"
+              >
+                Verify & Stop
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {sosCountdown !== null && (
         <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md flex flex-col items-center justify-center z-[300] animate-in fade-in duration-200">
           <div className="text-center space-y-6 max-w-sm px-6">
