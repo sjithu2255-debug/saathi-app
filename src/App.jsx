@@ -7178,9 +7178,10 @@ const DEMO_USER_PROFILE = {
 const DEFAULT_OTP = '000000';
 
 function AuthScreen({ onSuccess, isDarkMode, currentLanguage, setCurrentLanguage, t }) {
+  const isAdminRoute = window.location.pathname === '/admin';
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('pass@1234');
-  const [selectedRole, setSelectedRole] = useState('Citizen');
+  const [selectedRole, setSelectedRole] = useState(isAdminRoute ? 'Admin' : 'Citizen');
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
@@ -7333,9 +7334,11 @@ function AuthScreen({ onSuccess, isDarkMode, currentLanguage, setCurrentLanguage
           <div className="space-y-5 animate-in fade-in">
             <div>
               <h2 className="text-2xl font-bold text-white">
-                {t ? t('welcomeTitle') : 'Welcome'}
+                {isAdminRoute ? 'Admin Portal' : (t ? t('welcomeTitle') : 'Welcome')}
               </h2>
-              <p className="text-xs text-slate-400 mt-1">Sign in or register your account securely.</p>
+              <p className="text-xs text-slate-400 mt-1">
+                {isAdminRoute ? 'Sign in to the administrative dashboard securely.' : 'Sign in or register your account securely.'}
+              </p>
             </div>
 
             <div className="space-y-4">
@@ -7371,20 +7374,29 @@ function AuthScreen({ onSuccess, isDarkMode, currentLanguage, setCurrentLanguage
                 />
               </div>
               
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Role (for new users)</label>
-                <select
-                  value={selectedRole}
-                  onChange={(e) => setSelectedRole(e.target.value)}
-                  className="w-full p-3 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:border-orange-500/70 focus:outline-none"
-                >
-                  <option value="Citizen">Citizen</option>
-                  <option value="Volunteer">Volunteer</option>
-                  <option value="HealthcareWorker">Healthcare Worker</option>
-                  <option value="Admin">Admin</option>
-                  <option value="ControlRoom">Control Room</option>
-                </select>
-              </div>
+              {!isAdminRoute ? (
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Role (for new users)</label>
+                  <select
+                    value={selectedRole}
+                    onChange={(e) => setSelectedRole(e.target.value)}
+                    className="w-full p-3 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:border-orange-500/70 focus:outline-none"
+                  >
+                    <option value="Citizen">Citizen</option>
+                    <option value="Volunteer">Volunteer</option>
+                    <option value="NGO">NGO</option>
+                    <option value="Government">Government</option>
+                    <option value="CivilDefence">Civil Defence</option>
+                    <option value="ServiceProvider">Service Provider</option>
+                    <option value="HealthcareWorker">Healthcare Worker</option>
+                    <option value="ControlRoom">Control Room</option>
+                  </select>
+                </div>
+              ) : (
+                <div className="bg-red-950/20 border border-red-500/20 rounded-xl p-3 text-xs text-red-400 flex items-center justify-center font-bold">
+                  Admin Access Required
+                </div>
+              )}
 
               {error && <p className="text-xs text-red-400 font-bold">{error}</p>}
             </div>
