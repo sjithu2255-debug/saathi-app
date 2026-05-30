@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { 
-  AlertTriangle, HeartHandshake, Wrench, FileText, 
-  Bell, MapPin, User, ShieldAlert, ShieldCheck, 
-  Clock, Star, ChevronRight, Activity, 
-  Database, Server, Code, CheckCircle, Radio, 
+import {
+  AlertTriangle, HeartHandshake, Wrench, FileText,
+  Bell, MapPin, User, ShieldAlert, ShieldCheck,
+  Clock, Star, ChevronRight, Activity,
+  Database, Server, Code, CheckCircle, Radio,
   Navigation, Users, PhoneCall, Sparkles, Loader2,
   MessageSquare, Send, X, AlertOctagon, Award, Download,
   Phone, ArrowRight, ArrowLeft, Fingerprint, KeyRound, ScanLine,
   Paperclip, Image as ImageIcon, Wallet, TrendingUp, IndianRupee,
-  Gift, Zap, ArrowDownToLine, ArrowUpRight, Plus, Sun, Moon, Heart
+  Gift, Zap, ArrowDownToLine, ArrowUpRight, Plus, Sun, Moon, Heart, Menu
 } from 'lucide-react';
 import logoUrl from './assets/logo.png';
 
@@ -21,19 +21,19 @@ const BRAND = {
 function SaathiLogo({ size = 32, showWordmark = false, variant = 'default' }) {
   return (
     <div className="flex items-center gap-2">
-      <img 
-        src={logoUrl} 
+      <img
+        src={logoUrl}
         alt="Saathi Logo"
-        style={{ 
-          width: size, 
-          height: size, 
-          filter: 'drop-shadow(0 0 12px rgba(16, 185, 129, 0.6)) drop-shadow(0 0 20px rgba(245, 158, 11, 0.4))' 
-        }} 
+        style={{
+          width: size,
+          height: size,
+          filter: 'drop-shadow(0 0 12px rgba(16, 185, 129, 0.6)) drop-shadow(0 0 20px rgba(245, 158, 11, 0.4))'
+        }}
         className="flex-shrink-0"
       />
-      
+
       {showWordmark && (
-        <div className="flex flex-col leading-none">
+        <div className="hidden sm:flex flex-col leading-none">
           <span className="font-bold text-xl tracking-tight text-[#f97316]">{BRAND.name}</span>
           {variant === 'full' && (
             <span className="text-[9px] text-slate-500 uppercase tracking-widest mt-0.5">{BRAND.tagline}</span>
@@ -343,47 +343,47 @@ const MOCK_CONTACTS = [
 ];
 
 const MOCK_ALERTS = [
-  { 
-    id: 1, 
-    type: "Medical Emergency", 
+  {
+    id: 1,
+    type: "Medical Emergency",
     title: "Urgent A+ Blood Needed",
     description: "Emergency blood requirement raised for a patient undergoing surgery at Alappuzha General Hospital.",
     location: "Alappuzha General Hospital (Blood Bank Wing)",
     contactName: "Dr. Sreekumar (Emergency Coordinator)",
     contactPhone: "+91 98765 43210",
     notes: "Please confirm your availability and recent donation history. If you are eligible and within 5km, please reach the hospital wings or contact the coordinator immediately.",
-    distance: "0.5 km", 
-    time: "2 mins ago", 
-    status: "Active", 
-    severity: "high" 
+    distance: "0.5 km",
+    time: "2 mins ago",
+    status: "Active",
+    severity: "high"
   },
-  { 
-    id: 2, 
-    type: "Missing Person", 
+  {
+    id: 2,
+    type: "Missing Person",
     title: "Missing Child: 12yo Rahul",
     description: "A 12-year-old child named Rahul has been reported missing. He was last seen near the Central Park playing area.",
     location: "Central Park and surrounding neighborhood (Coimbatore)",
     contactName: "Ramesh (Father / Guardian)",
     contactPhone: "+91 98765 43211",
     notes: "Rahul is wearing a blue t-shirt and white shoes. He is about 4'5\" tall, light-brown hair. If you have any leads, please contact the guardian or call 112 directly.",
-    distance: "2.1 km", 
-    time: "1 hour ago", 
-    status: "Active", 
-    severity: "medium" 
+    distance: "2.1 km",
+    time: "1 hour ago",
+    status: "Active",
+    severity: "medium"
   },
-  { 
-    id: 3, 
-    type: "Water Logging", 
+  {
+    id: 3,
+    type: "Water Logging",
     title: "Water Logging NH66 Bypass",
     description: "Severe flooding reported near Ambalappuzha junction. Traffic advised to take alternative routes.",
     location: "NH66 Bypass Road, near Ambalappuzha junction",
     contactName: "Traffic Control Wing",
     contactPhone: "+91 484 233 4455",
     notes: "Cars and two-wheelers are strongly advised to take alternative bypass roads. Pedestrians should avoid walking near open storm drains.",
-    distance: "1.2 km", 
-    time: "3 hours ago", 
-    status: "Resolved", 
-    severity: "low" 
+    distance: "1.2 km",
+    time: "3 hours ago",
+    status: "Resolved",
+    severity: "low"
   },
 ];
 
@@ -482,7 +482,7 @@ const haversineKm = (lat1, lng1, lat2, lng2) => {
   const R = 6371;
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a = Math.sin(dLat/2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng/2) ** 2;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
 
@@ -498,7 +498,7 @@ const generateAIContent = async (prompt) => {
   await new Promise(res => setTimeout(res, 1200)); // Simulate network latency
 
   const lowerPrompt = prompt.toLowerCase();
-  
+
   // 1. Chat Moderation
   if (lowerPrompt.includes("chat moderator")) {
     if (lowerPrompt.match(/\b(sex|kiss|fuck)\b/)) return "SEXUAL";
@@ -529,7 +529,7 @@ const generateAIContent = async (prompt) => {
 // Clipboard fallback for execCommand environments
 const copyToClipboard = async (text) => {
   if (navigator.clipboard?.writeText) {
-    try { await navigator.clipboard.writeText(text); return true; } catch (e) {}
+    try { await navigator.clipboard.writeText(text); return true; } catch (e) { }
   }
   const textarea = document.createElement('textarea');
   textarea.value = text;
@@ -650,6 +650,7 @@ export default function AppWrapper() {
 }
 
 function SaathiApp() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showSplash, setShowSplash] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authedUser, setAuthedUser] = useState(null);
@@ -757,7 +758,7 @@ function SaathiApp() {
         .join('')
         .slice(0, 8)
         .toUpperCase();
-      
+
       setKeyPair(keys);
       setKeyFingerprint(fingerprint);
       return { keys, fingerprint };
@@ -786,7 +787,7 @@ function SaathiApp() {
       const signatureHex = signatureArray
         .map(b => b.toString(16).padStart(2, '0'))
         .join('');
-      
+
       const truncatedSig = signatureHex.slice(0, 16).toUpperCase();
       setLastSignedHash(truncatedSig);
       return signatureHex;
@@ -812,9 +813,9 @@ function SaathiApp() {
       if (dist > 150) {
         isImpossibleVelocity = true;
       }
-      
+
     }
-    
+
     if (isStaticOrZeroAccuracy || isImpossibleVelocity) {
       setIsGPSManipulated(true);
       setGpsTelemetryScore(50);
@@ -1077,9 +1078,9 @@ function SaathiApp() {
 
   const pendingApprovalsCount = useMemo(() => {
     return volunteerRequests.filter(r => r.status === 'pending').length +
-           services.filter(s => s.status === 'pending').length +
-           surveys.filter(s => s.status === 'pending').length +
-           (bloodRequests || []).filter(r => r.status === 'pending').length;
+      services.filter(s => s.status === 'pending').length +
+      surveys.filter(s => s.status === 'pending').length +
+      (bloodRequests || []).filter(r => r.status === 'pending').length;
   }, [volunteerRequests, services, surveys, bloodRequests]);
 
   const renderContent = () => {
@@ -1268,7 +1269,7 @@ function SaathiApp() {
           box-shadow: 0 0 25px rgba(16, 185, 129, 0.15);
         }
       `}</style>
-      
+
       {/* Background Holographic Grid */}
       <div className="absolute inset-0 hologram-grid opacity-10 pointer-events-none"></div>
 
@@ -1283,8 +1284,16 @@ function SaathiApp() {
       <header className="bg-[#0b0f19]/80 backdrop-blur-md shadow-2xl border-b border-slate-800/80 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <SaathiLogo size={36} showWordmark={true} />
-            
+            {isAuthenticated && (
+              <button
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                className="hidden md:flex p-2 -ml-2 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+              >
+                <Menu size={24} />
+              </button>
+            )}
+            <SaathiLogo size={36} showWordmark={false} />
+
             <div className="relative" data-dropdown>
               <button
                 onClick={(e) => {
@@ -1293,7 +1302,8 @@ function SaathiApp() {
                 }}
                 className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-orange-950/40 hover:bg-orange-900/60 text-orange-400 transition-all border border-orange-500/20 cursor-pointer"
               >
-                <span>{LANGUAGES[currentLanguage]?.nativeName || 'English'}</span>
+                <span className="hidden sm:inline">{LANGUAGES[currentLanguage]?.nativeName || 'English'}</span>
+                <span className="sm:hidden">{LANGUAGES[currentLanguage]?.nativeName.slice(0, 2).toUpperCase() || 'EN'}</span>
                 <ChevronRight size={12} className={`transform transition-transform ${showLanguageMenu ? 'rotate-90' : ''}`} />
               </button>
               {showLanguageMenu && (
@@ -1317,20 +1327,19 @@ function SaathiApp() {
               )}
             </div>
           </div>
-          
-          <div 
-            className={`flex items-center space-x-2 px-3 py-1.5 rounded-full text-xs font-bold transition-colors duration-200 border cursor-default select-none pointer-events-none ${
-              locationStatus === 'granted' ? 'bg-emerald-950/40 text-emerald-400 border-emerald-500/20' :
+
+          <div
+            className={`flex items-center space-x-2 px-3 py-1.5 rounded-full text-xs font-bold transition-colors duration-200 border cursor-default select-none pointer-events-none ${locationStatus === 'granted' ? 'bg-emerald-950/40 text-emerald-400 border-emerald-500/20' :
               locationStatus === 'manual' ? 'bg-blue-950/40 text-blue-400 border-blue-500/20' :
-              locationStatus === 'requesting' ? 'bg-blue-950/40 text-blue-400 border-blue-500/20' :
-              locationStatus === 'denied' || locationStatus === 'unavailable' ? 'bg-orange-950/40 text-orange-400 border-orange-500/20' :
-              'bg-slate-900 text-slate-400 border-slate-800'
-            }`}
+                locationStatus === 'requesting' ? 'bg-blue-950/40 text-blue-400 border-blue-500/20' :
+                  locationStatus === 'denied' || locationStatus === 'unavailable' ? 'bg-orange-950/40 text-orange-400 border-orange-500/20' :
+                    'bg-slate-900 text-slate-400 border-slate-800'
+              }`}
             title={
               locationStatus === 'granted' && userCoords ? `GPS: ${userCoords.lat.toFixed(5)}, ${userCoords.lng.toFixed(5)} (±${Math.round(userCoords.accuracy)}m)` :
-              locationStatus === 'manual' ? 'Manually set' :
-              locationStatus === 'denied' ? 'Location access blocked' :
-              locationStatus === 'requesting' ? 'Fetching location...' : ''
+                locationStatus === 'manual' ? 'Manually set' :
+                  locationStatus === 'denied' ? 'Location access blocked' :
+                    locationStatus === 'requesting' ? 'Fetching location...' : ''
             }
           >
             {locationStatus === 'requesting' ? (
@@ -1347,27 +1356,26 @@ function SaathiApp() {
             ) : (
               <MapPin size={14} className="text-slate-400" />
             )}
-            <span className="truncate max-w-[120px] sm:max-w-xs">
+            <span className="truncate max-w-[70px] sm:max-w-xs">
               {locationStatus === 'requesting' ? 'Locating...' :
-               locationStatus === 'denied' || locationStatus === 'unavailable' ? 'Location Disabled' :
-               resolvedLocation}
+                locationStatus === 'denied' || locationStatus === 'unavailable' ? 'Location Disabled' :
+                  resolvedLocation}
             </span>
           </div>
 
           <div className="flex items-center space-x-2">
             {/* Real-time System Integrity Badge */}
             <div className="relative group cursor-default" data-dropdown>
-              <div 
-                className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-black transition-all border ${
-                  securityScore >= 90 
-                    ? 'bg-emerald-950/40 text-emerald-400 border-emerald-500/20 pulse-glow-success' 
-                    : 'bg-red-950/40 text-red-400 border-red-500/20 animate-pulse'
-                }`}
+              <div
+                className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-black transition-all border ${securityScore >= 90
+                  ? 'bg-emerald-950/40 text-emerald-400 border-emerald-500/20 pulse-glow-success'
+                  : 'bg-red-950/40 text-red-400 border-red-500/20 animate-pulse'
+                  }`}
               >
                 <Fingerprint size={13} className="animate-pulse" />
                 <span className="hidden sm:inline">SECURE: {securityScore}%</span>
               </div>
-              
+
               <div className="absolute right-0 mt-2 w-80 bg-slate-950/95 backdrop-blur-md rounded-2xl p-4 shadow-2xl border border-slate-800/80 z-[300] hidden group-hover:block transition-all">
                 <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
                   <div className="flex items-center gap-2">
@@ -1376,7 +1384,7 @@ function SaathiApp() {
                   </div>
                   <span className="text-[9px] bg-slate-800 px-2 py-0.5 rounded text-slate-400">ACTIVE</span>
                 </div>
-                
+
                 <div className="space-y-2 text-[11px] text-slate-300">
                   <div className="flex justify-between items-center">
                     <span>Cryptographic Keypair:</span>
@@ -1414,7 +1422,7 @@ function SaathiApp() {
               </button>
             )}
             <div className="relative" data-dropdown>
-              <button 
+              <button
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowNotifPanel(!showNotifPanel);
@@ -1487,7 +1495,7 @@ function SaathiApp() {
             </div>
 
             <div className="relative" data-dropdown>
-              <button 
+              <button
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowProfileMenu(!showProfileMenu);
@@ -1515,12 +1523,12 @@ function SaathiApp() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="p-2 bg-slate-900">
                     <div className="text-[9px] font-black text-slate-500 mb-1.5 px-2 uppercase tracking-widest">Switch Profile Role</div>
                     <div className="space-y-1">
                       {['Citizen', 'Volunteer', 'NGO', 'ServiceProvider', 'HealthcareWorker', 'Admin'].map(role => (
-                        <button 
+                        <button
                           key={role}
                           onClick={() => {
                             setUserRole(role);
@@ -1551,11 +1559,10 @@ function SaathiApp() {
                                 e.stopPropagation();
                                 setHealthcareSubRole(sub);
                               }}
-                              className={`px-2 py-1.5 rounded-lg text-[9px] font-extrabold text-left transition-all cursor-pointer ${
-                                healthcareSubRole === sub
-                                  ? 'bg-emerald-600 text-white shadow-md'
-                                  : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200'
-                              }`}
+                              className={`px-2 py-1.5 rounded-lg text-[9px] font-extrabold text-left transition-all cursor-pointer ${healthcareSubRole === sub
+                                ? 'bg-emerald-600 text-white shadow-md'
+                                : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200'
+                                }`}
                             >
                               {sub === 'Bloodbank' ? 'Blood Bank' : sub}
                             </button>
@@ -1566,11 +1573,11 @@ function SaathiApp() {
                   </div>
 
                   <div className="border-t border-slate-800 p-2 bg-slate-950">
-                    <button 
+                    <button
                       onClick={handleSignOut}
                       className="w-full text-left px-3 py-2 text-xs text-red-400 hover:bg-red-950/30 rounded-lg transition-colors flex items-center gap-2 cursor-pointer font-bold"
                     >
-                      <ArrowLeft size={12}/> Sign Out Securely
+                      <ArrowLeft size={12} /> Sign Out Securely
                     </button>
                   </div>
                 </div>
@@ -1582,28 +1589,28 @@ function SaathiApp() {
 
       <main className="flex-1 overflow-y-auto pb-20 md:pb-0 scroll-smooth relative z-10">
         <div className="max-w-7xl mx-auto px-4 py-6 flex flex-col md:flex-row gap-6">
+          {isSidebarOpen && (
           <aside className="hidden md:flex flex-col w-64 shrink-0 space-y-2">
-            <NavButton active={activeTab === 'home'} onClick={() => setActiveTab('home')} icon={<Activity size={20}/>} label={t('dashboard')} />
-            <NavButton active={activeTab === 'rescue'} onClick={() => setActiveTab('rescue')} icon={<ShieldAlert size={20}/>} label={t('rescue')} color="red" />
-            <NavButton active={activeTab === 'volunteer'} onClick={() => setActiveTab('volunteer')} icon={<HeartHandshake size={20}/>} label={t('volunteer')} color="green" />
-            <NavButton active={activeTab === 'services'} onClick={() => setActiveTab('services')} icon={<Wrench size={20}/>} label={t('services')} color="orange" />
-            <NavButton active={activeTab === 'survey'} onClick={() => setActiveTab('survey')} icon={<FileText size={20}/>} label={t('surveys')} color="blue" />
+            <NavButton active={activeTab === 'home'} onClick={() => setActiveTab('home')} icon={<Activity size={20} />} label={t('dashboard')} />
+            <NavButton active={activeTab === 'rescue'} onClick={() => setActiveTab('rescue')} icon={<ShieldAlert size={20} />} label={t('rescue')} color="red" />
+            <NavButton active={activeTab === 'volunteer'} onClick={() => setActiveTab('volunteer')} icon={<HeartHandshake size={20} />} label={t('volunteer')} color="green" />
+            <NavButton active={activeTab === 'services'} onClick={() => setActiveTab('services')} icon={<Wrench size={20} />} label={t('services')} color="orange" />
+            <NavButton active={activeTab === 'survey'} onClick={() => setActiveTab('survey')} icon={<FileText size={20} />} label={t('surveys')} color="blue" />
             {['Admin', 'Volunteer'].includes(userRole) && (
-              <NavButton 
-                active={activeTab === 'admin-approvals'} 
-                onClick={() => setActiveTab('admin-approvals')} 
-                icon={<ShieldCheck size={20}/>} 
-                label="Approvals Hub" 
-                color="purple" 
-                badge={pendingApprovalsCount} 
+              <NavButton
+                active={activeTab === 'admin-approvals'}
+                onClick={() => setActiveTab('admin-approvals')}
+                icon={<ShieldCheck size={20} />}
+                label="Approvals Hub"
+                color="purple"
+                badge={pendingApprovalsCount}
               />
             )}
-            
-            <div className={`mt-8 p-4 rounded-xl border glass-panel ${
-              userRole === 'Admin' 
-                ? 'border-purple-500/20 bg-purple-950/10' 
-                : 'border-slate-800 bg-slate-900/30'
-            }`}>
+
+            <div className={`mt-8 p-4 rounded-xl border glass-panel ${userRole === 'Admin'
+              ? 'border-purple-500/20 bg-purple-950/10'
+              : 'border-slate-800 bg-slate-900/30'
+              }`}>
               <div className="flex items-center gap-1.5 mb-1">
                 <h4 className={`font-black text-xs uppercase tracking-wider ${userRole === 'Admin' ? 'text-purple-400' : 'text-orange-400'}`}>
                   Role: {userRole}
@@ -1625,6 +1632,7 @@ function SaathiApp() {
               </p>
             </div>
           </aside>
+          )}
 
           <div className="flex-1 min-w-0">
             {locationError && (locationStatus === 'denied' || locationStatus === 'unavailable') && (
@@ -1649,16 +1657,16 @@ function SaathiApp() {
         </div>
       </main>
 
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-50">
-        <div className="flex justify-around items-center h-16">
-          <MobileNavButton active={activeTab === 'home'} onClick={() => setActiveTab('home')} icon={<Activity size={22}/>} label={t('dashboard')} />
-          <MobileNavButton active={activeTab === 'rescue'} onClick={() => setActiveTab('rescue')} icon={<ShieldAlert size={22}/>} label={t('rescue')} color="text-red-600" />
-          <MobileNavButton active={activeTab === 'volunteer'} onClick={() => setActiveTab('volunteer')} icon={<HeartHandshake size={22}/>} label={t('volunteer')} />
-          <MobileNavButton active={activeTab === 'services'} onClick={() => setActiveTab('services')} icon={<Wrench size={22}/>} label={t('services')} />
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#0b0f19]/95 backdrop-blur-md border-t border-slate-800 z-[150] pb-safe">
+        <div className="flex justify-around items-center h-16 pb-1">
+          <MobileNavButton active={activeTab === 'home'} onClick={() => setActiveTab('home')} icon={<Activity size={22} />} label={t('dashboard')} />
+          <MobileNavButton active={activeTab === 'rescue'} onClick={() => setActiveTab('rescue')} icon={<ShieldAlert size={22} />} label={t('rescue')} color="text-red-500" />
+          <MobileNavButton active={activeTab === 'volunteer'} onClick={() => setActiveTab('volunteer')} icon={<HeartHandshake size={22} />} label={t('volunteer')} />
+          <MobileNavButton active={activeTab === 'services'} onClick={() => setActiveTab('services')} icon={<Wrench size={22} />} label={t('services')} />
           {['Admin', 'Volunteer'].includes(userRole) ? (
-            <MobileNavButton active={activeTab === 'admin-approvals'} onClick={() => setActiveTab('admin-approvals')} icon={<ShieldCheck size={22}/>} label="Approvals" color="text-purple-600" badge={pendingApprovalsCount} />
+            <MobileNavButton active={activeTab === 'admin-approvals'} onClick={() => setActiveTab('admin-approvals')} icon={<ShieldCheck size={22} />} label="Approvals" color="text-purple-400" badge={pendingApprovalsCount} />
           ) : (
-            <MobileNavButton active={activeTab === 'survey'} onClick={() => setActiveTab('survey')} icon={<FileText size={22}/>} label={t('surveys')} />
+            <MobileNavButton active={activeTab === 'survey'} onClick={() => setActiveTab('survey')} icon={<FileText size={22} />} label={t('surveys')} />
           )}
         </div>
       </nav>
@@ -1672,7 +1680,7 @@ function SaathiApp() {
             <h4 className="font-bold text-slate-900 text-sm">Live Location Shared</h4>
             <p className="text-xs text-slate-600 mt-1">A nearby citizen has triggered an SOS and shared their live location.</p>
             <div className="mt-2 flex gap-2">
-              <button 
+              <button
                 onClick={handleViewOnMap}
                 className="text-xs bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg font-medium flex items-center gap-1 transition-colors"
               >
@@ -1784,14 +1792,14 @@ function SaathiApp() {
                 <span className="text-5xl font-black text-red-600 animate-pulse">{sosCountdown}</span>
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <h3 className="text-2xl font-black text-white tracking-tight">TRIGGERING SOS</h3>
               <p className="text-sm text-slate-300 leading-relaxed">
                 Broadcasting emergency alert to nearby volunteers & contacts in {sosCountdown} seconds...
               </p>
             </div>
-            
+
             <button
               type="button"
               onClick={cancelSOSCountdown}
@@ -1809,7 +1817,7 @@ function SaathiApp() {
 // --- LOCATION PICKER MODAL ---
 function LocationPickerModal({ currentLocation, onSelect, onRetryGPS, locationStatus, onClose }) {
   const [typedLocation, setTypedLocation] = useState('');
-  
+
   const presetLocations = [
     { name: "Alappuzha, Kerala", lat: 9.4981, lng: 76.3388 },
     { name: "Coimbatore, Tamil Nadu", lat: 11.0168, lng: 76.9558 },
@@ -1869,11 +1877,10 @@ function LocationPickerModal({ currentLocation, onSelect, onRetryGPS, locationSt
               key={idx}
               type="button"
               onClick={() => onSelect(loc.name, loc.lat, loc.lng)}
-              className={`p-2.5 rounded-xl border text-xs font-semibold text-left transition-all ${
-                currentLocation === loc.name
-                  ? 'border-orange-500 bg-orange-50 text-orange-700'
-                  : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700'
-              }`}
+              className={`p-2.5 rounded-xl border text-xs font-semibold text-left transition-all ${currentLocation === loc.name
+                ? 'border-orange-500 bg-orange-50 text-orange-700'
+                : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700'
+                }`}
             >
               {loc.name}
             </button>
@@ -1948,7 +1955,7 @@ function PostAlertModal({ userRole, healthcareSubRole, currentLocation, onPost, 
     Hospital: ['Bed Availability', 'Emergency Ward Info', 'Vaccination Drive', 'General Announcement']
   };
 
-  const categories = userRole === 'HealthcareWorker' 
+  const categories = userRole === 'HealthcareWorker'
     ? (healthcareCategories[healthcareSubRole] || ['Medical Alert'])
     : volunteerCategories;
 
@@ -1977,11 +1984,10 @@ function PostAlertModal({ userRole, healthcareSubRole, currentLocation, onPost, 
                 type="button"
                 key={cat}
                 onClick={() => setType(cat)}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
-                  type === cat
-                    ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
-                    : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700'
-                }`}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${type === cat
+                  ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
+                  : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700'
+                  }`}
               >
                 {cat}
               </button>
@@ -1998,11 +2004,10 @@ function PostAlertModal({ userRole, healthcareSubRole, currentLocation, onPost, 
                   type="button"
                   key={sev}
                   onClick={() => setSeverity(sev)}
-                  className={`flex-1 py-2 text-xs font-extrabold uppercase transition-all ${
-                    severity === sev
-                      ? sev === 'high' ? 'bg-red-500 text-white' : sev === 'medium' ? 'bg-orange-500 text-white' : 'bg-slate-500 text-white'
-                      : 'bg-white hover:bg-slate-50 text-slate-600'
-                  }`}
+                  className={`flex-1 py-2 text-xs font-extrabold uppercase transition-all ${severity === sev
+                    ? sev === 'high' ? 'bg-red-500 text-white' : sev === 'medium' ? 'bg-orange-500 text-white' : 'bg-slate-500 text-white'
+                    : 'bg-white hover:bg-slate-50 text-slate-600'
+                    }`}
                 >
                   {t ? t(sev) : sev}
                 </button>
@@ -2109,7 +2114,7 @@ function WalletModal({ balance, transactions, onPayout, onClose }) {
   const handleRedeem = (e) => {
     e.preventDefault();
     setErrorMessage('');
-    
+
     // Validation
     const amt = parseFloat(amount);
     if (!upiId) {
@@ -2144,12 +2149,12 @@ function WalletModal({ balance, transactions, onPayout, onClose }) {
 
   return (
     <Modal onClose={onClose}>
-      <ModalHeader 
-        icon={<Wallet size={20} />} 
-        title="Redeem Rewards" 
-        subtitle="Withdraw your earnings instantly via UPI" 
-        gradient="from-amber-500 to-orange-600" 
-        onClose={onClose} 
+      <ModalHeader
+        icon={<Wallet size={20} />}
+        title="Redeem Rewards"
+        subtitle="Withdraw your earnings instantly via UPI"
+        gradient="from-amber-500 to-orange-600"
+        onClose={onClose}
       />
       <div className="p-5 overflow-y-auto space-y-5">
         <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-4 flex items-center justify-between">
@@ -2267,16 +2272,14 @@ function AlertDetailModal({ alert, isSOSActive, onTriggerSOS, onClose }) {
       />
       <div className="p-5 overflow-y-auto space-y-4 text-sm text-slate-700">
         <div className="flex gap-2">
-          <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider ${
-            alert.severity === 'high' ? 'bg-red-100 text-red-700' :
+          <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider ${alert.severity === 'high' ? 'bg-red-100 text-red-700' :
             alert.severity === 'medium' ? 'bg-orange-100 text-orange-700' :
-            'bg-slate-100 text-slate-700'
-          }`}>
+              'bg-slate-100 text-slate-700'
+            }`}>
             {alert.severity} Severity
           </span>
-          <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider ${
-            alert.status === 'Active' ? 'bg-emerald-100 text-emerald-700 animate-pulse' : 'bg-slate-100 text-slate-700'
-          }`}>
+          <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider ${alert.status === 'Active' ? 'bg-emerald-100 text-emerald-700 animate-pulse' : 'bg-slate-100 text-slate-700'
+            }`}>
             {alert.status}
           </span>
         </div>
@@ -2330,11 +2333,10 @@ function AlertDetailModal({ alert, isSOSActive, onTriggerSOS, onClose }) {
               type="button"
               onClick={onTriggerSOS}
               disabled={isSOSActive}
-              className={`flex-1 font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 group text-xs uppercase tracking-wider ${
-                isSOSActive 
-                  ? 'bg-emerald-50 text-emerald-700 cursor-not-allowed border border-emerald-200' 
-                  : 'bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white shadow-md shadow-orange-500/10'
-              }`}
+              className={`flex-1 font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 group text-xs uppercase tracking-wider ${isSOSActive
+                ? 'bg-emerald-50 text-emerald-700 cursor-not-allowed border border-emerald-200'
+                : 'bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white shadow-md shadow-orange-500/10'
+                }`}
             >
               <Radio size={16} className={`${isSOSActive ? '' : 'animate-pulse group-hover:scale-110'} transition-transform`} />
               {isSOSActive ? "Broadcast Active" : "Trigger SOS"}
@@ -2354,15 +2356,15 @@ function AlertDetailModal({ alert, isSOSActive, onTriggerSOS, onClose }) {
 }
 
 // --- HOME ---
-function HomeFeed({ 
+function HomeFeed({
   t,
   startSOSCountdown,
-  isSOSActive, 
-  setIsSOSActive, 
-  liveLocation, 
-  onViewCertificate, 
-  userRole, 
-  walletBalance, 
+  isSOSActive,
+  setIsSOSActive,
+  liveLocation,
+  onViewCertificate,
+  userRole,
+  walletBalance,
   onOpenWallet,
   volunteerApplicationStatus,
   setVolunteerApplicationStatus,
@@ -2374,10 +2376,12 @@ function HomeFeed({
   surveys,
   alerts,
   onOpenPostAlert,
-  bloodRequests = []
+  bloodRequests = [],
+  onEditAlert,
+  onRemoveAlert
 }) {
   const [selectedAlert, setSelectedAlert] = useState(null);
-  const showWalletCard = ['Volunteer', 'NGO', 'Admin'].includes(userRole);
+  const showWalletCard = ['Volunteer'].includes(userRole);
 
   const combinedAlerts = useMemo(() => {
     // Transform approved blood requests into alert-like structure for the hyperlocal feed
@@ -2436,7 +2440,7 @@ function HomeFeed({
       <div>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-            <Activity size={18} className="text-orange-600"/> {t('hyperlocalFeed')}
+            <Activity size={18} className="text-orange-600" /> {t('hyperlocalFeed')}
           </h3>
           <div className="flex items-center gap-2">
             {(userRole === 'Volunteer' || userRole === 'HealthcareWorker' || userRole === 'Admin') && (
@@ -2457,42 +2461,38 @@ function HomeFeed({
             const isMedium = alert.severity === 'medium';
             const isBlood = alert.isBloodAttestation;
             return (
-              <div 
-                key={alert.id} 
+              <div
+                key={alert.id}
                 onClick={() => setSelectedAlert(alert)}
-                className={`hyperlocal-card p-5 rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden group ${
-                  isBlood
-                    ? 'hyperlocal-card-blood'
-                    : isHigh 
-                      ? 'hyperlocal-card-high' 
-                      : isMedium 
-                        ? 'hyperlocal-card-medium' 
-                        : 'hyperlocal-card-low'
-                }`}
+                className={`hyperlocal-card p-5 rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden group ${isBlood
+                  ? 'hyperlocal-card-blood'
+                  : isHigh
+                    ? 'hyperlocal-card-high'
+                    : isMedium
+                      ? 'hyperlocal-card-medium'
+                      : 'hyperlocal-card-low'
+                  }`}
               >
-                <div className={`absolute top-0 left-0 w-1.5 h-full ${
-                  isBlood ? 'bg-rose-500' : isHigh ? 'bg-red-500' : isMedium ? 'bg-orange-500' : 'bg-slate-400'
-                }`} />
+                <div className={`absolute top-0 left-0 w-1.5 h-full ${isBlood ? 'bg-rose-500' : isHigh ? 'bg-red-500' : isMedium ? 'bg-orange-500' : 'bg-slate-400'
+                  }`} />
 
                 <div className="flex items-start gap-4">
-                  <div className={`p-3.5 rounded-xl shrink-0 relative ${
-                    isBlood
-                      ? 'bg-rose-950/60 text-rose-400 border border-rose-500/20'
-                      : isHigh 
-                        ? 'bg-red-950/60 text-red-400 border border-red-500/20' 
-                        : isMedium 
-                          ? 'bg-orange-950/60 text-orange-400 border border-orange-500/20' 
-                          : 'bg-slate-800 text-slate-300 border border-slate-700'
-                  }`}>
+                  <div className={`p-3.5 rounded-xl shrink-0 relative ${isBlood
+                    ? 'bg-rose-950/60 text-rose-400 border border-rose-500/20'
+                    : isHigh
+                      ? 'bg-red-950/60 text-red-400 border border-red-500/20'
+                      : isMedium
+                        ? 'bg-orange-950/60 text-orange-400 border border-orange-500/20'
+                        : 'bg-slate-800 text-slate-300 border border-slate-700'
+                    }`}>
                     {isBlood ? (
                       <Heart size={22} className="text-rose-500 animate-pulse fill-rose-500" />
                     ) : (
                       <AlertTriangle size={22} className={isHigh ? 'animate-pulse' : ''} />
                     )}
                     {alert.status === 'Active' && (
-                      <span className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white animate-ping ${
-                        isBlood ? 'bg-rose-500' : isHigh ? 'bg-red-500' : 'bg-orange-500'
-                      }`} />
+                      <span className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white animate-ping ${isBlood ? 'bg-rose-500' : isHigh ? 'bg-red-500' : 'bg-orange-500'
+                        }`} />
                     )}
                   </div>
 
@@ -2501,34 +2501,32 @@ function HomeFeed({
                       <h4 className="font-extrabold text-slate-100 text-sm tracking-tight">
                         {alert.title || alert.type}
                       </h4>
-                      <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                        isBlood
-                          ? 'bg-rose-950/80 text-rose-300'
-                          : isHigh 
-                            ? 'bg-red-950/80 text-red-300' 
-                            : isMedium 
-                              ? 'bg-orange-950/80 text-orange-300' 
-                              : 'bg-slate-800 text-slate-300'
-                      }`}>
+                      <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider ${isBlood
+                        ? 'bg-rose-950/80 text-rose-300'
+                        : isHigh
+                          ? 'bg-red-950/80 text-red-300'
+                          : isMedium
+                            ? 'bg-orange-950/80 text-orange-300'
+                            : 'bg-slate-800 text-slate-300'
+                        }`}>
                         {alert.type}
                       </span>
                       {alert.postedByRole && (
-                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 ${
-                          alert.isBloodAttestation
-                            ? 'bg-rose-950/60 text-rose-300 border border-rose-500/30'
-                            : alert.postedByRole === 'HealthcareWorker'
-                              ? alert.postedBySubRole === 'ASHA' ? 'bg-amber-950/60 text-amber-300 border border-amber-500/30' :
-                                alert.postedBySubRole === 'Bloodbank' ? 'bg-red-950/60 text-red-300 border border-red-500/30' :
+                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 ${alert.isBloodAttestation
+                          ? 'bg-rose-950/60 text-rose-300 border border-rose-500/30'
+                          : alert.postedByRole === 'HealthcareWorker'
+                            ? alert.postedBySubRole === 'ASHA' ? 'bg-amber-950/60 text-amber-300 border border-amber-500/30' :
+                              alert.postedBySubRole === 'Bloodbank' ? 'bg-red-950/60 text-red-300 border border-red-500/30' :
                                 alert.postedBySubRole === 'Doctor' ? 'bg-blue-950/60 text-blue-300 border border-blue-200' :
-                                'bg-indigo-950/60 text-indigo-300 border border-indigo-500/30'
-                              : alert.postedByRole === 'Volunteer' ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-500/30' :
-                                'bg-purple-950/60 text-purple-300 border border-purple-500/30'
-                        }`}>
+                                  'bg-indigo-950/60 text-indigo-300 border border-indigo-500/30'
+                            : alert.postedByRole === 'Volunteer' ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-500/30' :
+                              'bg-purple-950/60 text-purple-300 border border-purple-500/30'
+                          }`}>
                           {alert.isBloodAttestation ? <Heart size={10} className="text-rose-400 fill-rose-400" /> : <ShieldCheck size={10} />}
-                          {alert.isBloodAttestation 
-                            ? 'Verified Blood Request' 
-                            : alert.postedByRole === 'HealthcareWorker' 
-                              ? alert.postedBySubRole === 'Bloodbank' ? 'Blood Bank' : `${alert.postedBySubRole} (Health)` 
+                          {alert.isBloodAttestation
+                            ? 'Verified Blood Request'
+                            : alert.postedByRole === 'HealthcareWorker'
+                              ? alert.postedBySubRole === 'Bloodbank' ? 'Blood Bank' : `${alert.postedBySubRole} (Health)`
                               : alert.postedByRole}
                         </span>
                       )}
@@ -2539,9 +2537,9 @@ function HomeFeed({
                     </p>
 
                     <div className="flex items-center text-[11px] text-slate-400 mt-2 gap-3">
-                      <span className="flex items-center gap-1 font-medium"><MapPin size={12} className={isBlood ? 'text-rose-400' : isHigh ? 'text-red-500' : 'text-slate-400'}/> {alert.location || 'Nearby'} ({alert.distance})</span>
+                      <span className="flex items-center gap-1 font-medium"><MapPin size={12} className={isBlood ? 'text-rose-400' : isHigh ? 'text-red-500' : 'text-slate-400'} /> {alert.location || 'Nearby'} ({alert.distance})</span>
                       <span>•</span>
-                      <span className="flex items-center gap-1 font-medium"><Clock size={12}/> {alert.time}</span>
+                      <span className="flex items-center gap-1 font-medium"><Clock size={12} /> {alert.time}</span>
                     </div>
                   </div>
                 </div>
@@ -2549,13 +2547,13 @@ function HomeFeed({
                 <div className="flex items-center justify-end shrink-0 sm:self-center gap-3">
                   {userRole === 'Admin' && (
                     <div className="flex gap-2 mr-2">
-                      <button 
+                      <button
                         onClick={(e) => { e.stopPropagation(); onEditAlert && onEditAlert(alert); }}
                         className="text-xs bg-slate-800 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg transition-colors font-medium border border-slate-700 hover:border-blue-500"
                       >
                         Edit
                       </button>
-                      <button 
+                      <button
                         onClick={(e) => { e.stopPropagation(); onRemoveAlert && onRemoveAlert(alert.id); }}
                         className="text-xs bg-slate-800 hover:bg-rose-600 text-white px-3 py-1.5 rounded-lg transition-colors font-medium border border-slate-700 hover:border-rose-500"
                       >
@@ -2599,7 +2597,7 @@ function HomeFeed({
               </p>
             )}
           </div>
-          <button 
+          <button
             onClick={isSOSActive ? () => setIsSOSActive(false) : startSOSCountdown}
             className={`mt-4 px-6 py-2.5 rounded-full font-bold text-sm tracking-wide transition-all z-10 w-full sm:w-auto ${isSOSActive ? 'bg-white text-red-600 hover:bg-red-50 shadow-lg' : 'bg-red-500 hover:bg-red-400 text-white shadow-lg shadow-red-500/20 flex items-center justify-center gap-2'}`}
           >
@@ -2626,7 +2624,7 @@ function HomeFeed({
                 </div>
               </div>
             </div>
-            <button 
+            <button
               onClick={() => setActiveTab('admin-approvals')}
               className="mt-4 text-xs font-semibold bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg self-start backdrop-blur-sm transition-colors flex items-center gap-1.5 animate-pulse"
             >
@@ -2649,7 +2647,7 @@ function HomeFeed({
                 </div>
               </div>
             </div>
-            <button 
+            <button
               onClick={() => setActiveTab('volunteer')}
               className="mt-4 text-xs font-semibold bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg self-start backdrop-blur-sm transition-colors flex items-center gap-1.5"
             >
@@ -2672,7 +2670,7 @@ function HomeFeed({
                 </div>
               </div>
             </div>
-            <button 
+            <button
               onClick={() => setActiveTab('services')}
               className="mt-4 text-xs font-semibold bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg self-start backdrop-blur-sm transition-colors flex items-center gap-1.5"
             >
@@ -2695,7 +2693,7 @@ function HomeFeed({
                 </div>
               </div>
             </div>
-            <button 
+            <button
               onClick={onViewCertificate}
               className="mt-4 text-xs font-semibold bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg self-start backdrop-blur-sm transition-colors flex items-center gap-1.5"
             >
@@ -2797,12 +2795,12 @@ function HomeFeed({
 }
 
 // --- RESCUE ---
-function RescueModule({ 
-  isSOSActive, 
-  setIsSOSActive, 
-  liveLocation, 
-  onOpenChat, 
-  userCoords, 
+function RescueModule({
+  isSOSActive,
+  setIsSOSActive,
+  liveLocation,
+  onOpenChat,
+  userCoords,
   locationStatus,
   bloodRequests = [],
   setBloodRequests,
@@ -2817,11 +2815,11 @@ function RescueModule({
   const [customIncident, setCustomIncident] = useState("");
   const [aiAdvice, setAiAdvice] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  
+
   // Blood specific local states
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [selectedRequestForPledge, setSelectedRequestForPledge] = useState(null);
-  
+
   // New request form state
   const [patientName, setPatientName] = useState("");
   const [bloodType, setBloodType] = useState("O+");
@@ -2833,7 +2831,7 @@ function RescueModule({
   const [isSubmittingRequest, setIsSubmittingRequest] = useState(false);
   const [formError, setFormError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
-  
+
   // Pledge form state
   const [pledgeName, setPledgeName] = useState("");
   const [pledgePhone, setPledgePhone] = useState("");
@@ -2899,7 +2897,7 @@ function RescueModule({
     }
 
     setIsSubmittingRequest(true);
-    
+
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1200));
 
@@ -2927,7 +2925,7 @@ function RescueModule({
     setBloodRequests(prev => [newRequest, ...prev]);
     setIsSubmittingRequest(false);
     setSuccessMsg("Your blood request has been successfully submitted and is under verification by Saathi Volunteers/Admins!");
-    
+
     // Reset form
     setPatientName("");
     setBloodType("O+");
@@ -2936,7 +2934,7 @@ function RescueModule({
     setDoctorContact("");
     setRequestorPhone("");
     setUploadedFile(null);
-    
+
     setTimeout(() => {
       setShowRequestModal(false);
       setSuccessMsg("");
@@ -2992,22 +2990,20 @@ function RescueModule({
       <div className="flex border-b border-slate-800/80 p-1 bg-slate-950/40 rounded-xl max-w-sm">
         <button
           onClick={() => setSubModule('sos')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 text-xs font-black uppercase tracking-wider rounded-lg transition-all ${
-            subModule === 'sos'
-              ? 'bg-red-950/80 border border-red-500/30 text-red-400'
-              : 'text-slate-400 hover:text-slate-200'
-          }`}
+          className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 text-xs font-black uppercase tracking-wider rounded-lg transition-all ${subModule === 'sos'
+            ? 'bg-red-950/80 border border-red-500/30 text-red-400'
+            : 'text-slate-400 hover:text-slate-200'
+            }`}
         >
           <Radio size={14} className={subModule === 'sos' ? 'animate-pulse' : ''} />
           Emergency SOS
         </button>
         <button
           onClick={() => setSubModule('blood')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 text-xs font-black uppercase tracking-wider rounded-lg transition-all ${
-            subModule === 'blood'
-              ? 'bg-rose-950/80 border border-rose-500/30 text-rose-400'
-              : 'text-slate-400 hover:text-slate-200'
-          }`}
+          className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 text-xs font-black uppercase tracking-wider rounded-lg transition-all ${subModule === 'blood'
+            ? 'bg-rose-950/80 border border-rose-500/30 text-rose-400'
+            : 'text-slate-400 hover:text-slate-200'
+            }`}
         >
           <HeartHandshake size={14} className={subModule === 'blood' ? 'animate-pulse' : ''} />
           Blood Help
@@ -3038,14 +3034,13 @@ function RescueModule({
             ></iframe>
 
             {(locationStatus === 'granted' || locationStatus === 'manual' || locationStatus === 'denied' || locationStatus === 'unavailable') && (
-              <div 
-                className={`absolute top-3 left-3 bg-slate-950/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md text-xs font-semibold flex items-center gap-1.5 z-20 transition-all duration-300 ${
-                  locationStatus === 'granted'
-                    ? 'border border-emerald-500/20 text-emerald-400'
-                    : locationStatus === 'manual'
+              <div
+                className={`absolute top-3 left-3 bg-slate-950/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md text-xs font-semibold flex items-center gap-1.5 z-20 transition-all duration-300 ${locationStatus === 'granted'
+                  ? 'border border-emerald-500/20 text-emerald-400'
+                  : locationStatus === 'manual'
                     ? 'border border-blue-500/20 text-blue-400'
                     : 'border border-orange-500/20 text-orange-400'
-                }`}
+                  }`}
               >
                 {locationStatus === 'granted' ? (
                   <>
@@ -3084,16 +3079,16 @@ function RescueModule({
           <div className="bg-slate-900/40 p-5 rounded-2xl shadow-xl border border-slate-800/80 relative overflow-hidden glass-panel">
             <div className="absolute -top-12 -right-12 w-32 h-32 bg-purple-500/5 rounded-full blur-2xl"></div>
             <h3 className="font-bold text-white mb-3 flex items-center gap-2">
-              <AlertTriangle size={18} className="text-orange-500"/> Describe Emergency (AI Triage)
+              <AlertTriangle size={18} className="text-orange-500" /> Describe Emergency (AI Triage)
             </h3>
             <div className="flex flex-col md:flex-row gap-3">
-              <textarea 
+              <textarea
                 placeholder="E.g., 'Snake bite on the leg, person is feeling dizzy...'"
                 value={customIncident}
                 onChange={(e) => setCustomIncident(e.target.value)}
                 className="flex-1 p-3 rounded-xl border border-slate-800 bg-slate-950 text-slate-200 text-sm focus:ring-2 focus:ring-purple-500 outline-none resize-none h-16"
               />
-              <button 
+              <button
                 onClick={handleAnalyzeEmergency}
                 disabled={isAnalyzing || !customIncident.trim()}
                 className="md:w-48 flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2 px-4 rounded-xl text-sm font-semibold hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 transition-all btn-premium-interactive cursor-pointer"
@@ -3104,7 +3099,7 @@ function RescueModule({
             </div>
             {aiAdvice && (
               <div className="mt-4 p-4 bg-purple-950/20 border border-purple-500/20 rounded-xl text-sm text-purple-200">
-                <h4 className="font-bold mb-2 flex items-center gap-1 text-purple-400"><Sparkles size={14}/> Immediate AI Guidance:</h4>
+                <h4 className="font-bold mb-2 flex items-center gap-1 text-purple-400"><Sparkles size={14} /> Immediate AI Guidance:</h4>
                 <div className="whitespace-pre-wrap text-xs leading-relaxed">{aiAdvice}</div>
               </div>
             )}
@@ -3113,7 +3108,7 @@ function RescueModule({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-slate-900/40 p-5 rounded-2xl shadow-xl border border-slate-800/80 glass-panel">
               <h3 className="font-bold text-white mb-4 flex items-center gap-2">
-                <PhoneCall size={18} className="text-orange-500"/> Emergency Contacts
+                <PhoneCall size={18} className="text-orange-500" /> Emergency Contacts
               </h3>
               <div className="space-y-3">
                 {MOCK_CONTACTS.map((contact, idx) => (
@@ -3136,7 +3131,7 @@ function RescueModule({
 
             <div className="bg-slate-900/40 p-5 rounded-2xl shadow-xl border border-slate-800/80 glass-panel">
               <h3 className="font-bold text-white mb-4 flex items-center gap-2">
-                <Users size={18} className="text-green-500"/> Nearby Responders
+                <Users size={18} className="text-green-500" /> Nearby Responders
               </h3>
               <div className="space-y-3">
                 {MOCK_RESPONDERS.map(responder => {
@@ -3154,7 +3149,7 @@ function RescueModule({
                         <h4 className="font-bold text-sm text-slate-200">{responder.name}</h4>
                         <p className="text-xs text-slate-500 mt-0.5">{responder.type} • {responder.distance} away</p>
                       </div>
-                      <button 
+                      <button
                         onClick={() => onOpenChat(responder)}
                         className={`${btnStyles[responder.color]} p-2 rounded-full transition-colors cursor-pointer`}
                       >
@@ -3269,7 +3264,7 @@ function RescueModule({
                             </span>
                           </div>
                           <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
-                            <div 
+                            <div
                               className={`h-full transition-all duration-500 ${isCompleted ? 'bg-gradient-to-r from-emerald-500 to-teal-400' : 'bg-gradient-to-r from-rose-500 to-red-500 animate-pulse'}`}
                               style={{ width: `${percentComplete}%` }}
                             ></div>
@@ -3326,12 +3321,12 @@ function RescueModule({
       {/* RAISE BLOOD REQUEST MODAL */}
       {showRequestModal && (
         <Modal onClose={() => setShowRequestModal(false)} maxWidth="max-w-lg">
-          <ModalHeader 
-            icon={<HeartHandshake size={20} className="text-rose-500 animate-pulse" />} 
-            title="Create Blood Request Nodes" 
-            subtitle="Clinical Requisition Registry Form" 
-            gradient="from-rose-950 to-slate-950 border-b border-rose-500/20" 
-            onClose={() => setShowRequestModal(false)} 
+          <ModalHeader
+            icon={<HeartHandshake size={20} className="text-rose-500 animate-pulse" />}
+            title="Create Blood Request Nodes"
+            subtitle="Clinical Requisition Registry Form"
+            gradient="from-rose-950 to-slate-950 border-b border-rose-500/20"
+            onClose={() => setShowRequestModal(false)}
           />
           <form onSubmit={handleCreateBloodRequest} className="p-6 space-y-4 overflow-y-auto bg-slate-950 text-slate-200">
             {formError && (
@@ -3350,11 +3345,11 @@ function RescueModule({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1">
                 <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Patient Name</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={patientName}
                   onChange={(e) => setPatientName(e.target.value)}
-                  placeholder="E.g., K. R. Vijayan" 
+                  placeholder="E.g., K. R. Vijayan"
                   className="w-full p-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs focus:ring-2 focus:ring-rose-500 outline-none"
                   required
                 />
@@ -3362,7 +3357,7 @@ function RescueModule({
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1">
                   <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Blood Type</label>
-                  <select 
+                  <select
                     value={bloodType}
                     onChange={(e) => setBloodType(e.target.value)}
                     className="w-full p-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white focus:ring-2 focus:ring-rose-500 outline-none cursor-pointer"
@@ -3374,9 +3369,9 @@ function RescueModule({
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Units Needed</label>
-                  <input 
-                    type="number" 
-                    min="1" 
+                  <input
+                    type="number"
+                    min="1"
                     max="10"
                     value={unitsNeeded}
                     onChange={(e) => setUnitsNeeded(e.target.value)}
@@ -3389,11 +3384,11 @@ function RescueModule({
 
             <div className="space-y-1">
               <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Hospital Delivery Location</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={hospital}
                 onChange={(e) => setHospital(e.target.value)}
-                placeholder="E.g. Alappuzha General Hospital (Ward 5)" 
+                placeholder="E.g. Alappuzha General Hospital (Ward 5)"
                 className="w-full p-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs focus:ring-2 focus:ring-rose-500 outline-none"
                 required
               />
@@ -3402,22 +3397,22 @@ function RescueModule({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1">
                 <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Doctor's Contact number</label>
-                <input 
-                  type="tel" 
+                <input
+                  type="tel"
                   value={doctorContact}
                   onChange={(e) => setDoctorContact(e.target.value)}
-                  placeholder="10-digit Mobile Number" 
+                  placeholder="10-digit Mobile Number"
                   className="w-full p-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs focus:ring-2 focus:ring-rose-500 outline-none"
                   required
                 />
               </div>
               <div className="space-y-1">
                 <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Requestor Phone</label>
-                <input 
-                  type="tel" 
+                <input
+                  type="tel"
                   value={requestorPhone}
                   onChange={(e) => setRequestorPhone(e.target.value)}
-                  placeholder="10-digit Mobile Number" 
+                  placeholder="10-digit Mobile Number"
                   className="w-full p-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs focus:ring-2 focus:ring-rose-500 outline-none"
                   required
                 />
@@ -3429,7 +3424,7 @@ function RescueModule({
               <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400">
                 Attach Doctor's Requisition/Approval Letter <span className="text-red-500">*</span>
               </label>
-              
+
               {uploadedFile ? (
                 <div className="p-3 bg-slate-900 border border-emerald-500/20 rounded-xl flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -3439,8 +3434,8 @@ function RescueModule({
                       <p className="text-[9px] text-slate-500">{uploadedFile.size}</p>
                     </div>
                   </div>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => setUploadedFile(null)}
                     className="text-xs text-red-400 hover:text-red-300 font-bold px-2 py-1 rounded hover:bg-red-950/20 transition-all cursor-pointer"
                   >
@@ -3448,7 +3443,7 @@ function RescueModule({
                   </button>
                 </div>
               ) : (
-                <div 
+                <div
                   onClick={handleSimulateUpload}
                   className="border-2 border-dashed border-slate-800 hover:border-rose-500/30 rounded-2xl p-5 text-center cursor-pointer transition-all bg-slate-950"
                 >
@@ -3460,11 +3455,11 @@ function RescueModule({
             </div>
 
             <div className="flex items-start gap-2 pt-2">
-              <input 
-                type="checkbox" 
-                id="attest" 
+              <input
+                type="checkbox"
+                id="attest"
                 className="mt-0.5 rounded bg-slate-900 border-slate-800 text-rose-600 focus:ring-rose-500 cursor-pointer"
-                required 
+                required
               />
               <label htmlFor="attest" className="text-[10px] text-slate-400 leading-normal select-none cursor-pointer">
                 I attest that this is a verified medical emergency, and the uploaded requisition letter is a genuine clinical slip signed by a registered practitioner.
@@ -3495,12 +3490,12 @@ function RescueModule({
       {/* PLEDGE DONATION MODAL */}
       {selectedRequestForPledge && (
         <Modal onClose={() => setSelectedRequestForPledge(null)} maxWidth="max-w-md">
-          <ModalHeader 
-            icon={<HeartHandshake size={20} className="text-rose-400" />} 
-            title={`Pledge Donation: ${selectedRequestForPledge.bloodType}`} 
-            subtitle={`Beneficiary: ${selectedRequestForPledge.patientName}`} 
-            gradient="from-rose-950 to-slate-950 border-b border-rose-500/20" 
-            onClose={() => setSelectedRequestForPledge(null)} 
+          <ModalHeader
+            icon={<HeartHandshake size={20} className="text-rose-400" />}
+            title={`Pledge Donation: ${selectedRequestForPledge.bloodType}`}
+            subtitle={`Beneficiary: ${selectedRequestForPledge.patientName}`}
+            gradient="from-rose-950 to-slate-950 border-b border-rose-500/20"
+            onClose={() => setSelectedRequestForPledge(null)}
           />
           <form onSubmit={handlePledgeBlood} className="p-6 space-y-4 bg-slate-950 text-slate-200">
             <div className="bg-slate-900/50 border border-rose-500/20 p-4 rounded-xl space-y-2">
@@ -3521,11 +3516,11 @@ function RescueModule({
 
             <div className="space-y-1">
               <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Your Full Name</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={pledgeName}
                 onChange={(e) => setPledgeName(e.target.value)}
-                placeholder="E.g., Ramesh Kumar" 
+                placeholder="E.g., Ramesh Kumar"
                 className="w-full p-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs focus:ring-2 focus:ring-rose-500 outline-none"
                 required
               />
@@ -3533,11 +3528,11 @@ function RescueModule({
 
             <div className="space-y-1">
               <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Your Phone number</label>
-              <input 
-                type="tel" 
+              <input
+                type="tel"
                 value={pledgePhone}
                 onChange={(e) => setPledgePhone(e.target.value)}
-                placeholder="E.g. +91 94460 XXXXX" 
+                placeholder="E.g. +91 94460 XXXXX"
                 className="w-full p-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs focus:ring-2 focus:ring-rose-500 outline-none"
                 required
               />
@@ -3608,11 +3603,10 @@ function VolunteerModule({ userCoords, userRole, locationStatus }) {
         </div>
         <div className="flex gap-2">
           {canPost ? (
-            <button 
+            <button
               onClick={() => setShowPostForm(true)}
-              className={`text-white text-sm font-semibold px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm transition-colors ${
-                isAdmin ? 'bg-purple-600 hover:bg-purple-700' : 'bg-green-600 hover:bg-green-700'
-              }`}
+              className={`text-white text-sm font-semibold px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm transition-colors ${isAdmin ? 'bg-purple-600 hover:bg-purple-700' : 'bg-green-600 hover:bg-green-700'
+                }`}
             >
               <HeartHandshake size={16} /> Post Opportunity
               {isAdmin && <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded ml-1">ADMIN</span>}
@@ -3686,7 +3680,7 @@ function VolunteerModule({ userCoords, userRole, locationStatus }) {
                     <Clock size={14} className="mr-2 text-slate-400" /> {job.date}
                   </div>
                   <div className="flex items-center text-xs text-slate-500">
-                    <MapPin size={14} className="mr-2 text-slate-400" /> 
+                    <MapPin size={14} className="mr-2 text-slate-400" />
                     {job.distanceKm !== null ? `${formatDistance(job.distanceKm)} away` : 'Distance unavailable'}
                   </div>
                 </div>
@@ -3705,7 +3699,7 @@ function VolunteerModule({ userCoords, userRole, locationStatus }) {
       )}
 
       {showPostForm && (
-        <PostOpportunityModal 
+        <PostOpportunityModal
           userCoords={userCoords}
           userRole={userRole}
           onPost={handlePost}
@@ -3844,9 +3838,8 @@ function PostOpportunityModal({ userCoords, userRole, onPost, onClose }) {
           <button
             onClick={handleSubmit}
             disabled={submitting}
-            className={`flex-1 text-white text-sm font-semibold py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 ${
-              isAdmin ? 'bg-purple-600 hover:bg-purple-700' : 'bg-green-600 hover:bg-green-700'
-            }`}
+            className={`flex-1 text-white text-sm font-semibold py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 ${isAdmin ? 'bg-purple-600 hover:bg-purple-700' : 'bg-green-600 hover:bg-green-700'
+              }`}
           >
             {submitting ? <><Loader2 size={14} className="animate-spin" /> Posting...</> : 'Post Opportunity'}
           </button>
@@ -4013,9 +4006,8 @@ function ServicesModule({ userCoords, locationStatus, userRole, onCommission, on
             <button
               key={cat}
               onClick={() => setCategoryFilter(cat)}
-              className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-colors ${
-                categoryFilter === cat ? 'bg-orange-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}
+              className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-colors ${categoryFilter === cat ? 'bg-orange-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
             >
               {cat}
             </button>
@@ -4062,17 +4054,15 @@ function ServicesModule({ userCoords, locationStatus, userRole, onCommission, on
                 <div className="mt-3 pt-3 border-t border-slate-100 flex gap-2 flex-wrap">
                   <button
                     onClick={() => toggleVerified(service.id)}
-                    className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider transition-colors ${
-                      service.verified ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                    }`}
+                    className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider transition-colors ${service.verified ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
                   >
                     {service.verified ? '✓ Verified' : 'Unverified'}
                   </button>
                   <button
                     onClick={() => toggleAvailable(service.id)}
-                    className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider transition-colors ${
-                      service.available ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-100 text-red-700 hover:bg-red-200'
-                    }`}
+                    className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider transition-colors ${service.available ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-100 text-red-700 hover:bg-red-200'
+                      }`}
                   >
                     {service.available ? '● Available' : '○ Busy'}
                   </button>
@@ -4476,9 +4466,8 @@ function SurveyModule({ userRole, userCoords, onMicroReward, onShowEarning, surv
           {canPost && (
             <button
               onClick={() => setShowPostForm(true)}
-              className={`text-white text-sm font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors shadow-sm ${
-                isAdmin ? 'bg-purple-600 hover:bg-purple-700' : 'bg-green-600 hover:bg-green-700'
-              }`}
+              className={`text-white text-sm font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors shadow-sm ${isAdmin ? 'bg-purple-600 hover:bg-purple-700' : 'bg-green-600 hover:bg-green-700'
+                }`}
             >
               <FileText size={16} /> Post Survey
             </button>
@@ -4507,9 +4496,8 @@ function SurveyModule({ userRole, userCoords, onMicroReward, onShowEarning, surv
           <div key={survey.id} className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
             <div className="flex justify-between items-start mb-3 gap-2">
               <div className="flex flex-wrap gap-1">
-                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded ${
-                  survey.type === 'Government' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'
-                }`}>
+                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded ${survey.type === 'Government' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'
+                  }`}>
                   {survey.type || 'Active Poll'}
                 </span>
                 {survey.requiresVerification && (
@@ -4657,11 +4645,10 @@ function PostSurveyModal({ userRole, onSubmit, onClose }) {
               <button
                 key={t}
                 onClick={() => setForm({ ...form, type: t })}
-                className={`p-3 rounded-lg border-2 transition-colors text-left ${
-                  form.type === t
-                    ? (t === 'Government' ? 'border-blue-500 bg-blue-50' : 'border-orange-500 bg-orange-50')
-                    : 'border-slate-200 hover:border-slate-300'
-                }`}
+                className={`p-3 rounded-lg border-2 transition-colors text-left ${form.type === t
+                  ? (t === 'Government' ? 'border-blue-500 bg-blue-50' : 'border-orange-500 bg-orange-50')
+                  : 'border-slate-200 hover:border-slate-300'
+                  }`}
               >
                 <div className={`text-xs font-bold ${form.type === t ? (t === 'Government' ? 'text-blue-700' : 'text-orange-700') : 'text-slate-700'}`}>
                   {t}
@@ -4789,9 +4776,8 @@ function SurveyApprovalQueueModal({ surveys, onApprove, onReject, onClose }) {
             <div className="flex items-start justify-between mb-3 gap-2">
               <div className="flex-1">
                 <div className="flex gap-1 mb-2">
-                  <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded ${
-                    survey.type === 'Government' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'
-                  }`}>{survey.type}</span>
+                  <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded ${survey.type === 'Government' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'
+                    }`}>{survey.type}</span>
                   {survey.requiresVerification && (
                     <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded bg-red-100 text-red-700">
                       Photo Verify
@@ -4948,9 +4934,8 @@ function TakeSurveyModal({ survey, canEarn, onSubmit, onClose }) {
                   <button
                     key={opt}
                     onClick={() => setAnswers({ ...answers, q1: opt })}
-                    className={`p-2 text-[10px] rounded-lg border-2 transition-colors text-center ${
-                      answers.q1 === opt ? 'border-orange-500 bg-orange-50 text-orange-700 font-bold' : 'border-slate-200 hover:border-slate-300'
-                    }`}
+                    className={`p-2 text-[10px] rounded-lg border-2 transition-colors text-center ${answers.q1 === opt ? 'border-orange-500 bg-orange-50 text-orange-700 font-bold' : 'border-slate-200 hover:border-slate-300'
+                      }`}
                   >
                     {i + 1}
                   </button>
@@ -5040,7 +5025,7 @@ function TakeSurveyModal({ survey, canEarn, onSubmit, onClose }) {
       {step === 'camera' && (
         <div className="p-5 space-y-4">
           <h3 className="font-bold text-slate-900 text-center">Capture Verification Photo</h3>
-          
+
           <div className="relative bg-slate-900 rounded-xl overflow-hidden aspect-[4/3]">
             {!photoData ? (
               <>
@@ -5121,15 +5106,15 @@ function TakeSurveyModal({ survey, canEarn, onSubmit, onClose }) {
 }
 
 // --- ADMIN APPROVALS ---
-function AdminApprovalsModule({ 
-  volunteerRequests, 
-  setVolunteerRequests, 
-  services, 
-  setServices, 
-  surveys, 
-  setSurveys, 
-  userRole, 
-  setUserRole, 
+function AdminApprovalsModule({
+  volunteerRequests,
+  setVolunteerRequests,
+  services,
+  setServices,
+  surveys,
+  setSurveys,
+  userRole,
+  setUserRole,
   setVolunteerApplicationStatus,
   displayUser,
   addWalletTxn,
@@ -5217,11 +5202,10 @@ function AdminApprovalsModule({
       <div className="flex border-b border-slate-800 overflow-x-auto">
         <button
           onClick={() => setSubTab('volunteers')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-black uppercase tracking-wider whitespace-nowrap border-b-2 transition-all ${
-            subTab === 'volunteers'
-              ? 'border-purple-500 text-purple-400 font-bold'
-              : 'border-transparent text-slate-500 hover:text-slate-300'
-          }`}
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-black uppercase tracking-wider whitespace-nowrap border-b-2 transition-all ${subTab === 'volunteers'
+            ? 'border-purple-500 text-purple-400 font-bold'
+            : 'border-transparent text-slate-500 hover:text-slate-300'
+            }`}
         >
           <HeartHandshake size={14} />
           Volunteer Requests
@@ -5233,11 +5217,10 @@ function AdminApprovalsModule({
         </button>
         <button
           onClick={() => setSubTab('services')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-black uppercase tracking-wider whitespace-nowrap border-b-2 transition-all ${
-            subTab === 'services'
-              ? 'border-purple-500 text-purple-400 font-bold'
-              : 'border-transparent text-slate-500 hover:text-slate-300'
-          }`}
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-black uppercase tracking-wider whitespace-nowrap border-b-2 transition-all ${subTab === 'services'
+            ? 'border-purple-500 text-purple-400 font-bold'
+            : 'border-transparent text-slate-500 hover:text-slate-300'
+            }`}
         >
           <Wrench size={14} />
           Service Listings
@@ -5249,11 +5232,10 @@ function AdminApprovalsModule({
         </button>
         <button
           onClick={() => setSubTab('surveys')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-black uppercase tracking-wider whitespace-nowrap border-b-2 transition-all ${
-            subTab === 'surveys'
-              ? 'border-purple-500 text-purple-400 font-bold'
-              : 'border-transparent text-slate-500 hover:text-slate-300'
-          }`}
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-black uppercase tracking-wider whitespace-nowrap border-b-2 transition-all ${subTab === 'surveys'
+            ? 'border-purple-500 text-purple-400 font-bold'
+            : 'border-transparent text-slate-500 hover:text-slate-300'
+            }`}
         >
           <FileText size={14} />
           Civic Surveys
@@ -5265,11 +5247,10 @@ function AdminApprovalsModule({
         </button>
         <button
           onClick={() => setSubTab('blood')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-black uppercase tracking-wider whitespace-nowrap border-b-2 transition-all ${
-            subTab === 'blood'
-              ? 'border-purple-500 text-purple-400 font-bold'
-              : 'border-transparent text-slate-500 hover:text-slate-300'
-          }`}
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-black uppercase tracking-wider whitespace-nowrap border-b-2 transition-all ${subTab === 'blood'
+            ? 'border-purple-500 text-purple-400 font-bold'
+            : 'border-transparent text-slate-500 hover:text-slate-300'
+            }`}
         >
           <HeartHandshake size={14} className="text-rose-500 animate-pulse" />
           Blood Requests
@@ -5451,7 +5432,7 @@ function AdminApprovalsModule({
               pendingBlood.map(req => (
                 <div key={req.id} className="bg-[#0b0f19]/60 border border-slate-850 rounded-2xl p-5 shadow-xl glass-panel relative overflow-hidden transition-all hover:border-purple-500/20">
                   <div className="absolute -top-12 -right-12 w-28 h-28 bg-rose-500/5 rounded-full blur-2xl"></div>
-                  
+
                   <div className="flex flex-col md:flex-row items-start justify-between gap-4">
                     <div className="flex items-start gap-3">
                       <div className="w-12 h-12 bg-rose-950/80 border border-rose-500/30 text-rose-500 rounded-xl flex items-center justify-center font-black text-lg animate-pulse shrink-0">
@@ -5466,7 +5447,7 @@ function AdminApprovalsModule({
                         <p className="text-[11px] text-slate-500 font-semibold mt-1">
                           Raised by: {req.requestorName} • Phone: {req.requestorPhone}
                         </p>
-                        
+
                         {/* Clinical requisition preview area */}
                         <div className="mt-3 bg-slate-950/80 border border-slate-900 rounded-xl p-3 max-w-sm space-y-2.5 relative">
                           <p className="text-[9px] uppercase font-black text-slate-500 tracking-wider">Clinical Requisition slip</p>
@@ -5477,7 +5458,7 @@ function AdminApprovalsModule({
                               <p className="text-[9px] text-slate-500">Official Practitioner Requisition Attested</p>
                             </div>
                           </div>
-                          <button 
+                          <button
                             type="button"
                             onClick={() => setSelectedDocPreview(req)}
                             className="w-full text-center py-2 bg-slate-900 hover:bg-slate-850 text-[10px] text-purple-400 hover:text-purple-300 rounded-lg transition-colors font-black uppercase tracking-wider cursor-pointer border border-slate-800"
@@ -5487,7 +5468,7 @@ function AdminApprovalsModule({
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="flex flex-col items-end gap-2 text-right">
                       <span className="text-[10px] bg-amber-950/60 text-amber-400 border border-amber-500/20 px-2.5 py-1 rounded-full font-bold uppercase tracking-wider animate-pulse">
                         Awaiting Verification
@@ -5497,7 +5478,7 @@ function AdminApprovalsModule({
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="flex gap-3 mt-5 border-t border-slate-800/40 pt-4">
                     <button
                       onClick={() => handleRejectBlood(req.id)}
@@ -5505,7 +5486,7 @@ function AdminApprovalsModule({
                     >
                       Reject Request
                     </button>
-                    
+
                     <button
                       onClick={() => {
                         // Phone lines secure simulator
@@ -5533,12 +5514,12 @@ function AdminApprovalsModule({
       {/* DETAILED DOCUMENT INSPECTION MODAL */}
       {selectedDocPreview && (
         <Modal onClose={() => setSelectedDocPreview(null)} maxWidth="max-w-md" zIndex="z-[300]">
-          <ModalHeader 
-            icon={<ShieldCheck size={20} className="text-purple-400" />} 
-            title="Inspect Requisition Slip" 
-            subtitle="Saathi Decentralized Verification Hub" 
-            gradient="from-purple-950 to-slate-950 border-b border-purple-500/20" 
-            onClose={() => setSelectedDocPreview(null)} 
+          <ModalHeader
+            icon={<ShieldCheck size={20} className="text-purple-400" />}
+            title="Inspect Requisition Slip"
+            subtitle="Saathi Decentralized Verification Hub"
+            gradient="from-purple-950 to-slate-950 border-b border-purple-500/20"
+            onClose={() => setSelectedDocPreview(null)}
           />
           <div className="p-6 space-y-4 bg-slate-950 text-slate-200">
             {/* Holographic Watermark Letterhead slip */}
@@ -5670,8 +5651,8 @@ WS     /ws/sos-broadcast`;
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="flex border-b border-slate-200 overflow-x-auto">
-          <DocTab active={docTab === 'schema'} onClick={() => setDocTab('schema')} icon={<Database size={16}/>} label="PostgreSQL Schema" />
-          <DocTab active={docTab === 'api'} onClick={() => setDocTab('api')} icon={<Server size={16}/>} label="REST APIs" />
+          <DocTab active={docTab === 'schema'} onClick={() => setDocTab('schema')} icon={<Database size={16} />} label="PostgreSQL Schema" />
+          <DocTab active={docTab === 'api'} onClick={() => setDocTab('api')} icon={<Server size={16} />} label="REST APIs" />
         </div>
         <div className="p-0 bg-slate-900 text-slate-300 font-mono text-xs overflow-x-auto">
           <pre className="p-6 whitespace-pre">{docTab === 'schema' ? schemaCode : apiCode}</pre>
@@ -5715,7 +5696,7 @@ function NavButton({ icon, label, active, onClick, color = 'orange', badge }) {
     purple: 'bg-purple-950/40 text-purple-400 border border-purple-500/20 glass-glow-purple font-extrabold'
   };
   return (
-    <button 
+    <button
       onClick={onClick}
       className={`flex items-center justify-between w-full px-4 py-3 rounded-xl font-medium transition-all duration-200 cursor-pointer ${active ? activeClasses[color] : 'text-slate-400 hover:bg-slate-900/60 hover:text-white border border-transparent'}`}
     >
@@ -5734,9 +5715,9 @@ function NavButton({ icon, label, active, onClick, color = 'orange', badge }) {
 
 function MobileNavButton({ icon, label, active, onClick, color = '', badge }) {
   return (
-    <button 
+    <button
       onClick={onClick}
-      className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors relative ${active ? (color || 'text-orange-600') : 'text-slate-400 hover:text-slate-600'}`}
+      className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors relative ${active ? (color || 'text-orange-500') : 'text-slate-500 hover:text-slate-300'}`}
     >
       <div className="relative">
         {icon}
@@ -5753,7 +5734,7 @@ function MobileNavButton({ icon, label, active, onClick, color = '', badge }) {
 
 function DocTab({ label, icon, active, onClick }) {
   return (
-    <button 
+    <button
       onClick={onClick}
       className={`flex items-center gap-2 px-6 py-3 text-sm font-semibold whitespace-nowrap transition-colors ${active ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-50'}`}
     >
@@ -5830,7 +5811,7 @@ function CertificateModal({ user, onClose }) {
   return (
     <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-[200] p-4 overflow-y-auto">
       <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl max-w-4xl w-full overflow-hidden my-8 glass-panel-heavy holo-watermark relative">
-        
+
         {/* Holographic glowing lines */}
         <div className="absolute inset-0 hologram-grid pointer-events-none opacity-20"></div>
 
@@ -5875,7 +5856,7 @@ function CertificateModal({ user, onClose }) {
               </defs>
 
               <rect width="1000" height="700" fill="url(#bgGrad)" />
-              
+
               {/* Dynamic decorative grid inside SVG */}
               <g opacity="0.05" stroke="#ffffff" strokeWidth="0.5">
                 <path d="M 0,100 L 1000,100 M 0,200 L 1000,200 M 0,300 L 1000,300 M 0,400 L 1000,400 M 0,500 L 1000,500 M 0,600 L 1000,600" />
@@ -6222,11 +6203,10 @@ Message: "${userText}"`;
         {messages.map(msg => (
           <div key={msg.id} className={`flex ${msg.sender === 'me' ? 'justify-end' : msg.sender === 'system' ? 'justify-center' : 'justify-start'}`}>
             {msg.sender === 'system' ? (
-              <div className={`text-xs py-2 px-4 rounded-lg flex items-center gap-2 border max-w-[90%] text-center ${
-                msg.severity === 'ban' ? 'bg-red-600 text-white border-red-700 font-semibold' :
+              <div className={`text-xs py-2 px-4 rounded-lg flex items-center gap-2 border max-w-[90%] text-center ${msg.severity === 'ban' ? 'bg-red-600 text-white border-red-700 font-semibold' :
                 msg.severity === 'warning' ? 'bg-orange-50 text-orange-700 border-orange-200' :
-                'bg-red-50 text-red-600 border-red-100'
-              }`}>
+                  'bg-red-50 text-red-600 border-red-100'
+                }`}>
                 <AlertOctagon size={14} className="shrink-0" /> {msg.text}
               </div>
             ) : (
@@ -6237,9 +6217,8 @@ Message: "${userText}"`;
                     href={`https://www.openstreetmap.org/?mlat=${msg.locationShare.lat}&mlon=${msg.locationShare.lng}#map=16/${msg.locationShare.lat}/${msg.locationShare.lng}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`rounded-2xl overflow-hidden border-2 transition-shadow hover:shadow-md w-64 ${
-                      msg.sender === 'me' ? 'border-orange-300' : 'border-slate-200'
-                    }`}
+                    className={`rounded-2xl overflow-hidden border-2 transition-shadow hover:shadow-md w-64 ${msg.sender === 'me' ? 'border-orange-300' : 'border-slate-200'
+                      }`}
                   >
                     <div className="bg-slate-100 h-24 relative overflow-hidden">
                       <iframe
@@ -6289,9 +6268,8 @@ Message: "${userText}"`;
 
                 {/* Text bubble */}
                 {msg.text && (
-                  <div className={`rounded-2xl px-4 py-2 text-sm ${
-                    msg.sender === 'me' ? 'bg-orange-600 text-white rounded-tr-none' : 'bg-white text-slate-800 border border-slate-200 rounded-tl-none'
-                  }`}>
+                  <div className={`rounded-2xl px-4 py-2 text-sm ${msg.sender === 'me' ? 'bg-orange-600 text-white rounded-tr-none' : 'bg-white text-slate-800 border border-slate-200 rounded-tl-none'
+                    }`}>
                     {msg.text}
                   </div>
                 )}
@@ -6522,9 +6500,8 @@ function SplashScreen({ onDone }) {
 
   return (
     <div
-      className={`fixed inset-0 z-[1000] flex flex-col items-center justify-center bg-[#070913] transition-opacity duration-500 ${
-        phase === 'exit' ? 'opacity-0' : 'opacity-100'
-      }`}
+      className={`fixed inset-0 z-[1000] flex flex-col items-center justify-center bg-[#070913] transition-opacity duration-500 ${phase === 'exit' ? 'opacity-0' : 'opacity-100'
+        }`}
     >
       <style>{`
         @keyframes splashLogo {
@@ -6589,14 +6566,14 @@ function SplashScreen({ onDone }) {
 // Larger, more detailed logo mark for splash & auth screens
 function SplashLogoMark({ size = 140 }) {
   return (
-    <img 
-      src={logoUrl} 
+    <img
+      src={logoUrl}
       alt="Saathi Logo"
-      style={{ 
-        width: size, 
-        height: size, 
-        filter: 'drop-shadow(0 0 25px rgba(16, 185, 129, 0.7)) drop-shadow(0 0 45px rgba(245, 158, 11, 0.5))' 
-      }} 
+      style={{
+        width: size,
+        height: size,
+        filter: 'drop-shadow(0 0 25px rgba(16, 185, 129, 0.7)) drop-shadow(0 0 45px rgba(245, 158, 11, 0.5))'
+      }}
       className="flex-shrink-0 animate-pulse-slow"
     />
   );
@@ -6695,7 +6672,7 @@ function AuthScreen({ onSuccess }) {
   const brandPanel = (
     <div className="hidden md:flex flex-col justify-between bg-[#0b0f19] text-white p-12 md:w-1/2 relative overflow-hidden border-r border-slate-800">
       <div className="absolute inset-0 hologram-grid pointer-events-none opacity-20"></div>
-      
+
       {/* Radial soft glow */}
       <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -6720,7 +6697,7 @@ function AuthScreen({ onSuccess }) {
             <p className="text-xs text-slate-400 mt-1 leading-relaxed">One-tap SOS shares cryptographically sealed GPS telemetry with local volunteers & responders.</p>
           </div>
         </div>
-        
+
         <div className="flex items-start gap-4 p-4 rounded-2xl bg-slate-900/40 backdrop-blur border border-slate-800/40">
           <div className="bg-green-500/10 p-2.5 rounded-xl text-green-400 shrink-0">
             <HeartHandshake size={20} />
@@ -6753,7 +6730,7 @@ function AuthScreen({ onSuccess }) {
         <div className="absolute inset-0 hologram-grid opacity-10 pointer-events-none"></div>
 
         <div className="w-full max-w-md bg-slate-900/30 border border-slate-800/80 backdrop-blur-md rounded-2xl p-6 sm:p-8 relative z-10 shadow-2xl">
-          
+
           {/* Mobile logo header */}
           <div className="md:hidden mb-8 flex flex-col items-center text-center">
             <div className="mb-4">
@@ -6781,10 +6758,10 @@ function AuthScreen({ onSuccess }) {
                   <Loader2 size={18} className="animate-spin text-emerald-400" />
                 ) : (
                   <svg width="20" height="20" viewBox="0 0 24 24">
-                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                   </svg>
                 )}
                 Continue with Google
@@ -6874,8 +6851,8 @@ function AuthScreen({ onSuccess }) {
 
           {(screen === 'signin-otp' || screen === 'signup-otp') && (
             <div className="space-y-5 animate-in fade-in">
-              <button 
-                onClick={() => setScreen(screen === 'signin-otp' ? 'signin-phone' : 'signup-phone')} 
+              <button
+                onClick={() => setScreen(screen === 'signin-otp' ? 'signin-phone' : 'signup-phone')}
                 className="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1"
               >
                 <ArrowLeft size={14} /> Change number
@@ -6901,7 +6878,7 @@ function AuthScreen({ onSuccess }) {
                       value={digit}
                       onChange={(e) => handleOtpChange(idx, e.target.value)}
                       onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                      className="w-12 h-12 text-center bg-slate-950 border border-slate-800 rounded-xl text-lg font-black text-white focus:border-orange-500 focus:outline-none transition-colors"
+                      className="w-10 h-12 sm:w-12 sm:h-12 text-center bg-slate-950 border border-slate-800 rounded-xl text-lg font-black text-white focus:border-orange-500 focus:outline-none transition-colors"
                     />
                   ))}
                 </div>
@@ -7058,9 +7035,9 @@ function DigiLockerStep({ onComplete, onBack, isCompleting }) {
   return (
     <div className="space-y-5 animate-in fade-in text-slate-200">
       <div className="flex items-center gap-2 text-[10px] uppercase font-bold text-slate-500">
-        <span className="bg-emerald-950 text-emerald-400 px-2.5 py-1 rounded-full flex items-center gap-1 border border-emerald-500/20"><CheckCircle size={10}/> Phone verified</span>
+        <span className="bg-emerald-950 text-emerald-400 px-2.5 py-1 rounded-full flex items-center gap-1 border border-emerald-500/20"><CheckCircle size={10} /> Phone verified</span>
         <ChevronRight size={10} className="text-slate-700" />
-        <span className="bg-emerald-950 text-emerald-400 px-2.5 py-1 rounded-full flex items-center gap-1 border border-emerald-500/20"><CheckCircle size={10}/> Profile setup</span>
+        <span className="bg-emerald-950 text-emerald-400 px-2.5 py-1 rounded-full flex items-center gap-1 border border-emerald-500/20"><CheckCircle size={10} /> Profile setup</span>
         <ChevronRight size={10} className="text-slate-700" />
         <span className="text-orange-400 font-extrabold">ID Verification</span>
       </div>
