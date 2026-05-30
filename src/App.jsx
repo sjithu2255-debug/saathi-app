@@ -2704,13 +2704,20 @@ function AlertDetailModal({ alert, isSOSActive, autoShare, onTriggerSOS, onClose
     const previousTransform = modalRef.current.style.transform;
     try {
       const canvas = await html2canvas(modalRef.current, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
-      const image = canvas.toDataURL("image/png");
-      const link = document.createElement('a');
-      link.href = image;
-      link.download = `Saathi_Verified_Alert_${alert.id}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          alert("Failed to generate image blob.");
+          return;
+        }
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Saathi_Verified_Alert_${alert.id}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+      }, "image/png");
     } catch (err) {
       console.error("Failed to share image", err);
       alert("Error generating image: " + err.message);
