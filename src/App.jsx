@@ -1184,8 +1184,15 @@ function SaathiApp() {
     };
   }, []);
 
+  const AUTH_TRANSLATIONS = {
+    en: { welcomeTitle: "Welcome", welcomeSub: "Sign in or create your Saathi account securely.", googleBtn: "Continue with Google", phoneBtn: "Continue with Phone" },
+    hi: { welcomeTitle: "स्वागत है", welcomeSub: "साइन इन करें या अपना साथी खाता सुरक्षित रूप से बनाएं।", googleBtn: "Google के साथ जारी रखें", phoneBtn: "फोन के साथ जारी रखें" },
+    ml: { welcomeTitle: "സ്വാഗതം", welcomeSub: "സൈൻ ഇൻ ചെയ്യുക അല്ലെങ്കിൽ നിങ്ങളുടെ സാഥി അക്കൗണ്ട് സുരക്ഷിതമായി സൃഷ്ടിക്കുക.", googleBtn: "Google ഉപയോഗിച്ച് തുടരുക", phoneBtn: "ഫോൺ ഉപയോഗിച്ച് തുടരുക" },
+    ta: { welcomeTitle: "வரவேற்கிறோம்", welcomeSub: "உள்நுழையவும் அல்லது உங்கள் சாதி கணக்கை பாதுகாப்பாக உருவாக்கவும்.", googleBtn: "Google மூலம் தொடரவும்", phoneBtn: "தொலைபேசி மூலம் தொடரவும்" }
+  };
+
   const t = useCallback((key) => {
-    return TRANSLATIONS[currentLanguage]?.[key] || TRANSLATIONS['en'][key];
+    return TRANSLATIONS[currentLanguage]?.[key] || AUTH_TRANSLATIONS[currentLanguage]?.[key] || TRANSLATIONS['en'][key] || AUTH_TRANSLATIONS['en'][key] || key;
   }, [currentLanguage]);
 
   const pendingApprovalsCount = useMemo(() => {
@@ -1213,30 +1220,11 @@ function SaathiApp() {
   }
 
   if (!isAuthenticated) {
-    return <AuthScreen isDarkMode={isDarkMode} currentLanguage={currentLanguage} setCurrentLanguage={setCurrentLanguage} onSuccess={(user) => {
+    return <AuthScreen isDarkMode={isDarkMode} currentLanguage={currentLanguage} setCurrentLanguage={setCurrentLanguage} t={t} onSuccess={(user) => {
       setAuthedUser(user);
       setIsAuthenticated(true);
-
-      if (user.registerAsVolunteer) {
-        setUserRole('Citizen');
-        setVolunteerApplicationStatus('pending');
-        setVolunteerRequests(prev => [
-          {
-            id: Date.now(),
-            name: user.name || "Jithu Sreekumar",
-            phone: user.phone || "+91 98765 43210",
-            email: user.email || "",
-            status: "pending",
-            date: "Just now",
-            idType: user.idType || "Aadhaar Card",
-            idNumber: user.idNumber || "XXXX XXXX 4521"
-          },
-          ...prev
-        ]);
-      } else {
-        setUserRole(user.role || 'Citizen');
-        setVolunteerApplicationStatus('idle');
-      }
+      setUserRole(user.role || 'Citizen');
+      setVolunteerApplicationStatus('idle');
     }} />;
   }
 
@@ -1635,30 +1623,6 @@ function SaathiApp() {
 
           <div className="flex items-center gap-1 sm:gap-2">
 
-            {/* SOS button in header */}
-            {isSOSActive ? (
-              <button
-                type="button"
-                onClick={() => setShowSOSStopModal(true)}
-                className="flex items-center gap-1.5 bg-white text-red-600 border border-red-500 hover:bg-red-50 font-bold px-2 sm:px-3 py-1.5 rounded-full shadow-sm transition-all animate-pulse text-[10px] sm:text-xs uppercase tracking-wider whitespace-nowrap shrink-0 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50"
-              >
-                <span className="w-2 h-2 bg-red-600 rounded-full animate-ping"></span>
-                <span>{t('stopBroadcast')}</span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={startSOSCountdown}
-                disabled={sosCountdown !== null}
-                className={`flex items-center gap-1.5 px-2 sm:px-3 py-1.5 bg-red-600 hover:bg-red-700 active:scale-95 rounded-full shadow-sm transition-all group cursor-pointer whitespace-nowrap shrink-0 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 ${!isDarkMode ? 'text-black' : 'text-white'}`}
-                title={t('triggerSOS')}
-              >
-                <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-25 group-hover:opacity-40"></div>
-                <ShieldAlert size={14} className="relative z-10 shrink-0" />
-                <span className={`text-[10px] sm:text-xs font-black tracking-wider relative z-10 uppercase ${!isDarkMode ? 'text-black' : 'text-white'}`}>SOS HELP</span>
-              </button>
-            )}
-
             {/* Real-time System Integrity Badge */}
             <div className="relative group cursor-default" data-dropdown>
               <div
@@ -1950,6 +1914,71 @@ function SaathiApp() {
                 {userRole === 'Admin' ? 'All capabilities signed' : 'Cryptographic keys active'}
               </p>
             </div>
+
+            {userRole === 'Citizen' && (
+              <div className="mt-8">
+                {volunteerApplicationStatus === 'idle' && (
+                  <div className="bg-emerald-950/30 border border-emerald-500/30 rounded-xl p-4 shadow-[0_0_15px_rgba(16,185,129,0.15)] flex flex-col gap-3">
+                    <div className="flex items-center gap-2 text-emerald-400">
+                      <HeartHandshake size={16} />
+                      <h3 className="font-bold text-sm">{t('volunteerRegister')}</h3>
+                    </div>
+                    <p className="text-emerald-500 text-[10px] leading-relaxed">
+                      {t('volunteerRegisterSub')}
+                    </p>
+                    <button
+                      onClick={() => {
+                        setVolunteerApplicationStatus('pending');
+                        setVolunteerRequests(prev => [
+                          {
+                            id: Date.now(),
+                            name: displayUser?.name || "Jithu Sreekumar",
+                            phone: displayUser?.phone || "+91 98765 43210",
+                            email: displayUser?.email || "jithu@gmail.com",
+                            status: "pending",
+                            date: "Just now",
+                            idType: displayUser?.idType || "Aadhaar Card",
+                            idNumber: displayUser?.idNumber || "XXXX XXXX 4521"
+                          },
+                          ...prev
+                        ]);
+                      }}
+                      className="bg-green-600 hover:bg-green-700 text-white font-semibold py-1.5 px-3 rounded-lg text-xs transition-all shadow-sm flex items-center gap-1.5 justify-center cursor-pointer"
+                    >
+                      <HeartHandshake size={12} /> {t('registerBtn')}
+                    </button>
+                  </div>
+                )}
+                {volunteerApplicationStatus === 'pending' && (
+                  <div className="bg-amber-950/30 border border-amber-500/30 rounded-xl p-4 shadow-sm flex flex-col gap-3">
+                    <div className="flex items-center gap-2 text-amber-400">
+                      <Clock size={16} className="animate-spin" />
+                      <h3 className="font-bold text-sm">Pending</h3>
+                    </div>
+                    <p className="text-amber-500/80 text-[10px] leading-relaxed">
+                      Your application has been submitted to the platform administrators for ID and profile verification.
+                    </p>
+                  </div>
+                )}
+                {volunteerApplicationStatus === 'rejected' && (
+                  <div className="bg-red-950/30 border border-red-500/30 rounded-xl p-4 shadow-sm flex flex-col gap-3">
+                    <div className="flex items-center gap-2 text-red-400">
+                      <X size={16} />
+                      <h3 className="font-bold text-sm">Rejected</h3>
+                    </div>
+                    <p className="text-red-500/80 text-[10px] leading-relaxed">
+                      Unfortunately, your volunteer application could not be approved at this time.
+                    </p>
+                    <button
+                      onClick={() => setVolunteerApplicationStatus('idle')}
+                      className="bg-red-600 hover:bg-red-700 text-white font-semibold py-1.5 px-3 rounded-lg text-xs transition-all shadow-sm cursor-pointer"
+                    >
+                      Try Again
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </aside>
           )}
 
@@ -2019,13 +2048,13 @@ function SaathiApp() {
         <CertificateModal user={displayUser} onClose={() => setShowCertificate(false)} />
       )}
 
-      {showLocationPicker && (
+      {(!userCoords || showLocationPicker) && (
         <LocationPickerModal
           currentLocation={resolvedLocation}
           onSelect={setManualLocation}
           onRetryGPS={requestLocationAgain}
           locationStatus={locationStatus}
-          onClose={() => setShowLocationPicker(false)}
+          onClose={userCoords ? () => setShowLocationPicker(false) : undefined}
         />
       )}
 
@@ -2780,172 +2809,8 @@ function HomeFeed({
         </button>
       )}
 
-      {/* Hyperlocal Feed moved UP */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-            <Activity size={18} className="text-orange-600" /> {t('hyperlocalFeed')}
-          </h3>
-          <div className="flex items-center gap-2">
-            {(userRole === 'Volunteer' || userRole === 'HealthcareWorker' || userRole === 'Admin') && (
-              <button
-                type="button"
-                onClick={onOpenPostAlert}
-                className="bg-orange-600 hover:bg-orange-700 text-white font-bold py-1.5 px-3 rounded-xl text-xs flex items-center gap-1 transition-all shadow-sm active:scale-95 cursor-pointer"
-              >
-                <Plus size={12} /> Post Alert
-              </button>
-            )}
-            <button className="text-sm text-orange-600 font-medium hover:underline">{t('viewMap')}</button>
-          </div>
-        </div>
-        <div className="space-y-4">
-          {(combinedAlerts || []).map(alert => {
-            const isHigh = alert.severity === 'high';
-            const isMedium = alert.severity === 'medium';
-            const isBlood = alert.isBloodAttestation;
-            return (
-              <div
-                key={alert.id}
-                onClick={() => setSelectedAlert(alert)}
-                className={`p-5 rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden group ${
-                  isDarkMode
-                    ? `hyperlocal-card ${isBlood ? 'hyperlocal-card-blood' : isHigh ? 'hyperlocal-card-high' : isMedium ? 'hyperlocal-card-medium' : 'hyperlocal-card-low'}`
-                    : `${isBlood ? 'bg-rose-50 border-rose-200 hover:shadow-md' : isHigh ? 'bg-red-50 border-red-200 hover:shadow-md' : isMedium ? 'bg-orange-50 border-orange-200 hover:shadow-md' : 'bg-white border-slate-200 hover:shadow-md'}`
-                }`}
-              >
-                <div className={`absolute top-0 left-0 w-1.5 h-full ${isBlood ? 'bg-rose-500' : isHigh ? 'bg-red-500' : isMedium ? 'bg-orange-500' : 'bg-slate-400'
-                  }`} />
-
-                <div className="flex items-start gap-4">
-                  <div className={`p-3.5 rounded-xl shrink-0 relative ${
-                    isDarkMode
-                      ? (isBlood ? 'bg-rose-950/60 text-rose-400 border border-rose-500/20'
-                         : isHigh ? 'bg-red-950/60 text-red-400 border border-red-500/20'
-                         : isMedium ? 'bg-orange-950/60 text-orange-400 border border-orange-500/20'
-                         : 'bg-slate-800 text-slate-300 border border-slate-700')
-                      : (isBlood ? 'bg-rose-100 text-rose-600 border border-rose-200'
-                         : isHigh ? 'bg-red-100 text-red-600 border border-red-200'
-                         : isMedium ? 'bg-orange-100 text-orange-600 border border-orange-200'
-                         : 'bg-slate-100 text-slate-600 border border-slate-200')
-                  }`}>
-                    {isBlood ? (
-                      <Heart size={22} className="text-rose-500 animate-pulse fill-rose-500" />
-                    ) : (
-                      <AlertTriangle size={22} className={isHigh ? 'animate-pulse' : ''} />
-                    )}
-                    {alert.status === 'Active' && (
-                      <span className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white animate-ping ${isBlood ? 'bg-rose-500' : isHigh ? 'bg-red-500' : 'bg-orange-500'
-                        }`} />
-                    )}
-                  </div>
-
-                  <div className="space-y-1.5 flex-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h4 className={`font-extrabold text-sm tracking-tight ${isDarkMode ? 'text-slate-100' : 'text-slate-900'}`}>
-                        {alert.title || alert.type}
-                      </h4>
-                      <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                        isDarkMode
-                          ? (isBlood ? 'bg-rose-950/80 text-rose-300' : isHigh ? 'bg-red-950/80 text-red-300' : isMedium ? 'bg-orange-950/80 text-orange-300' : 'bg-slate-800 text-slate-300')
-                          : (isBlood ? 'bg-rose-200 text-rose-700' : isHigh ? 'bg-red-200 text-red-700' : isMedium ? 'bg-orange-200 text-orange-700' : 'bg-slate-200 text-slate-700')
-                      }`}>
-                        {alert.type}
-                      </span>
-                      {alert.postedByRole && (
-                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 ${alert.isBloodAttestation
-                          ? 'bg-rose-950/60 text-rose-300 border border-rose-500/30'
-                          : alert.postedByRole === 'HealthcareWorker'
-                            ? alert.postedBySubRole === 'ASHA' ? 'bg-amber-950/60 text-amber-300 border border-amber-500/30' :
-                              alert.postedBySubRole === 'Bloodbank' ? 'bg-red-950/60 text-red-300 border border-red-500/30' :
-                                alert.postedBySubRole === 'Doctor' ? 'bg-blue-950/60 text-blue-300 border border-blue-200' :
-                                  'bg-indigo-950/60 text-indigo-300 border border-indigo-500/30'
-                            : alert.postedByRole === 'Volunteer' ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-500/30' :
-                              'bg-purple-950/60 text-purple-300 border border-purple-500/30'
-                          }`}>
-                          {alert.isBloodAttestation ? <Heart size={10} className="text-rose-400 fill-rose-400" /> : <ShieldCheck size={10} />}
-                          {alert.isBloodAttestation
-                            ? 'Verified Blood Request'
-                            : alert.postedByRole === 'HealthcareWorker'
-                              ? alert.postedBySubRole === 'Bloodbank' ? 'Blood Bank' : `${alert.postedBySubRole} (Health)`
-                              : alert.postedByRole}
-                        </span>
-                      )}
-                    </div>
-
-                    <p className={`text-xs line-clamp-2 leading-relaxed max-w-xl ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
-                      {alert.description}
-                    </p>
-
-                    <div className="flex items-center text-[11px] text-slate-400 mt-2 gap-3">
-                      <span className="flex items-center gap-1 font-medium"><MapPin size={12} className={isBlood ? 'text-rose-400' : isHigh ? 'text-red-500' : 'text-slate-400'} /> {alert.location || 'Nearby'} ({alert.distance})</span>
-                      <span>•</span>
-                      <span className="flex items-center gap-1 font-medium"><Clock size={12} /> {alert.time}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-end shrink-0 sm:self-center gap-3">
-                  {userRole === 'Admin' && (
-                    <div className="flex gap-2 mr-2">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); onEditAlert && onEditAlert(alert); }}
-                        className="text-xs bg-slate-800 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg transition-colors font-medium border border-slate-700 hover:border-blue-500"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); onRemoveAlert && onRemoveAlert(alert.id); }}
-                        className="text-xs bg-slate-800 hover:bg-rose-600 text-white px-3 py-1.5 rounded-lg transition-colors font-medium border border-slate-700 hover:border-rose-500"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-1 text-xs font-bold text-orange-500 group-hover:translate-x-1 transition-transform duration-200">
-                    View & Action
-                    <ChevronRight size={16} />
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className={`relative overflow-hidden rounded-2xl p-6 flex flex-col justify-between items-start transition-all duration-300 ${isSOSActive ? 'bg-red-600 shadow-red-500/40' : 'bg-slate-900'} text-white shadow-xl min-h-[180px]`}>
-          <div className="absolute -right-10 -top-10 opacity-10">
-            <ShieldAlert size={150} />
-          </div>
-          <div className="w-full relative z-10">
-            <h2 className="text-2xl font-bold mb-1">{isSOSActive ? t('activeSOS') : t('emergencyAssist')}</h2>
-            {isSOSActive ? (
-              <div className="space-y-2 mt-2">
-                <div className="flex items-center gap-2 text-red-100 bg-red-700/50 p-2 rounded-lg backdrop-blur-sm">
-                  <Radio size={16} className="animate-pulse text-white" />
-                  <div className="text-xs font-mono font-medium">
-                    Lat: {liveLocation?.lat} | Lng: {liveLocation?.lng}
-                  </div>
-                </div>
-                <p className="text-xs text-red-50 flex items-center gap-1.5">
-                  <Users size={14} /> Notifying {MOCK_CONTACTS.length} contacts & nearby volunteers...
-                </p>
-              </div>
-            ) : (
-              <p className="text-white/80 text-sm max-w-xs">
-                Trigger a hyperlocal alert to nearby volunteers and share your live location instantly.
-              </p>
-            )}
-          </div>
-          <button
-            onClick={isSOSActive ? () => setIsSOSActive(false) : startSOSCountdown}
-            className={`mt-4 px-6 py-2.5 rounded-full font-bold text-sm tracking-wide transition-all z-10 w-full sm:w-auto ${isSOSActive ? 'bg-white text-red-600 hover:bg-red-50 shadow-lg' : 'bg-red-500 hover:bg-red-400 text-white shadow-lg shadow-red-500/20 flex items-center justify-center gap-2'}`}
-          >
-            {isSOSActive ? t('stopBroadcast') : <><AlertTriangle size={18} /> {t('triggerSOS')}</>}
-          </button>
-        </div>
-
+      {/* ROLE-BASED DASHBOARD (Moved to Top) */}
+      <div className="mb-6">
         {userRole === 'Admin' ? (
           <div className="bg-gradient-to-br from-purple-600 to-indigo-700 rounded-2xl p-6 text-white shadow-xl flex flex-col justify-between min-h-[180px]">
             <div>
@@ -3044,81 +2909,105 @@ function HomeFeed({
         )}
       </div>
 
-      {userRole === 'Citizen' && (
-        <div className="mt-4">
-          {volunteerApplicationStatus === 'idle' && (
-            <div className="bg-emerald-950/30 border border-emerald-500/30 rounded-2xl p-6 shadow-[0_0_15px_rgba(16,185,129,0.15)] flex flex-col justify-between min-h-[180px] animate-in slide-in-from-bottom duration-300">
-              <div>
-                <div className="flex items-center gap-2 mb-2 text-emerald-400">
-                  <HeartHandshake size={20} />
-                  <h3 className="font-black text-xl">{t('volunteerRegister')}</h3>
+      {/* TRIGGER SOS RED BOX */}
+      <div className="mb-6">
+        <div className={`relative overflow-hidden rounded-2xl p-6 flex flex-col justify-between items-start transition-all duration-300 bg-red-600 shadow-red-500/40 text-white shadow-xl min-h-[180px]`}>
+          <div className="absolute -right-10 -top-10 opacity-10">
+            <ShieldAlert size={150} />
+          </div>
+          <div className="w-full relative z-10">
+            <h2 className="text-2xl font-bold mb-1">{isSOSActive ? t('activeSOS') : t('emergencyAssist')}</h2>
+            {isSOSActive ? (
+              <div className="space-y-2 mt-2">
+                <div className="flex items-center gap-2 text-red-100 bg-red-700/50 p-2 rounded-lg backdrop-blur-sm">
+                  <Radio size={16} className="animate-pulse text-white" />
+                  <div className="text-xs font-mono font-medium">
+                    Lat: {liveLocation?.lat} | Lng: {liveLocation?.lng}
+                  </div>
                 </div>
-                <p className="text-emerald-500 text-sm font-medium leading-relaxed max-w-md">
-                  {t('volunteerRegisterSub')}
+                <p className="text-xs text-red-50 flex items-center gap-1.5">
+                  <Users size={14} /> Notifying {MOCK_CONTACTS.length} contacts & nearby volunteers...
                 </p>
               </div>
-              <button
-                onClick={() => {
-                  setVolunteerApplicationStatus('pending');
-                  setVolunteerRequests(prev => [
-                    {
-                      id: Date.now(),
-                      name: displayUser?.name || "Jithu Sreekumar",
-                      phone: displayUser?.phone || "+91 98765 43210",
-                      email: displayUser?.email || "jithu@gmail.com",
-                      status: "pending",
-                      date: "Just now",
-                      idType: displayUser?.idType || "Aadhaar Card",
-                      idNumber: displayUser?.idNumber || "XXXX XXXX 4521"
-                    },
-                    ...prev
-                  ]);
-                }}
-                className="mt-4 bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-5 rounded-xl text-xs self-start transition-all shadow-sm flex items-center gap-1.5"
-              >
-                <HeartHandshake size={14} /> {t('registerBtn')}
-              </button>
-            </div>
-          )}
-
-          {volunteerApplicationStatus === 'pending' && (
-            <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between min-h-[180px] animate-in fade-in duration-300">
-              <div>
-                <div className="flex items-center gap-2 mb-2 text-amber-800">
-                  <Clock size={20} className="animate-spin" />
-                  <h3 className="font-bold text-lg">Volunteer Registration Pending</h3>
-                </div>
-                <p className="text-slate-600 text-xs leading-relaxed max-w-md">
-                  Thank you for applying to be a Saathi Volunteer! Your application has been submitted to the platform administrators for ID and profile verification. You will be notified as soon as it is approved.
-                </p>
-              </div>
-              <div className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 bg-amber-100 px-3 py-1.5 rounded-lg self-start">
-                <Clock size={12} className="animate-spin" /> Waiting for Admin Approval
-              </div>
-            </div>
-          )}
-
-          {volunteerApplicationStatus === 'rejected' && (
-            <div className="bg-gradient-to-br from-red-50 to-rose-50 border border-red-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between min-h-[180px] animate-in fade-in duration-300">
-              <div>
-                <div className="flex items-center gap-2 mb-2 text-red-800">
-                  <X size={20} />
-                  <h3 className="font-bold text-lg">Volunteer Registration Rejected</h3>
-                </div>
-                <p className="text-slate-600 text-xs leading-relaxed max-w-md">
-                  Unfortunately, your volunteer application could not be approved at this time. Please check that your details and verification ID are correct.
-                </p>
-              </div>
-              <button
-                onClick={() => setVolunteerApplicationStatus('idle')}
-                className="mt-4 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-xl text-xs self-start transition-all shadow-sm"
-              >
-                Try Again
-              </button>
-            </div>
-          )}
+            ) : (
+              <p className="text-white/90 text-sm max-w-xs font-medium">
+                Trigger a hyperlocal alert to nearby volunteers and share your live location instantly.
+              </p>
+            )}
+          </div>
+          <button
+            onClick={isSOSActive ? () => setIsSOSActive(false) : startSOSCountdown}
+            className={`mt-4 px-6 py-2.5 rounded-full font-bold text-sm tracking-wide transition-all z-10 w-full sm:w-auto ${isSOSActive ? 'bg-white text-red-600 hover:bg-red-50 shadow-lg' : 'bg-white text-red-600 hover:bg-red-50 shadow-lg flex items-center justify-center gap-2'}`}
+          >
+            {isSOSActive ? t('stopBroadcast') : <><AlertTriangle size={18} /> {t('triggerSOS')}</>}
+          </button>
         </div>
-      )}
+      </div>
+
+      {/* HYPERLOCAL FEED (Small Boxes) */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+            <Activity size={18} className="text-orange-600" /> {t('hyperlocalFeed')}
+          </h3>
+          <div className="flex items-center gap-2">
+            {(userRole === 'Volunteer' || userRole === 'HealthcareWorker' || userRole === 'Admin') && (
+              <button
+                type="button"
+                onClick={onOpenPostAlert}
+                className="bg-orange-600 hover:bg-orange-700 text-white font-bold py-1.5 px-3 rounded-xl text-xs flex items-center gap-1 transition-all shadow-sm active:scale-95 cursor-pointer"
+              >
+                <Plus size={12} /> Post Alert
+              </button>
+            )}
+            <button className="text-sm text-orange-600 font-medium hover:underline">{t('viewMap')}</button>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          {(combinedAlerts || []).map(alert => {
+            const isHigh = alert.severity === 'high';
+            const isMedium = alert.severity === 'medium';
+            const isBlood = alert.isBloodAttestation;
+            return (
+              <div
+                key={alert.id}
+                onClick={() => setSelectedAlert(alert)}
+                className={`p-3 rounded-xl border transition-all duration-300 cursor-pointer flex flex-col gap-2 relative overflow-hidden group hover:scale-[1.02] ${
+                  isDarkMode
+                    ? `hyperlocal-card ${isBlood ? 'hyperlocal-card-blood' : isHigh ? 'hyperlocal-card-high' : isMedium ? 'hyperlocal-card-medium' : 'hyperlocal-card-low'}`
+                    : `${isBlood ? 'bg-rose-50 border-rose-200 hover:shadow-md' : isHigh ? 'bg-red-50 border-red-200 hover:shadow-md' : isMedium ? 'bg-orange-50 border-orange-200 hover:shadow-md' : 'bg-white border-slate-200 hover:shadow-md'}`
+                }`}
+              >
+                <div className={`absolute top-0 left-0 w-full h-1 ${isBlood ? 'bg-rose-500' : isHigh ? 'bg-red-500' : isMedium ? 'bg-orange-500' : 'bg-slate-400'
+                  }`} />
+                
+                <div className="flex items-center justify-between mt-1">
+                  <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider ${
+                        isDarkMode
+                          ? (isBlood ? 'bg-rose-950/80 text-rose-300' : isHigh ? 'bg-red-950/80 text-red-300' : isMedium ? 'bg-orange-950/80 text-orange-300' : 'bg-slate-800 text-slate-300')
+                          : (isBlood ? 'bg-rose-200 text-rose-700' : isHigh ? 'bg-red-200 text-red-700' : isMedium ? 'bg-orange-200 text-orange-700' : 'bg-slate-200 text-slate-700')
+                      }`}>
+                    {alert.type}
+                  </span>
+                  {alert.status === 'Active' && (
+                    <span className={`w-2 h-2 rounded-full animate-pulse ${isBlood ? 'bg-rose-500' : isHigh ? 'bg-red-500' : 'bg-orange-500'}`} />
+                  )}
+                </div>
+
+                <h4 className={`font-extrabold text-sm tracking-tight line-clamp-2 ${isDarkMode ? 'text-slate-100' : 'text-slate-900'}`}>
+                  {alert.title || alert.type}
+                </h4>
+
+                <div className="flex items-center text-[10px] text-slate-400 gap-2 mt-auto pt-2">
+                  <span className="flex items-center gap-0.5 font-medium truncate"><MapPin size={10} className={isBlood ? 'text-rose-400' : isHigh ? 'text-red-500' : 'text-slate-400'} /> {alert.distance}</span>
+                  <span>•</span>
+                  <span className="flex items-center gap-0.5 font-medium whitespace-nowrap"><Clock size={10} /> {alert.time}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
       {selectedAlert && (
         <AlertDetailModal
@@ -6932,7 +6821,7 @@ const DEMO_USER_PROFILE = {
 };
 const DEFAULT_OTP = '000000';
 
-function AuthScreen({ onSuccess, isDarkMode, currentLanguage, setCurrentLanguage }) {
+function AuthScreen({ onSuccess, isDarkMode, currentLanguage, setCurrentLanguage, t }) {
   const [screen, setScreen] = useState('landing');
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [phone, setPhone] = useState('');
@@ -7123,8 +7012,8 @@ function AuthScreen({ onSuccess, isDarkMode, currentLanguage, setCurrentLanguage
           {screen === 'landing' && (
             <div className="space-y-6 animate-in fade-in">
               <div>
-                <h2 className="text-2xl font-black text-white">Welcome</h2>
-                <p className="text-xs text-slate-400 mt-1">Sign in or create your Saathi account securely.</p>
+                <h2 className="text-2xl font-black text-white">{t ? t('welcomeTitle') : 'Welcome'}</h2>
+                <p className="text-xs text-slate-400 mt-1">{t ? t('welcomeSub') : 'Sign in or create your Saathi account securely.'}</p>
               </div>
 
               <button
