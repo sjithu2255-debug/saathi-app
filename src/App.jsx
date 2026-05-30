@@ -1150,12 +1150,14 @@ function SaathiApp() {
     <div className={`flex flex-col h-screen font-sans overflow-hidden relative transition-colors ${isDarkMode ? 'bg-[#070913] text-slate-200' : 'bg-slate-50 text-slate-800'}`}>
       {!isDarkMode && (
         <style>{`
-          /* Convert hardcoded dark backgrounds to light */
+          /* Convert hardcoded dark backgrounds to light with high transparency */
           .bg-slate-950,
           div[class*="bg-slate-950"],
           section[class*="bg-slate-950"],
           span[class*="bg-slate-950"] {
-            background-color: #ffffff !important;
+            background-color: rgba(255, 255, 255, 0.4) !important;
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
             color: #1e293b !important;
           }
 
@@ -1163,7 +1165,9 @@ function SaathiApp() {
           div[class*="bg-slate-900"],
           aside[class*="bg-slate-900"],
           span[class*="bg-slate-900"] {
-            background-color: #f8fafc !important;
+            background-color: rgba(248, 250, 252, 0.4) !important;
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
             color: #1e293b !important;
           }
 
@@ -1171,7 +1175,9 @@ function SaathiApp() {
           div[class*="bg-slate-800"],
           button[class*="bg-slate-800"],
           span[class*="bg-slate-800"] {
-            background-color: #f1f5f9 !important;
+            background-color: rgba(241, 245, 249, 0.5) !important;
+            backdrop-filter: blur(12px) !important;
+            -webkit-backdrop-filter: blur(12px) !important;
             color: #0f172a !important;
           }
 
@@ -1233,9 +1239,11 @@ function SaathiApp() {
           }
           
           .glass-panel {
-            background-color: rgba(255, 255, 255, 0.9) !important;
-            border-color: #e2e8f0 !important;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+            background-color: rgba(255, 255, 255, 0.4) !important;
+            backdrop-filter: blur(20px) !important;
+            -webkit-backdrop-filter: blur(20px) !important;
+            border-color: rgba(226, 232, 240, 0.6) !important;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05) !important;
           }
         `}</style>
       )}
@@ -1247,15 +1255,29 @@ function SaathiApp() {
           color: #f1f5f9 !important;
         }
 
-        /* Force dark theme for all white background elements */
+        /* Force dark theme for all white background elements with high transparency */
         .bg-white,
         .bg-slate-50,
         .modal-content,
         div[class*="bg-white"],
         nav[class*="bg-white"],
         header[class*="bg-white"] {
-          background-color: #0b0f19 !important;
+          background-color: rgba(11, 15, 25, 0.4) !important;
+          backdrop-filter: blur(16px) !important;
+          -webkit-backdrop-filter: blur(16px) !important;
           color: #e2e8f0 !important;
+        }
+
+        /* Increase transparency for dark slate backgrounds */
+        .bg-slate-950, div[class*="bg-slate-950"] { background-color: rgba(2, 6, 23, 0.4) !important; backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important; }
+        .bg-slate-900, div[class*="bg-slate-900"] { background-color: rgba(15, 23, 42, 0.4) !important; backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important; }
+        .bg-slate-800, div[class*="bg-slate-800"] { background-color: rgba(30, 41, 59, 0.5) !important; backdrop-filter: blur(12px) !important; -webkit-backdrop-filter: blur(12px) !important; }
+
+        .glass-panel {
+          background-color: rgba(15, 23, 42, 0.3) !important;
+          backdrop-filter: blur(20px) !important;
+          -webkit-backdrop-filter: blur(20px) !important;
+          border-color: rgba(255, 255, 255, 0.1) !important;
         }
 
         /* Make card and element borders dark and clean */
