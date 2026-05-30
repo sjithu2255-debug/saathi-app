@@ -1416,7 +1416,7 @@ function SaathiApp() {
 
       <header className={`backdrop-blur-md shadow-2xl border-b sticky top-0 z-50 ${isDarkMode ? 'bg-[#0b0f19]/80 border-slate-800/80' : 'bg-white/90 border-slate-200'}`}>
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-1 sm:gap-3">
             {isAuthenticated && (
               <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -1428,12 +1428,12 @@ function SaathiApp() {
             <SaathiLogo size={36} showWordmark={false} />
             <button
               onClick={() => setIsDarkMode(!isDarkMode)}
-              className={`p-2 rounded-xl transition-colors ${isDarkMode ? 'text-slate-400 hover:bg-slate-800 hover:text-white' : 'text-slate-600 hover:bg-slate-200 hover:text-slate-900'}`}
+              className={`hidden sm:flex p-2 rounded-xl transition-colors ${isDarkMode ? 'text-slate-400 hover:bg-slate-800 hover:text-white' : 'text-slate-600 hover:bg-slate-200 hover:text-slate-900'}`}
             >
               {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
             </button>
 
-            <div className="relative" data-dropdown>
+            <div className="relative hidden sm:block" data-dropdown>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -1441,8 +1441,7 @@ function SaathiApp() {
                 }}
                 className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-orange-950/40 hover:bg-orange-900/60 text-orange-400 transition-all border border-orange-500/20 cursor-pointer"
               >
-                <span className="hidden sm:inline">{LANGUAGES[currentLanguage]?.nativeName || 'English'}</span>
-                <span className="sm:hidden">{LANGUAGES[currentLanguage]?.nativeName.slice(0, 2).toUpperCase() || 'EN'}</span>
+                <span>{LANGUAGES[currentLanguage]?.nativeName || 'English'}</span>
                 <ChevronRight size={12} className={`transform transition-transform ${showLanguageMenu ? 'rotate-90' : ''}`} />
               </button>
               {showLanguageMenu && (
@@ -1497,13 +1496,13 @@ function SaathiApp() {
             )}
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             {/* SOS button in header */}
             {isSOSActive ? (
               <button
                 type="button"
                 onClick={() => setIsSOSActive(false)}
-                className="flex items-center gap-1.5 bg-white text-red-600 border border-red-500 hover:bg-red-50 font-bold px-3 py-1.5 rounded-full shadow-sm transition-all animate-pulse text-[10px] sm:text-xs uppercase tracking-wider"
+                className="flex items-center gap-1.5 bg-white text-red-600 border border-red-500 hover:bg-red-50 font-bold px-2 sm:px-3 py-1.5 rounded-full shadow-sm transition-all animate-pulse text-[10px] sm:text-xs uppercase tracking-wider whitespace-nowrap shrink-0"
               >
                 <span className="w-2 h-2 bg-red-600 rounded-full animate-ping"></span>
                 <span>{t('stopBroadcast')}</span>
@@ -1513,11 +1512,11 @@ function SaathiApp() {
                 type="button"
                 onClick={startSOSCountdown}
                 disabled={sosCountdown !== null}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 active:scale-95 text-white rounded-full shadow-sm transition-all relative group cursor-pointer"
+                className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 bg-red-600 hover:bg-red-700 active:scale-95 text-white rounded-full shadow-sm transition-all relative group cursor-pointer whitespace-nowrap shrink-0"
                 title={t('triggerSOS')}
               >
                 <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-25 group-hover:opacity-40"></div>
-                <ShieldAlert size={14} className="relative z-10" />
+                <ShieldAlert size={14} className="relative z-10 shrink-0" />
                 <span className="text-[10px] sm:text-xs font-black tracking-wider relative z-10 uppercase">SOS HELP</span>
               </button>
             )}
@@ -1682,6 +1681,31 @@ function SaathiApp() {
                   </div>
 
                   <div className="p-2 bg-slate-900">
+                    {/* Mobile Settings */}
+                    <div className="sm:hidden mb-2 pb-2 border-b border-slate-800 space-y-2">
+                      <div className="flex items-center justify-between px-2 py-1 text-xs font-bold text-slate-300">
+                        <span>Theme Mode</span>
+                        <button
+                          onClick={() => setIsDarkMode(!isDarkMode)}
+                          className="p-1.5 bg-slate-800 rounded-lg text-slate-300 hover:text-white"
+                        >
+                          {isDarkMode ? <Sun size={14} /> : <Moon size={14} />}
+                        </button>
+                      </div>
+                      <div className="flex items-center justify-between px-2 py-1 text-xs font-bold text-slate-300">
+                        <span>Language</span>
+                        <select
+                          value={currentLanguage}
+                          onChange={(e) => setCurrentLanguage(e.target.value)}
+                          className="bg-slate-800 text-orange-400 font-black px-2 py-1 rounded-lg border border-slate-700 text-[10px] outline-none cursor-pointer"
+                        >
+                          {Object.keys(LANGUAGES).map(langCode => (
+                            <option key={langCode} value={langCode}>{LANGUAGES[langCode].nativeName}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
                     <div className="text-[9px] font-black text-slate-500 mb-1.5 px-2 uppercase tracking-widest">Switch Profile Role</div>
                     <div className="space-y-1">
                       {['Citizen', 'Volunteer', 'NGO', 'ServiceProvider', 'HealthcareWorker', 'Admin'].map(role => (
