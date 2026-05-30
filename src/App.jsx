@@ -1148,6 +1148,97 @@ function SaathiApp() {
 
   return (
     <div className={`flex flex-col h-screen font-sans overflow-hidden relative transition-colors ${isDarkMode ? 'bg-[#070913] text-slate-200' : 'bg-slate-50 text-slate-800'}`}>
+      {!isDarkMode && (
+        <style>{`
+          /* Convert hardcoded dark backgrounds to light */
+          .bg-slate-950,
+          div[class*="bg-slate-950"],
+          section[class*="bg-slate-950"],
+          span[class*="bg-slate-950"] {
+            background-color: #ffffff !important;
+            color: #1e293b !important;
+          }
+
+          .bg-slate-900,
+          div[class*="bg-slate-900"],
+          aside[class*="bg-slate-900"],
+          span[class*="bg-slate-900"] {
+            background-color: #f8fafc !important;
+            color: #1e293b !important;
+          }
+
+          .bg-slate-800,
+          div[class*="bg-slate-800"],
+          button[class*="bg-slate-800"],
+          span[class*="bg-slate-800"] {
+            background-color: #f1f5f9 !important;
+            color: #0f172a !important;
+          }
+
+          /* NavButton Active States Mapping */
+          .bg-orange-950\\/40, div[class*="bg-orange-950"], button[class*="bg-orange-950"] {
+            background-color: #fff7ed !important;
+            color: #ea580c !important;
+          }
+          .bg-emerald-950\\/40, div[class*="bg-emerald-950"], button[class*="bg-emerald-950"] {
+            background-color: #ecfdf5 !important;
+            color: #059669 !important;
+          }
+          .bg-red-950\\/40, .bg-red-950\\/30, div[class*="bg-red-950"], button[class*="bg-red-950"] {
+            background-color: #fef2f2 !important;
+            color: #dc2626 !important;
+          }
+          .bg-blue-950\\/40, div[class*="bg-blue-950"], button[class*="bg-blue-950"] {
+            background-color: #eff6ff !important;
+            color: #2563eb !important;
+          }
+          .bg-purple-950\\/40, .bg-purple-950\\/10, div[class*="bg-purple-950"], button[class*="bg-purple-950"] {
+            background-color: #faf5ff !important;
+            color: #9333ea !important;
+          }
+
+          /* Convert dark borders to light */
+          .border-slate-800,
+          .border-slate-700,
+          .border-slate-850,
+          div[class*="border-slate-800"],
+          div[class*="border-slate-700"],
+          div[class*="border-slate-850"] {
+            border-color: #e2e8f0 !important;
+          }
+
+          /* Convert muted light text to darker text */
+          .text-slate-200,
+          .text-slate-300,
+          .text-slate-400,
+          span[class*="text-slate-200"],
+          span[class*="text-slate-300"],
+          span[class*="text-slate-400"],
+          div[class*="text-slate-200"],
+          div[class*="text-slate-300"],
+          div[class*="text-slate-400"],
+          p[class*="text-slate-300"],
+          p[class*="text-slate-400"] {
+            color: #475569 !important;
+          }
+
+          /* Hover states for dark items */
+          .hover\\:bg-slate-900:hover,
+          .hover\\:bg-slate-800:hover,
+          .hover\\:bg-slate-900\\/60:hover,
+          button[class*="hover:bg-slate-900"]:hover,
+          button[class*="hover:bg-slate-800"]:hover {
+            background-color: #e2e8f0 !important;
+            color: #0f172a !important;
+          }
+          
+          .glass-panel {
+            background-color: rgba(255, 255, 255, 0.9) !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+          }
+        `}</style>
+      )}
       {isDarkMode && (
       <style>{`
         /* Premium, cohesive dark theme overrides globally */
