@@ -1480,11 +1480,8 @@ function SaathiApp() {
                 </div>
               )}
             </div>
-          </div>
 
-
-
-          <div className="flex items-center gap-1 sm:gap-2">
+            {/* Location Badge */}
             <div
               className={`flex items-center justify-center w-9 h-9 rounded-full transition-colors duration-200 border cursor-default select-none pointer-events-none ${locationStatus === 'granted' ? 'bg-emerald-950/40 text-emerald-400 border-emerald-500/20' :
                 locationStatus === 'manual' ? 'bg-blue-950/40 text-blue-400 border-blue-500/20' :
@@ -1514,6 +1511,12 @@ function SaathiApp() {
                 <MapPin size={16} className="text-slate-400" />
               )}
             </div>
+          </div>
+
+
+
+          <div className="flex items-center gap-1 sm:gap-2">
+
             {/* SOS button in header */}
             {isSOSActive ? (
               <button
