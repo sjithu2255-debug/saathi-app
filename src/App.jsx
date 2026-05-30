@@ -11,6 +11,7 @@ import {
   Gift, Zap, ArrowDownToLine, ArrowUpRight, Plus, Sun, Moon, Heart, Menu
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import logoUrl from './assets/logo.png';
 
 // --- BRAND ---
@@ -590,9 +591,22 @@ const formatDistance = (km) => {
   return `${Math.round(km)} km`;
 };
 
-// --- AI INTEGRATION (Mock Simulation) ---
-// Since this is a frontend-only app, we mock the AI responses to avoid CORS errors and API key leaks.
+// --- AI INTEGRATION ---
 const generateAIContent = async (prompt) => {
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  if (apiKey) {
+    try {
+      const genAI = new GoogleGenerativeAI(apiKey);
+      // Try to use gemini-1.5-flash as it's the stable default, though gemini-2.5-flash can be used if available
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const result = await model.generateContent(prompt);
+      return result.response.text();
+    } catch (e) {
+      console.error("Gemini API Error, falling back to mock:", e);
+    }
+  }
+
+  // Fallback to mock if no API key or if API call fails
   await new Promise(res => setTimeout(res, 1200)); // Simulate network latency
 
   const lowerPrompt = prompt.toLowerCase();
@@ -2622,7 +2636,7 @@ function WalletModal({ balance, transactions, onPayout, onClose }) {
   );
 }
 
-function AlertDetailModal({ alert, isSOSActive, onTriggerSOS, onClose }) {
+function AlertDetailModal({ alert, isSOSActive, autoShare, onTriggerSOS, onClose }) {
   const [hasPledged, setHasPledged] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
   const modalRef = useRef(null);
@@ -2655,6 +2669,14 @@ function AlertDetailModal({ alert, isSOSActive, onTriggerSOS, onClose }) {
       setIsSharing(false);
     }
   };
+
+  useEffect(() => {
+    if (autoShare && !isSharing) {
+      setTimeout(() => {
+        handleShareAsImage();
+      }, 300);
+    }
+  }, [autoShare]);
 
   return (
     <Modal onClose={onClose} maxWidth="max-w-md">
@@ -2911,6 +2933,7 @@ function HomeFeed({
   onRemoveAlert
 }) {
   const [selectedAlert, setSelectedAlert] = useState(null);
+  const [autoShare, setAutoShare] = useState(false);
   const [activeFilter, setActiveFilter] = useState('All');
   const showWalletCard = ['Volunteer'].includes(userRole);
 
@@ -3265,13 +3288,13 @@ function HomeFeed({
                 
                 <div className="flex gap-2 mt-1 pt-2 border-t border-slate-200/50 dark:border-slate-700/50">
                   <button 
-                    onClick={(e) => { e.stopPropagation(); setSelectedAlert(alert); }}
+                    onClick={(e) => { e.stopPropagation(); setAutoShare(false); setSelectedAlert(alert); }}
                     className="flex-1 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20 font-bold py-1.5 rounded-lg text-[10px] flex items-center justify-center gap-1 transition-colors"
                   >
                     <HeartHandshake size={12} /> Pledge
                   </button>
                   <button 
-                    onClick={(e) => { e.stopPropagation(); setSelectedAlert(alert); }}
+                    onClick={(e) => { e.stopPropagation(); setAutoShare(true); setSelectedAlert(alert); }}
                     className="flex-1 bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-500/10 dark:text-blue-400 dark:hover:bg-blue-500/20 font-bold py-1.5 rounded-lg text-[10px] flex items-center justify-center gap-1 transition-colors"
                   >
                     <Download size={12} /> Share
@@ -3287,11 +3310,15 @@ function HomeFeed({
         <AlertDetailModal
           alert={selectedAlert}
           isSOSActive={isSOSActive}
+          autoShare={autoShare}
           onTriggerSOS={() => {
             startSOSCountdown();
             setSelectedAlert(null);
           }}
-          onClose={() => setSelectedAlert(null)}
+          onClose={() => {
+            setSelectedAlert(null);
+            setAutoShare(false);
+          }}
         />
       )}
     </div>
