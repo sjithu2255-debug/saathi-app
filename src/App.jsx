@@ -2712,7 +2712,9 @@ function AlertDetailModal({ alert, isSOSActive, autoShare, onTriggerSOS, onClose
       const link = document.createElement('a');
       link.href = image;
       link.download = `Saathi_Verified_Alert_${alert.id}.png`;
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
     } catch (err) {
       console.error("Failed to share image", err);
     } finally {
@@ -2902,18 +2904,20 @@ function FaceVerifyStopSOSModal({ onVerify, onCancel }) {
     setIsVerifying(true);
     // Take picture in 2 seconds
     setTimeout(() => {
+      let capturedImage = null;
       if (videoRef.current) {
         const canvas = document.createElement('canvas');
         canvas.width = videoRef.current.videoWidth || 480;
         canvas.height = videoRef.current.videoHeight || 640;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-        setPhotoData(canvas.toDataURL('image/jpeg'));
+        capturedImage = canvas.toDataURL('image/jpeg');
+        setPhotoData(capturedImage);
       }
       
       // Simulate verification process after capturing picture
       setTimeout(() => {
-        onVerify(canvas.toDataURL('image/jpeg'));
+        onVerify(capturedImage);
       }, 1000);
     }, 2000);
   };
