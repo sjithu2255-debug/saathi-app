@@ -8,7 +8,7 @@ import {
   MessageSquare, Send, X, AlertOctagon, Award, Download,
   Phone, ArrowRight, ArrowLeft, Fingerprint, KeyRound, ScanLine,
   Paperclip, Image as ImageIcon, Wallet, TrendingUp, IndianRupee,
-  Gift, Zap, ArrowDownToLine, ArrowUpRight, Plus, Sun, Moon, Heart, Menu
+  Gift, Zap, ArrowDownToLine, ArrowUpRight, Plus, Sun, Moon, Heart, Menu, Eye, EyeOff
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -7439,6 +7439,7 @@ function AuthScreen({ onSuccess, isDarkMode, currentLanguage, setCurrentLanguage
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('pass@1234');
+  const [showPassword, setShowPassword] = useState(false);
   const [selectedRole, setSelectedRole] = useState(isAdminRoute ? 'Admin' : 'Citizen');
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
@@ -7678,13 +7679,22 @@ function AuthScreen({ onSuccess, isDarkMode, currentLanguage, setCurrentLanguage
 
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Password</label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  className="w-full p-3 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:border-orange-500/70 focus:outline-none"
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    className="w-full p-3 pr-12 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:border-orange-500/70 focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300 p-1 rounded-full transition-colors focus:outline-none"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
               
               {!isAdminRoute && !isLoginMode && (
