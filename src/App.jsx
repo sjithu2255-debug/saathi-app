@@ -2033,6 +2033,7 @@ function SaathiApp() {
         <WalletModal
           balance={walletBalance}
           transactions={walletTxns}
+          isDarkMode={isDarkMode}
           onPayout={(amount) => addWalletTxn({ type: 'debit', source: 'payout', amount, description: 'UPI Payout to *****1234' })}
           onClose={() => setShowWallet(false)}
         />
