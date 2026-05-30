@@ -1294,7 +1294,7 @@ function SaathiApp() {
       case 'volunteer': return <VolunteerModule userCoords={userCoords} userRole={userRole} locationStatus={locationStatus} />;
       case 'services': return <ServicesModule userCoords={userCoords} locationStatus={locationStatus} userRole={userRole} onCommission={creditCommission} onShowEarning={showEarning} services={services} setServices={setServices} />;
       case 'survey': return <SurveyModule userRole={userRole} userCoords={userCoords} onMicroReward={creditMicro} onShowEarning={showEarning} surveys={surveys} setSurveys={setSurveys} />;
-      case 'admin-approvals': return <AdminApprovalsModule volunteerRequests={volunteerRequests} setVolunteerRequests={setVolunteerRequests} services={services} setServices={setServices} surveys={surveys} setSurveys={setSurveys} userRole={userRole} setUserRole={setUserRole} setVolunteerApplicationStatus={setVolunteerApplicationStatus} displayUser={displayUser} addWalletTxn={addWalletTxn} bloodRequests={bloodRequests} setBloodRequests={setBloodRequests} creditMicro={creditMicro} showEarning={showEarning} sosReports={sosReports} setSosReports={setSosReports} />;
+      case 'admin-approvals': return <AdminApprovalsModule volunteerRequests={volunteerRequests} setVolunteerRequests={setVolunteerRequests} services={services} setServices={setServices} surveys={surveys} setSurveys={setSurveys} userRole={userRole} setUserRole={setUserRole} setVolunteerApplicationStatus={setVolunteerApplicationStatus} displayUser={displayUser} addWalletTxn={addWalletTxn} bloodRequests={bloodRequests} setBloodRequests={setBloodRequests} creditMicro={creditMicro} showEarning={showEarning} sosReports={sosReports} setSosReports={setSosReports} setAlerts={setAlerts} />;
       default: return <HomeFeed t={t} startSOSCountdown={startSOSCountdown} isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onViewCertificate={() => setShowCertificate(true)} userRole={userRole} walletBalance={walletBalance} onOpenWallet={() => setShowWallet(true)} volunteerApplicationStatus={volunteerApplicationStatus} setVolunteerApplicationStatus={setVolunteerApplicationStatus} setVolunteerRequests={setVolunteerRequests} displayUser={displayUser} services={services} setActiveTab={setActiveTab} volunteerRequests={volunteerRequests} surveys={surveys} alerts={alerts} onOpenPostAlert={() => { setEditingAlert(null); setShowPostAlertModal(true); }} bloodRequests={bloodRequests} onEditAlert={(alert) => { setEditingAlert(alert); setShowPostAlertModal(true); }} onRemoveAlert={(id) => setAlerts(prev => prev.filter(a => a.id !== id))} pledgedAlerts={pledgedAlerts} togglePledge={togglePledge} />;
     }
   };
@@ -5735,7 +5735,8 @@ function AdminApprovalsModule({
   creditMicro,
   showEarning,
   sosReports = [],
-  setSosReports
+  setSosReports,
+  setAlerts
 }) {
   const [subTab, setSubTab] = useState('roleRequests');
   const [selectedDocPreview, setSelectedDocPreview] = useState(null); // for inspecting requisition slips
@@ -5996,12 +5997,34 @@ function AdminApprovalsModule({
                     </div>
                   </div>
                   
-                  <div className="mt-4 pt-4 border-t border-slate-100">
+                  <div className="mt-4 pt-4 border-t border-slate-100 flex gap-3">
                     <button
                       onClick={() => setSosReports(prev => prev.filter(r => r.id !== report.id))}
-                      className="w-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-sm"
+                      className="flex-1 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-sm"
                     >
-                      Mark as Resolved & Dismiss
+                      Resolved & Dismiss
+                    </button>
+                    <button
+                      onClick={() => {
+                        setAlerts(prev => [{
+                          id: Date.now(),
+                          type: "Suspicious Activity",
+                          title: "Suspicious SOS Deactivation",
+                          description: `SOS was deactivated under suspicious circumstances by ${report.user?.name || 'Unknown User'}. Face verification did not clear manual checks.`,
+                          location: report.location || "Unknown Location",
+                          contactName: "Admin Command Center",
+                          contactPhone: "Control Room",
+                          notes: "Volunteers in the vicinity are requested to be cautious and observe the area. Report any findings to authorities.",
+                          distance: "0.0 km",
+                          time: "Just now",
+                          status: "Active",
+                          severity: "high"
+                        }, ...prev]);
+                        setSosReports(prev => prev.filter(r => r.id !== report.id));
+                      }}
+                      className="flex-1 bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2"
+                    >
+                      <AlertTriangle size={14} /> Suspicious (Alert Volunteers)
                     </button>
                   </div>
                 </div>
