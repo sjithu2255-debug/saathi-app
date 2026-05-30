@@ -100,6 +100,23 @@ const TRANSLATIONS = {
     medium: "Medium",
     high: "High",
     publishAlert: "Publish Hyperlocal Alert",
+    emergencySOS: "Emergency SOS",
+    bloodHelp: "Blood Help",
+    broadcastingLoc: "Broadcasting Location",
+    standby: "Standby",
+    liveGPS: "Live GPS Active",
+    manualLoc: "Manual Location Set",
+    fallbackLoc: "Using fallback location",
+    youAreHere: "You are here",
+    describeEmergency: "Describe Emergency (AI Triage)",
+    emergencyPlaceholder: "E.g., 'Snake bite on the leg, person is feeling dizzy...'",
+    analyzing: "Analyzing...",
+    getAIAdvice: "Get AI Advice",
+    aiGuidance: "Immediate AI Guidance:",
+    emergencyContacts: "Emergency Contacts",
+    notified: "Notified",
+    nearbyResponders: "Nearby Responders",
+    approvals: "Approvals",
   },
   hi: {
     dashboard: "डैशबोर्ड",
@@ -1087,7 +1104,7 @@ function SaathiApp() {
   const renderContent = () => {
     switch (activeTab) {
       case 'home': return <HomeFeed t={t} startSOSCountdown={startSOSCountdown} isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onViewCertificate={() => setShowCertificate(true)} userRole={userRole} walletBalance={walletBalance} onOpenWallet={() => setShowWallet(true)} volunteerApplicationStatus={volunteerApplicationStatus} setVolunteerApplicationStatus={setVolunteerApplicationStatus} setVolunteerRequests={setVolunteerRequests} displayUser={displayUser} services={services} setActiveTab={setActiveTab} volunteerRequests={volunteerRequests} surveys={surveys} alerts={alerts} onOpenPostAlert={() => { setEditingAlert(null); setShowPostAlertModal(true); }} bloodRequests={bloodRequests} onEditAlert={(alert) => { setEditingAlert(alert); setShowPostAlertModal(true); }} onRemoveAlert={(id) => setAlerts(prev => prev.filter(a => a.id !== id))} />;
-      case 'rescue': return <RescueModule isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onOpenChat={setActiveChatUser} userCoords={userCoords} locationStatus={locationStatus} bloodRequests={bloodRequests} setBloodRequests={setBloodRequests} userRole={userRole} addWalletTxn={addWalletTxn} creditMicro={creditMicro} showEarning={showEarning} keyFingerprint={keyFingerprint} signActionPayload={signActionPayload} />;
+      case 'rescue': return <RescueModule t={t} isDarkMode={isDarkMode} isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onOpenChat={setActiveChatUser} userCoords={userCoords} locationStatus={locationStatus} bloodRequests={bloodRequests} setBloodRequests={setBloodRequests} userRole={userRole} addWalletTxn={addWalletTxn} creditMicro={creditMicro} showEarning={showEarning} keyFingerprint={keyFingerprint} signActionPayload={signActionPayload} />;
       case 'volunteer': return <VolunteerModule userCoords={userCoords} userRole={userRole} locationStatus={locationStatus} />;
       case 'services': return <ServicesModule userCoords={userCoords} locationStatus={locationStatus} userRole={userRole} onCommission={creditCommission} onShowEarning={showEarning} services={services} setServices={setServices} />;
       case 'survey': return <SurveyModule userRole={userRole} userCoords={userCoords} onMicroReward={creditMicro} onShowEarning={showEarning} surveys={surveys} setSurveys={setSurveys} />;
@@ -1610,7 +1627,7 @@ function SaathiApp() {
                 active={activeTab === 'admin-approvals'}
                 onClick={() => setActiveTab('admin-approvals')}
                 icon={<ShieldCheck size={20} />}
-                label="Approvals Hub"
+                label={t('approvals')}
                 color="purple"
                 badge={pendingApprovalsCount}
               />
@@ -1673,7 +1690,7 @@ function SaathiApp() {
           <MobileNavButton active={activeTab === 'volunteer'} onClick={() => setActiveTab('volunteer')} icon={<HeartHandshake size={22} />} label={t('volunteer')} />
           <MobileNavButton active={activeTab === 'services'} onClick={() => setActiveTab('services')} icon={<Wrench size={22} />} label={t('services')} />
           {['Admin', 'Volunteer'].includes(userRole) ? (
-            <MobileNavButton active={activeTab === 'admin-approvals'} onClick={() => setActiveTab('admin-approvals')} icon={<ShieldCheck size={22} />} label="Approvals" color="text-purple-400" badge={pendingApprovalsCount} />
+            <MobileNavButton active={activeTab === 'admin-approvals'} onClick={() => setActiveTab('admin-approvals')} icon={<ShieldCheck size={22} />} label={t('approvals')} color="text-purple-400" badge={pendingApprovalsCount} />
           ) : (
             <MobileNavButton active={activeTab === 'survey'} onClick={() => setActiveTab('survey')} icon={<FileText size={22} />} label={t('surveys')} />
           )}
@@ -2805,6 +2822,8 @@ function HomeFeed({
 
 // --- RESCUE ---
 function RescueModule({
+  t,
+  isDarkMode,
   isSOSActive,
   setIsSOSActive,
   liveLocation,
@@ -3005,7 +3024,7 @@ function RescueModule({
             }`}
         >
           <Radio size={14} className={subModule === 'sos' ? 'animate-pulse' : ''} />
-          Emergency SOS
+          {t('emergencySOS')}
         </button>
         <button
           onClick={() => setSubModule('blood')}
@@ -3015,20 +3034,20 @@ function RescueModule({
             }`}
         >
           <HeartHandshake size={14} className={subModule === 'blood' ? 'animate-pulse' : ''} />
-          Blood Help
+          {t('bloodHelp')}
         </button>
       </div>
 
       {subModule === 'sos' ? (
         <>
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-xl font-black text-white">Emergency & Rescue</h2>
+            <h2 className={`text-xl font-black ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>{t('rescue')}</h2>
             {isSOSActive ? (
               <span className="bg-red-950/90 text-red-400 text-xs font-black px-3.5 py-1.5 rounded-full flex items-center gap-1.5 border border-red-500/30 pulse-glow-sos gpu-stabilized">
-                <Radio size={14} className="animate-pulse" /> Broadcasting Location
+                <Radio size={14} className="animate-pulse" /> {t('broadcastingLoc')}
               </span>
             ) : (
-              <span className="bg-slate-900/50 border border-slate-800 text-slate-400 text-[10px] uppercase font-bold tracking-widest px-2.5 py-1 rounded-full flex items-center gap-1">Standby</span>
+              <span className="bg-slate-900/50 border border-slate-800 text-slate-400 text-[10px] uppercase font-bold tracking-widest px-2.5 py-1 rounded-full flex items-center gap-1">{t('standby')}</span>
             )}
           </div>
 
@@ -3054,17 +3073,17 @@ function RescueModule({
                 {locationStatus === 'granted' ? (
                   <>
                     <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                    Live GPS Active
+                    {t('liveGPS')}
                   </>
                 ) : locationStatus === 'manual' ? (
                   <>
                     <MapPin size={12} className="text-blue-400" />
-                    Manual Location Set
+                    {t('manualLoc')}
                   </>
                 ) : (
                   <>
                     <AlertTriangle size={12} className="text-orange-400 animate-pulse" />
-                    Using fallback location
+                    {t('fallbackLoc')}
                   </>
                 )}
               </div>
@@ -3078,21 +3097,21 @@ function RescueModule({
                   <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
                 </div>
                 <div className="absolute top-6 whitespace-nowrap bg-slate-950 border border-red-500/20 px-3 py-1 rounded-lg shadow-lg text-xs font-bold text-red-400 z-20 flex flex-col items-center">
-                  <span>You are here</span>
+                  <span>{t('youAreHere')}</span>
                   <span className="text-[9px] text-slate-500 font-mono mt-0.5">{liveLocation?.lat}, {liveLocation?.lng}</span>
                 </div>
               </div>
             )}
           </div>
 
-          <div className="bg-slate-900/40 p-5 rounded-2xl shadow-xl border border-slate-800/80 relative overflow-hidden glass-panel">
+          <div className={`p-5 rounded-2xl shadow-xl border relative overflow-hidden glass-panel ${isDarkMode ? 'bg-slate-900/40 border-slate-800/80 text-white' : 'bg-white border-slate-200 text-slate-800'}`}>
             <div className="absolute -top-12 -right-12 w-32 h-32 bg-purple-500/5 rounded-full blur-2xl"></div>
-            <h3 className="font-bold text-white mb-3 flex items-center gap-2">
-              <AlertTriangle size={18} className="text-orange-500" /> Describe Emergency (AI Triage)
+            <h3 className={`font-bold mb-3 flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
+              <AlertTriangle size={18} className="text-orange-500" /> {t('describeEmergency')}
             </h3>
             <div className="flex flex-col md:flex-row gap-3">
               <textarea
-                placeholder="E.g., 'Snake bite on the leg, person is feeling dizzy...'"
+                placeholder={t('emergencyPlaceholder')}
                 value={customIncident}
                 onChange={(e) => setCustomIncident(e.target.value)}
                 className="flex-1 p-3 rounded-xl border border-slate-800 bg-slate-950 text-slate-200 text-sm focus:ring-2 focus:ring-purple-500 outline-none resize-none h-16"
@@ -3103,21 +3122,21 @@ function RescueModule({
                 className="md:w-48 flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2 px-4 rounded-xl text-sm font-semibold hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 transition-all btn-premium-interactive cursor-pointer"
               >
                 {isAnalyzing ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
-                {isAnalyzing ? "Analyzing..." : "Get AI Advice"}
+                {isAnalyzing ? t('analyzing') : t('getAIAdvice')}
               </button>
             </div>
             {aiAdvice && (
               <div className="mt-4 p-4 bg-purple-950/20 border border-purple-500/20 rounded-xl text-sm text-purple-200">
-                <h4 className="font-bold mb-2 flex items-center gap-1 text-purple-400"><Sparkles size={14} /> Immediate AI Guidance:</h4>
+                <h4 className="font-bold mb-2 flex items-center gap-1 text-purple-400"><Sparkles size={14} /> {t('aiGuidance')}</h4>
                 <div className="whitespace-pre-wrap text-xs leading-relaxed">{aiAdvice}</div>
               </div>
             )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-slate-900/40 p-5 rounded-2xl shadow-xl border border-slate-800/80 glass-panel">
-              <h3 className="font-bold text-white mb-4 flex items-center gap-2">
-                <PhoneCall size={18} className="text-orange-500" /> Emergency Contacts
+            <div className={`p-5 rounded-2xl shadow-xl border glass-panel ${isDarkMode ? 'bg-slate-900/40 border-slate-800/80' : 'bg-white border-slate-200'}`}>
+              <h3 className={`font-bold mb-4 flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
+                <PhoneCall size={18} className="text-orange-500" /> {t('emergencyContacts')}
               </h3>
               <div className="space-y-3">
                 {MOCK_CONTACTS.map((contact, idx) => (
@@ -3128,7 +3147,7 @@ function RescueModule({
                     </div>
                     {isSOSActive ? (
                       <span className="text-[10px] bg-green-950 text-green-400 border border-green-500/20 px-2.5 py-1 rounded-full font-bold flex items-center gap-1">
-                        <CheckCircle size={10} /> Notified
+                        <CheckCircle size={10} /> {t('notified')}
                       </span>
                     ) : (
                       <button className="text-slate-500 hover:text-orange-400 cursor-pointer"><PhoneCall size={16} /></button>
@@ -3138,9 +3157,9 @@ function RescueModule({
               </div>
             </div>
 
-            <div className="bg-slate-900/40 p-5 rounded-2xl shadow-xl border border-slate-800/80 glass-panel">
-              <h3 className="font-bold text-white mb-4 flex items-center gap-2">
-                <Users size={18} className="text-green-500" /> Nearby Responders
+            <div className={`p-5 rounded-2xl shadow-xl border glass-panel ${isDarkMode ? 'bg-slate-900/40 border-slate-800/80' : 'bg-white border-slate-200'}`}>
+              <h3 className={`font-bold mb-4 flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
+                <Users size={18} className="text-green-500" /> {t('nearbyResponders')}
               </h3>
               <div className="space-y-3">
                 {MOCK_RESPONDERS.map(responder => {
