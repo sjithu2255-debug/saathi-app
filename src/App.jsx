@@ -450,23 +450,35 @@ const ROLE_DESCRIPTIONS = {
   Citizen: 'Access SOS, services, surveys, and volunteer opportunities.',
   Volunteer: 'Respond to SOS, onboard services, post surveys with approval.',
   NGO: 'Post volunteer drives, manage events, access analytics.',
+  Government: 'Post official drives, manage events, access analytics.',
+  CivilDefence: 'Manage emergency response, post volunteer drives, access analytics.',
   ServiceProvider: 'Manage your listing, availability, bookings, and reviews.',
   HealthcareWorker: 'Post hyperlocal health & medical alerts (ASHA, Doctor, Blood Bank, Hospital).',
   Admin: 'Full access: all NGO & Volunteer powers, plus city-wide moderation.'
 };
 
+const ROLE_COLORS = {
+  Citizen: 'bg-blue-600',
+  Volunteer: 'bg-emerald-600',
+  NGO: 'bg-orange-600',
+  Government: 'bg-purple-600',
+  CivilDefence: 'bg-red-600',
+  ServiceProvider: 'bg-cyan-600',
+  HealthcareWorker: 'bg-rose-600',
+  Admin: 'bg-indigo-600'
+};
 
 const can = {
-  postOpportunity: (role) => role === 'NGO' || role === 'Admin',
-  onboardService: (role) => ['Volunteer', 'NGO', 'Admin'].includes(role),
+  postOpportunity: (role) => ['NGO', 'Admin', 'Government', 'CivilDefence'].includes(role),
+  onboardService: (role) => ['Volunteer', 'NGO', 'Admin', 'Government', 'CivilDefence'].includes(role),
   postSurvey: (role) => ['Volunteer', 'Admin'].includes(role),
   approveContent: (role) => role === 'Admin',
   manageOwnService: (role) => role === 'ServiceProvider',
   manageServices: (role) => role === 'Admin',
   moderateContent: (role) => role === 'Admin',
-  respondToSOS: (role) => ['Volunteer', 'NGO', 'Admin'].includes(role),
-  viewAnalytics: (role) => ['NGO', 'Admin'].includes(role),
-  verifyOrgs: (role) => role === 'Admin',
+  respondToSOS: (role) => ['Volunteer', 'NGO', 'Admin', 'Government', 'CivilDefence'].includes(role),
+  viewAnalytics: (role) => ['NGO', 'Admin', 'Government', 'CivilDefence'].includes(role),
+  verifyOrgs: (role) => ['Admin', 'Government'].includes(role),
 };
 
 // --- REWARDS & REVENUE MODEL ---
@@ -1668,8 +1680,8 @@ function SaathiApp() {
               </div>
             </div>
 
-            {/* Wallet — visible to Volunteer/NGO/Admin */}
-            {['Volunteer', 'NGO', 'Admin'].includes(userRole) && (
+            {/* Wallet — visible to Volunteer/NGO/Admin/Government/CivilDefence */}
+            {['Volunteer', 'NGO', 'Government', 'CivilDefence', 'Admin'].includes(userRole) && (
               <button
                 onClick={() => setShowWallet(true)}
                 title={`Wallet: ${formatINR(walletBalance)}`}
@@ -1760,15 +1772,15 @@ function SaathiApp() {
                 }}
                 className={`flex items-center gap-2 p-1 pr-2 rounded-full transition-colors cursor-pointer ${showProfileMenu ? 'bg-slate-900 border border-slate-800' : 'hover:bg-slate-900'}`}
               >
-                <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-emerald-600 rounded-full flex items-center justify-center text-white text-xs font-black border border-slate-800 shadow-sm">
+                <div className={`w-8 h-8 ${ROLE_COLORS[userRole]} rounded-full flex items-center justify-center text-white text-xs font-black border border-slate-800 shadow-sm`}>
                   {displayUser.name.charAt(0)}
                 </div>
-                <span className="hidden sm:block text-[10px] font-black text-slate-300 tracking-wider uppercase">{userRole === 'HealthcareWorker' ? 'Healthcare' : userRole}</span>
+                <span className="hidden sm:block text-[10px] font-black text-slate-300 tracking-wider uppercase">{userRole === 'HealthcareWorker' ? 'Healthcare' : userRole === 'CivilDefence' ? 'Civil Defence' : userRole}</span>
               </button>
 
               {showProfileMenu && (
                 <div className="absolute right-0 mt-2 w-72 bg-slate-900 rounded-2xl shadow-2xl border border-slate-850 z-50 overflow-hidden">
-                  <div className="p-4 bg-gradient-to-br from-orange-500/90 via-orange-650/90 to-emerald-650/90 backdrop-blur-md text-white border-b border-slate-800">
+                  <div className={`p-4 ${ROLE_COLORS[userRole]} backdrop-blur-md text-white border-b border-slate-800`}>
                     <div className="flex items-center gap-3">
                       <div className="w-11 h-11 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-lg font-black border border-white/30">
                         {displayUser.name.charAt(0)}
@@ -1809,19 +1821,19 @@ function SaathiApp() {
 
                     <div className="text-[9px] font-black text-slate-500 mb-1.5 px-2 uppercase tracking-widest">Switch Profile Role</div>
                     <div className="space-y-1">
-                      {['Citizen', 'Volunteer', 'NGO', 'ServiceProvider', 'HealthcareWorker', 'Admin'].map(role => (
+                      {['Citizen', 'Volunteer', 'NGO', 'Government', 'CivilDefence', 'ServiceProvider', 'HealthcareWorker', 'Admin'].map(role => (
                         <button
                           key={role}
                           onClick={() => {
                             setUserRole(role);
                             setShowProfileMenu(false);
                           }}
-                          className={`w-full text-left px-3 py-2 text-xs rounded-lg transition-colors flex items-start justify-between gap-2 cursor-pointer ${userRole === role ? 'bg-orange-950/40 text-orange-400 border border-orange-500/10' : 'hover:bg-slate-800 text-slate-400'}`}
+                          className={`w-full text-left px-3 py-2 text-xs rounded-lg transition-colors flex items-start justify-between gap-2 cursor-pointer ${userRole === role ? 'bg-slate-800 text-white' : 'hover:bg-slate-800 text-slate-400'}`}
                         >
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1.5">
-                              <span className="font-bold">{role === 'HealthcareWorker' ? 'Healthcare Worker' : role}</span>
-                              {userRole === role && <CheckCircle size={10} className="text-orange-500 shrink-0" />}
+                              <span className="font-bold">{role === 'HealthcareWorker' ? 'Healthcare Worker' : role === 'CivilDefence' ? 'Civil Defence' : role}</span>
+                              {userRole === role && <CheckCircle size={10} className={`${ROLE_COLORS[role].replace('bg-', 'text-')} shrink-0`} />}
                             </div>
                             <p className="text-[9px] text-slate-500 mt-0.5 leading-tight">{ROLE_DESCRIPTIONS[role]}</p>
                           </div>
@@ -4222,8 +4234,8 @@ function ServicesModule({ userCoords, locationStatus, userRole, onCommission, on
       paidAmount: PRICING.serviceRegistration,
     }, ...prev]);
 
-    // Credit commission to the onboarding user (Volunteer/NGO/Admin)
-    if (isVolunteer || userRole === 'NGO') {
+    // Credit commission to the onboarding user
+    if (['Volunteer', 'NGO', 'Government', 'CivilDefence', 'Admin'].includes(userRole)) {
       const commission = onCommission?.(PRICING.serviceRegistration, `Onboarded ${pendingOnboarding.name}`);
       if (commission) onShowEarning?.(commission, 'commission');
     }
@@ -4716,7 +4728,7 @@ function SurveyModule({ userRole, userCoords, onMicroReward, onShowEarning, surv
 
   const canPost = can.postSurvey(userRole);
   const isAdmin = userRole === 'Admin';
-  const canEarn = ['Volunteer', 'NGO', 'Admin'].includes(userRole);
+  const canEarn = ['Volunteer', 'NGO', 'Government', 'CivilDefence', 'Admin'].includes(userRole);
   const pendingCount = useMemo(() => surveys.filter(s => s.status === 'pending').length, [surveys]);
   const visibleSurveys = useMemo(() => surveys.filter(s => s.status === 'approved'), [surveys]);
 
