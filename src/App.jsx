@@ -2701,11 +2701,7 @@ function AlertDetailModal({ alert, isSOSActive, autoShare, onTriggerSOS, onClose
 
   const handleShareAsImage = async () => {
     if (!modalRef.current) return;
-    setIsSharing(true);
-    
-    // Give React a tick to hide the bottom buttons before capturing
-    await new Promise(resolve => setTimeout(resolve, 150));
-    
+    const previousTransform = modalRef.current.style.transform;
     try {
       const canvas = await html2canvas(modalRef.current, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
       const image = canvas.toDataURL("image/png");
@@ -2717,19 +2713,15 @@ function AlertDetailModal({ alert, isSOSActive, autoShare, onTriggerSOS, onClose
       document.body.removeChild(link);
     } catch (err) {
       console.error("Failed to share image", err);
-    } finally {
-      setIsSharing(false);
+      alert("Error generating image: " + err.message);
     }
   };
 
   useEffect(() => {
-    if (autoShare && !isSharing) {
-      setTimeout(() => {
-        handleShareAsImage().catch(err => {
-          console.error("AutoShare error:", err);
-          alert("Auto-download was blocked by your browser. Please click the 'Share as Image' button below.");
-        });
-      }, 300);
+    if (autoShare) {
+      handleShareAsImage().catch(err => {
+        console.error("AutoShare error:", err);
+      });
     }
   }, [autoShare]);
 
@@ -2799,9 +2791,8 @@ function AlertDetailModal({ alert, isSOSActive, autoShare, onTriggerSOS, onClose
         </div>
       </div>
       
-      {!isSharing && (
-        <div className="p-4 bg-white border-t border-slate-100 rounded-b-2xl flex flex-col gap-2">
-          {!hasPledged ? (
+      <div data-html2canvas-ignore="true" className="p-4 bg-white border-t border-slate-100 rounded-b-2xl flex flex-col gap-2">
+        {!hasPledged ? (
             <button
               onClick={handlePledge}
               className="w-full font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wider shadow-sm bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20"
@@ -2876,7 +2867,6 @@ function AlertDetailModal({ alert, isSOSActive, autoShare, onTriggerSOS, onClose
             </button>
           </div>
         </div>
-      )}
     </Modal>
   );
 }
