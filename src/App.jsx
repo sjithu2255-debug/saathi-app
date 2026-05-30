@@ -729,6 +729,9 @@ function SaathiApp() {
   const [currentLanguage, setCurrentLanguage] = useState('en');
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [sosCountdown, setSosCountdown] = useState(null);
+  const [showSOSStopModal, setShowSOSStopModal] = useState(false);
+  const [sosPasscode, setSosPasscode] = useState("");
+  const sirenIntervalRef = useRef(null);
   const [securityScore, setSecurityScore] = useState(100);
   const [isDevToolsOpen, setIsDevToolsOpen] = useState(false);
   const [keyPair, setKeyPair] = useState(null);
@@ -1051,6 +1054,52 @@ function SaathiApp() {
     }, 100);
   }, []);
 
+  const startSiren = useCallback(() => {
+    if (navigator.vibrate) {
+      navigator.vibrate([500, 250, 500, 250, 500, 250, 500, 250, 500, 250, 500, 250, 500, 250, 500]);
+    }
+    
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+      const audioCtx = new AudioContext();
+      
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      
+      oscillator.type = 'square';
+      oscillator.frequency.value = 400;
+      gainNode.gain.value = 0.1;
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      oscillator.start();
+      
+      let high = false;
+      const interval = setInterval(() => {
+        oscillator.frequency.value = high ? 400 : 800;
+        high = !high;
+        if (navigator.vibrate) navigator.vibrate(500);
+      }, 500);
+      
+      sirenIntervalRef.current = { interval, oscillator, audioCtx };
+    } catch(e) {
+      console.warn("AudioContext error", e);
+    }
+  }, []);
+
+  const stopSiren = useCallback(() => {
+    if (sirenIntervalRef.current) {
+      clearInterval(sirenIntervalRef.current.interval);
+      try {
+        sirenIntervalRef.current.oscillator.stop();
+        sirenIntervalRef.current.audioCtx.close();
+      } catch(e) {}
+      sirenIntervalRef.current = null;
+    }
+    if (navigator.vibrate) navigator.vibrate(0);
+  }, []);
+
   const startSOSCountdown = useCallback(() => {
     if (isSOSActive) {
       setIsSOSActive(false);
@@ -1064,6 +1113,7 @@ function SaathiApp() {
           clearInterval(interval);
           setIsSOSActive(true);
           setActiveTab('rescue');
+          startSiren();
           // Cryptographically sign the SOS activation payload
           signActionPayload('SOS_ACTIVATE', { timestamp: Date.now() });
           return null;
@@ -1521,7 +1571,7 @@ function SaathiApp() {
             {isSOSActive ? (
               <button
                 type="button"
-                onClick={() => setIsSOSActive(false)}
+                onClick={() => setShowSOSStopModal(true)}
                 className="flex items-center gap-1.5 bg-white text-red-600 border border-red-500 hover:bg-red-50 font-bold px-2 sm:px-3 py-1.5 rounded-full shadow-sm transition-all animate-pulse text-[10px] sm:text-xs uppercase tracking-wider whitespace-nowrap shrink-0 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50"
               >
                 <span className="w-2 h-2 bg-red-600 rounded-full animate-ping"></span>
