@@ -1137,8 +1137,14 @@ function SaathiApp() {
         setShowProfileMenu(false);
       }
     };
+    const handleOpenSOSStop = () => setShowSOSStopModal(true);
+    
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    window.addEventListener('openSOSStop', handleOpenSOSStop);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('openSOSStop', handleOpenSOSStop);
+    };
   }, []);
 
   const handleSignOut = useCallback(() => {
@@ -1157,49 +1163,11 @@ function SaathiApp() {
   }, []);
 
   const startSiren = useCallback(() => {
-    if (navigator.vibrate) {
-      navigator.vibrate([500, 250, 500, 250, 500, 250, 500, 250, 500, 250, 500, 250, 500, 250, 500]);
-    }
-    
-    try {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContext) return;
-      const audioCtx = new AudioContext();
-      
-      const oscillator = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
-      
-      oscillator.type = 'square';
-      oscillator.frequency.value = 400;
-      gainNode.gain.value = 0.1;
-      
-      oscillator.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-      oscillator.start();
-      
-      let high = false;
-      const interval = setInterval(() => {
-        oscillator.frequency.value = high ? 400 : 800;
-        high = !high;
-        if (navigator.vibrate) navigator.vibrate(500);
-      }, 500);
-      
-      sirenIntervalRef.current = { interval, oscillator, audioCtx };
-    } catch(e) {
-      console.warn("AudioContext error", e);
-    }
+    // Sound and vibration removed as requested
   }, []);
 
   const stopSiren = useCallback(() => {
-    if (sirenIntervalRef.current) {
-      clearInterval(sirenIntervalRef.current.interval);
-      try {
-        sirenIntervalRef.current.oscillator.stop();
-        sirenIntervalRef.current.audioCtx.close();
-      } catch(e) {}
-      sirenIntervalRef.current = null;
-    }
-    if (navigator.vibrate) navigator.vibrate(0);
+    // Sound and vibration removed as requested
   }, []);
 
   const startSOSCountdown = useCallback(() => {
@@ -1729,7 +1697,7 @@ function SaathiApp() {
 
             {/* Header SOS Button */}
             <button
-              onClick={() => setIsSOSActive(!isSOSActive)}
+              onClick={isSOSActive ? () => setShowSOSStopModal(true) : startSOSCountdown}
               className={`flex items-center justify-center w-9 h-9 sm:w-auto sm:px-3 sm:py-1.5 rounded-full text-xs font-bold transition-all shadow-md cursor-pointer border ${isSOSActive ? 'bg-red-600 text-white border-red-500 animate-pulse shadow-red-500/50' : 'bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20'}`}
               title="Trigger Emergency SOS"
             >
@@ -2172,54 +2140,49 @@ function SaathiApp() {
       )}
 
       {/* Full-screen countdown overlay */}
-      {/* SOS Stop Passcode Modal */}
+      {/* SOS Stop Face Verify Modal */}
       {showSOSStopModal && (
-        <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-          <form 
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (sosPasscode === '123456') {
-                setIsSOSActive(false);
-                stopSiren();
-                setShowSOSStopModal(false);
-                setSosPasscode('');
-              } else {
-                alert('Invalid PIN!');
-              }
-            }}
-            className="bg-slate-900 border border-slate-800 p-6 rounded-3xl w-full max-w-sm text-center shadow-2xl relative overflow-hidden max-h-full overflow-y-auto"
-          >
-            <div className="absolute inset-0 bg-red-500/10 animate-pulse pointer-events-none"></div>
-            <ShieldAlert size={48} className="text-red-500 mx-auto mb-4 animate-bounce relative z-10" />
-            <h3 className="text-xl font-black text-white mb-2 uppercase relative z-10">Stop Emergency Broadcast</h3>
-            <p className="text-xs text-slate-400 mb-6 relative z-10">Enter your 6-digit security PIN to cancel the SOS alert and deactivate the siren.</p>
+        <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md">
+          <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl w-full max-w-sm text-center shadow-2xl relative overflow-hidden">
+            <h3 className="text-xl font-black text-white mb-2 uppercase">Stop SOS Broadcast</h3>
+            <p className="text-xs text-slate-400 mb-6">Please look at the camera to verify your identity to stop the SOS.</p>
             
-            <input
-              type="password"
-              maxLength={6}
-              value={sosPasscode}
-              onChange={(e) => setSosPasscode(e.target.value)}
-              placeholder="••••••"
-              className="w-full bg-slate-950 border border-slate-800 text-center text-3xl font-mono text-white rounded-xl py-4 mb-4 tracking-[0.5em] focus:border-red-500 focus:outline-none transition-colors relative z-10"
-              autoFocus
-            />
+            <div className="relative bg-slate-950 rounded-xl overflow-hidden aspect-[4/3] mb-6 flex items-center justify-center border-2 border-slate-800 group">
+              <ScanLine size={48} className="text-slate-500 animate-pulse group-hover:text-red-500 transition-colors" />
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-40 h-52 border-4 border-white/20 rounded-full"></div>
+              </div>
+              <p className="absolute bottom-3 left-1/2 -translate-x-1/2 text-white text-[10px] bg-black/50 px-2 py-1 rounded">
+                Center your face
+              </p>
+            </div>
             
-            <div className="flex gap-3 relative z-10">
+            <div className="flex gap-3">
               <button
                 type="button"
                 onClick={() => setShowSOSStopModal(false)}
-                className="flex-1 px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl transition-colors"
+                className="flex-1 px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl transition-colors text-sm"
               >
                 Cancel
               </button>
               <button
-                type="submit"
-                className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors shadow-lg shadow-red-900/50"
+                type="button"
+                onClick={() => {
+                  // Simulate 1.5s verify
+                  const btn = document.getElementById('verify-btn');
+                  if (btn) btn.innerHTML = '<span class="animate-spin inline-block mr-2">⟳</span>Verifying...';
+                  setTimeout(() => {
+                    setIsSOSActive(false);
+                    setShowSOSStopModal(false);
+                  }, 1500);
+                }}
+                id="verify-btn"
+                className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors shadow-lg shadow-red-900/50 text-sm flex items-center justify-center"
               >
-                Verify & Stop
+                <ScanLine size={16} className="mr-1" /> Face Verify
               </button>
             </div>
-          </form>
+          </div>
         </div>
       )}
 
@@ -3139,10 +3102,10 @@ function HomeFeed({
               )}
 
               <button
-                onClick={isSOSActive ? () => setIsSOSActive(false) : startSOSCountdown}
+                onClick={isSOSActive ? () => document.getElementById('hyperlocal-map') ? window.dispatchEvent(new CustomEvent('openSOSStop')) : null : startSOSCountdown}
                 className={`mt-3 w-full py-2.5 rounded-xl font-bold text-xs tracking-wide transition-all z-10 ${isSOSActive ? 'bg-white text-red-600 hover:bg-red-50 shadow-md' : 'bg-white text-red-600 hover:bg-red-50 shadow-md flex items-center justify-center gap-1.5'}`}
               >
-                {isSOSActive ? t('stopBroadcast') : <>{t('triggerSOS')}</>}
+                {isSOSActive ? 'STOP SOS' : <>{t('triggerSOS')}</>}
               </button>
             </div>
           </div>
@@ -3224,10 +3187,25 @@ function HomeFeed({
                   {alert.title || alert.type}
                 </h4>
 
-                <div className="flex items-center text-[10px] text-slate-400 gap-2 mt-auto pt-2">
+                <div className="flex items-center text-[10px] text-slate-400 gap-2 mt-auto pt-2 pb-2">
                   <span className="flex items-center gap-0.5 font-medium truncate"><MapPin size={10} className={isBlood ? 'text-rose-400' : isHigh ? 'text-red-500' : 'text-slate-400'} /> {alert.distance}</span>
                   <span>•</span>
                   <span className="flex items-center gap-0.5 font-medium whitespace-nowrap"><Clock size={10} /> {alert.time}</span>
+                </div>
+                
+                <div className="flex gap-2 mt-1 pt-2 border-t border-slate-200/50 dark:border-slate-700/50">
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); setSelectedAlert(alert); }}
+                    className="flex-1 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20 font-bold py-1.5 rounded-lg text-[10px] flex items-center justify-center gap-1 transition-colors"
+                  >
+                    <HeartHandshake size={12} /> Pledge
+                  </button>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); setSelectedAlert(alert); }}
+                    className="flex-1 bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-500/10 dark:text-blue-400 dark:hover:bg-blue-500/20 font-bold py-1.5 rounded-lg text-[10px] flex items-center justify-center gap-1 transition-colors"
+                  >
+                    <Download size={12} /> Share
+                  </button>
                 </div>
               </div>
             );
