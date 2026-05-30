@@ -790,6 +790,9 @@ function SaathiApp() {
       return next;
     });
   }, []);
+
+  const [sosReports, setSosReports] = useState([]);
+
   const [volunteerApplicationStatus, setVolunteerApplicationStatus] = useState('idle'); // idle | pending | approved | rejected
   const [volunteerRequests, setVolunteerRequests] = useState([
     { id: 1, name: "Amit Sharma", phone: "+91 98765 43220", email: "amit.sharma@example.com", status: "pending", date: "1 day ago", idType: "Aadhaar Card", idNumber: "XXXX XXXX 8892" },
@@ -1291,7 +1294,7 @@ function SaathiApp() {
       case 'volunteer': return <VolunteerModule userCoords={userCoords} userRole={userRole} locationStatus={locationStatus} />;
       case 'services': return <ServicesModule userCoords={userCoords} locationStatus={locationStatus} userRole={userRole} onCommission={creditCommission} onShowEarning={showEarning} services={services} setServices={setServices} />;
       case 'survey': return <SurveyModule userRole={userRole} userCoords={userCoords} onMicroReward={creditMicro} onShowEarning={showEarning} surveys={surveys} setSurveys={setSurveys} />;
-      case 'admin-approvals': return <AdminApprovalsModule volunteerRequests={volunteerRequests} setVolunteerRequests={setVolunteerRequests} services={services} setServices={setServices} surveys={surveys} setSurveys={setSurveys} userRole={userRole} setUserRole={setUserRole} setVolunteerApplicationStatus={setVolunteerApplicationStatus} displayUser={displayUser} addWalletTxn={addWalletTxn} bloodRequests={bloodRequests} setBloodRequests={setBloodRequests} creditMicro={creditMicro} showEarning={showEarning} />;
+      case 'admin-approvals': return <AdminApprovalsModule volunteerRequests={volunteerRequests} setVolunteerRequests={setVolunteerRequests} services={services} setServices={setServices} surveys={surveys} setSurveys={setSurveys} userRole={userRole} setUserRole={setUserRole} setVolunteerApplicationStatus={setVolunteerApplicationStatus} displayUser={displayUser} addWalletTxn={addWalletTxn} bloodRequests={bloodRequests} setBloodRequests={setBloodRequests} creditMicro={creditMicro} showEarning={showEarning} sosReports={sosReports} setSosReports={setSosReports} />;
       default: return <HomeFeed t={t} startSOSCountdown={startSOSCountdown} isSOSActive={isSOSActive} setIsSOSActive={setIsSOSActive} liveLocation={liveLocation} onViewCertificate={() => setShowCertificate(true)} userRole={userRole} walletBalance={walletBalance} onOpenWallet={() => setShowWallet(true)} volunteerApplicationStatus={volunteerApplicationStatus} setVolunteerApplicationStatus={setVolunteerApplicationStatus} setVolunteerRequests={setVolunteerRequests} displayUser={displayUser} services={services} setActiveTab={setActiveTab} volunteerRequests={volunteerRequests} surveys={surveys} alerts={alerts} onOpenPostAlert={() => { setEditingAlert(null); setShowPostAlertModal(true); }} bloodRequests={bloodRequests} onEditAlert={(alert) => { setEditingAlert(alert); setShowPostAlertModal(true); }} onRemoveAlert={(id) => setAlerts(prev => prev.filter(a => a.id !== id))} pledgedAlerts={pledgedAlerts} togglePledge={togglePledge} />;
     }
   };
@@ -2191,7 +2194,16 @@ function SaathiApp() {
       {/* SOS Stop Face Verify Modal */}
       {showSOSStopModal && (
         <FaceVerifyStopSOSModal 
-          onVerify={() => {
+          onVerify={(photoData) => {
+            const newReport = {
+              id: Date.now().toString(),
+              timestamp: new Date().toLocaleString(),
+              user: displayUser,
+              location: resolvedLocation,
+              coords: userCoords,
+              photo: photoData,
+            };
+            setSosReports(prev => [newReport, ...prev]);
             setIsSOSActive(false);
             setShowSOSStopModal(false);
           }}
@@ -2901,7 +2913,7 @@ function FaceVerifyStopSOSModal({ onVerify, onCancel }) {
       
       // Simulate verification process after capturing picture
       setTimeout(() => {
-        onVerify();
+        onVerify(canvas.toDataURL('image/jpeg'));
       }, 1000);
     }, 2000);
   };
@@ -5721,7 +5733,9 @@ function AdminApprovalsModule({
   bloodRequests = [],
   setBloodRequests,
   creditMicro,
-  showEarning
+  showEarning,
+  sosReports = [],
+  setSosReports
 }) {
   const [subTab, setSubTab] = useState('roleRequests');
   const [selectedDocPreview, setSelectedDocPreview] = useState(null); // for inspecting requisition slips
@@ -5916,10 +5930,85 @@ function AdminApprovalsModule({
             </span>
           )}
         </button>
+        <button
+          onClick={() => setSubTab('sosReports')}
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-black uppercase tracking-wider whitespace-nowrap border-b-2 transition-all ${subTab === 'sosReports'
+            ? 'border-red-500 text-red-400 font-bold'
+            : 'border-transparent text-slate-500 hover:text-slate-300'
+            }`}
+        >
+          <ShieldAlert size={14} className="text-red-500" />
+          SOS Reports
+          {sosReports.length > 0 && (
+            <span className="bg-red-950 text-red-400 border border-red-500/20 text-[10px] font-bold px-2 py-0.5 rounded-full">
+              {sosReports.length}
+            </span>
+          )}
+        </button>
       </div>
 
       {/* Tab Panels */}
       <div className="space-y-4">
+        {subTab === 'sosReports' && (
+          <div className="space-y-3">
+            {sosReports.length === 0 ? (
+              <div className="bg-white border border-dashed border-slate-200 rounded-2xl p-8 text-center text-slate-500">
+                <CheckCircle size={36} className="mx-auto text-green-500 mb-2" />
+                <p className="text-sm font-medium">No pending SOS Incident Reports.</p>
+              </div>
+            ) : (
+              sosReports.map(report => (
+                <div key={report.id} className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm transition-all hover:border-red-200">
+                  <div className="flex items-start justify-between gap-4 mb-4">
+                    <div className="flex gap-3">
+                      <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 shrink-0">
+                        <ShieldAlert size={20} />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-slate-900">SOS Incident Report</h4>
+                        <p className="text-xs text-slate-500 mt-0.5">Reported by: {report.user?.name || 'Unknown User'}</p>
+                        <p className="text-xs text-slate-400">{report.timestamp}</p>
+                      </div>
+                    </div>
+                    <span className="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider animate-pulse">
+                      Critical
+                    </span>
+                  </div>
+                  
+                  <div className="flex flex-col sm:flex-row gap-4 bg-slate-50 border border-slate-100 rounded-xl p-3">
+                    {report.photo && (
+                      <div className="w-full sm:w-1/3 aspect-[3/4] rounded-lg overflow-hidden border-2 border-slate-200 shrink-0">
+                        <img src={report.photo} alt="SOS Verification" className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                    <div className="flex-1 space-y-3">
+                      <div>
+                        <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Location Name</p>
+                        <p className="text-sm font-black text-slate-800">{report.location || 'Unknown'}</p>
+                      </div>
+                      {report.coords && (
+                        <div className="bg-white border border-slate-200 rounded-lg p-2.5">
+                          <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1 flex items-center gap-1"><MapPin size={10} /> Exact GPS Coordinates</p>
+                          <p className="text-xs font-mono text-slate-700">{report.coords.lat.toFixed(6)}, {report.coords.lng.toFixed(6)}</p>
+                          <p className="text-[10px] text-slate-500 mt-0.5">Accuracy: ±{Math.round(report.coords.accuracy || 0)}m</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4 pt-4 border-t border-slate-100">
+                    <button
+                      onClick={() => setSosReports(prev => prev.filter(r => r.id !== report.id))}
+                      className="w-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-sm"
+                    >
+                      Mark as Resolved & Dismiss
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
         {subTab === 'roleRequests' && (
           <div className="space-y-3">
             {roleRequests.length === 0 ? (
