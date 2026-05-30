@@ -1098,7 +1098,7 @@ function SaathiApp() {
 
   // Show auth screen until logged in
   if (showSplash) {
-    return <SplashScreen onDone={() => setShowSplash(false)} />;
+    return <SplashScreen isDarkMode={isDarkMode} onDone={() => setShowSplash(false)} />;
   }
 
   if (!isAuthenticated) {
@@ -6497,7 +6497,7 @@ ${transcript}
 }
 
 // --- SPLASH SCREEN ---
-function SplashScreen({ onDone }) {
+function SplashScreen({ onDone, isDarkMode }) {
   const [phase, setPhase] = useState('enter'); // enter | hold | exit
 
   useEffect(() => {
